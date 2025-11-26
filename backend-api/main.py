@@ -48,7 +48,7 @@ class ContactMessage(BaseModel):
     email: str
     content: str
 
-# --- FUNÇÃO DE EMAIL (AGORA SÍNCRONA) ---
+# --- FUNÇÃO DE EMAIL SÍNCRONA (Porta 587 - STARTTLS) ---
 def send_email_sync(contact: ContactMessage):
     print(">>> [SYNC] Iniciando envio de email (Bloqueante)...")
     
@@ -57,7 +57,7 @@ def send_email_sync(contact: ContactMessage):
             print(">>> [SYNC] ERRO: Credenciais de email ausentes.")
             return False
 
-        print(f">>> [SYNC] Tentando conectar ao SMTP SSL (465)...")
+        print(f">>> [SYNC] Tentando conectar ao SMTP (587) com STARTTLS...")
         
         # Monta o email
         msg = MIMEMultipart()
@@ -72,11 +72,15 @@ def send_email_sync(contact: ContactMessage):
         """
         msg.attach(MIMEText(body, 'plain'))
 
-        # Conexão
-        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        # Conexão Padrão (Porta 587)
+        # Nota: Não usamos SMTP_SSL aqui, usamos SMTP normal e depois "starttls"
+        server = smtplib.SMTP('smtp.gmail.com', 587)
         server.set_debuglevel(1) 
         
-        print(">>> [SYNC] Conectado. Fazendo login...")
+        print(">>> [SYNC] Conectado. Iniciando TLS...")
+        server.starttls() # Criptografa a conexão
+        
+        print(">>> [SYNC] Fazendo login...")
         server.login(EMAIL_FROM, EMAIL_PASSWORD)
         
         print(">>> [SYNC] Enviando mensagem...")
@@ -109,7 +113,6 @@ def get_experiences():
 
 @app.post("/contact")
 def send_contact(message: ContactMessage):
-    # Removemos 'background_tasks' dos parâmetros e 'async' da definição
     print(f"--- ROTA CONTACT CHAMADA: {message.name} ---")
     
     try:
@@ -123,7 +126,7 @@ def send_contact(message: ContactMessage):
             }).execute()
             print("--- Salvo no Supabase com sucesso. ---")
         
-        # 2. Envia Email AGORA (o usuário espera terminar)
+        # 2. Envia Email AGORA
         print("--- Enviando email de forma SÍNCRONA... ---")
         email_sucesso = send_email_sync(message)
         
@@ -132,7 +135,9 @@ def send_contact(message: ContactMessage):
             return {"status": "success", "message": "Recebido e Email Enviado"}
         else:
             print("--- Email falhou, mas salvo no banco. ---")
-            return {"status": "partial_success", "message": "Salvo, mas falha no email"}
+            # Retornamos sucesso para o usuário não achar que o site quebrou,
+            # já que a mensagem foi salva no banco.
+            return {"status": "partial_success", "message": "Salvo no banco"}
             
     except Exception as e:
         print(f"--- ERRO NA ROTA: {e} ---")
