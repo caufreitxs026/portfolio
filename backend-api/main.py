@@ -21,13 +21,15 @@ except:
     supabase = None
 
 # --- CONFIGURAÇÃO RESEND ---
-RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
-EMAIL_TO = os.environ.get("EMAIL_TO") # Seu email pessoal
+# Chave fornecida: re_7hKWQt9L_9HUJKpAbADvVkCHhTpdDhkDE
+# E-mail verificado: cauafreitas026@gmail.com
 
-if RESEND_API_KEY:
-    resend.api_key = RESEND_API_KEY
-else:
-    print("Aviso: RESEND_API_KEY não encontrada.")
+# Em produção (Render), é melhor usar a variável de ambiente, mas podemos colocar aqui como fallback
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY") or "re_7hKWQt9L_9HUJKpAbADvVkCHhTpdDhkDE"
+resend.api_key = RESEND_API_KEY
+
+# O email de destino DEVE ser o email verificado no Resend (o seu)
+EMAIL_TO = "cauafreitas026@gmail.com"
 
 app = FastAPI(title="Portfolio API - Cauã Freitas")
 
@@ -48,23 +50,25 @@ class ContactMessage(BaseModel):
 def send_email_resend(contact: ContactMessage):
     print(">>> [RESEND] Iniciando envio via API...")
     
-    if not RESEND_API_KEY or not EMAIL_TO:
-        print(">>> [RESEND] Erro: Configurações de email ausentes.")
+    if not RESEND_API_KEY:
+        print(">>> [RESEND] Erro: API Key ausente.")
         return False
 
     try:
+        # O 'from' deve ser obrigatoriamente este domínio de teste se não tiver domínio próprio
         params = {
-            "from": "Portfolio <onboarding@resend.dev>", # Domínio de teste do Resend
-            "to": [EMAIL_TO],
-            "subject": f"Portfolio: Novo contato de {contact.name}",
+            "from": "Portfolio <onboarding@resend.dev>",
+            "to": [EMAIL_TO], # Envia APENAS para você
+            "subject": f"Portfolio: Contato de {contact.name}",
             "html": f"""
-            <p><strong>Nova mensagem recebida!</strong></p>
+            <h3>Nova mensagem recebida!</h3>
             <p><strong>Nome:</strong> {contact.name}</p>
-            <p><strong>Email:</strong> {contact.email}</p>
+            <p><strong>Email do Visitante:</strong> {contact.email}</p>
+            <hr />
             <p><strong>Mensagem:</strong></p>
             <p>{contact.content}</p>
             """,
-            "reply_to": contact.email
+            "reply_to": contact.email # Quando você clicar em responder, vai para o visitante
         }
 
         email = resend.Emails.send(params)
