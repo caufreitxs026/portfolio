@@ -29,6 +29,7 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY") or "re_7hKWQt9L_9HUJKpAbADvVkC
 resend.api_key = RESEND_API_KEY
 
 # O email de destino DEVE ser o email verificado no Resend (o seu)
+# IMPORTANTE: No plano gratuito, você SÓ pode enviar para este email.
 EMAIL_TO = "cauafreitas026@gmail.com"
 
 app = FastAPI(title="Portfolio API - Cauã Freitas")
@@ -55,11 +56,13 @@ def send_email_resend(contact: ContactMessage):
         return False
 
     try:
-        # O 'from' deve ser obrigatoriamente este domínio de teste se não tiver domínio próprio
+        # CORREÇÃO AQUI:
+        # O 'from' deve ser o domínio de teste do Resend.
+        # O 'to' DEVE ser o seu e-mail (EMAIL_TO), não o do visitante.
         params = {
             "from": "Portfolio <onboarding@resend.dev>",
-            "to": [EMAIL_TO], # Envia APENAS para você
-            "subject": f"Portfolio: Contato de {contact.name}",
+            "to": [EMAIL_TO], # FIXO: Envia apenas para você
+            "subject": f"Portfolio: Novo contato de {contact.name}",
             "html": f"""
             <h3>Nova mensagem recebida!</h3>
             <p><strong>Nome:</strong> {contact.name}</p>
