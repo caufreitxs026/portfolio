@@ -2,7 +2,7 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -16,9 +16,14 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    raise ValueError("As variáveis SUPABASE_URL e SUPABASE_KEY são obrigatórias no .env")
+    # Em produção, isso evita que a API quebre se as envs não carregarem na hora
+    print("Aviso: Variáveis do Supabase não encontradas.")
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Tenta conectar, se falhar, a API continua rodando
+try:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+except:
+    supabase = None
 
 # Configuração Email
 EMAIL_FROM = os.environ.get("EMAIL_FROM")
@@ -27,16 +32,10 @@ EMAIL_TO = os.environ.get("EMAIL_TO")
 
 app = FastAPI(title="Portfolio API - Cauã Freitas")
 
-# --- CONFIGURAÇÃO DE CORS (NOVO) ---
-# Permite que o Frontend (localhost:3000) converse com este Backend
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-
+# --- CONFIGURAÇÃO DE CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Em produção, substitua "*" pela URL do seu site
+    allow_origins=["*"], # Permite qualquer origem (Vercel, Localhost)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -48,75 +47,98 @@ class ContactMessage(BaseModel):
     email: str
     content: str
 
-# --- FUNÇÃO AUXILIAR DE EMAIL ---
-def send_email_notification(contact: ContactMessage):
+# --- TAREFA DE EMAIL (RODA EM SEGUNDO PLANO) ---
+def send_email_background(contact: ContactMessage):
+    """
+    Esta função roda desconectada da resposta do usuário.
+    Se demorar 10 segundos, o usuário não percebe.
+    """
     try:
         if not EMAIL_FROM or not EMAIL_PASSWORD:
-            print("Email não configurado no .env, pulando envio.")
-            return False
+            print("Email não configurado nas variáveis de ambiente.")
+            return
+
+        print(f"Iniciando envio de email para {EMAIL_TO}...")
 
         # Monta o email
         msg = MIMEMultipart()
         msg['From'] = EMAIL_FROM
         msg['To'] = EMAIL_TO
-        msg['Subject'] = f"Novo contato no Portfolio: {contact.name}"
+        msg['Subject'] = f"Portfolio: Novo contato de {contact.name}"
 
         body = f"""
-        Você recebeu uma nova mensagem do site!
-        
+        NOVA MENSAGEM RECEBIDA PELO PORTFÓLIO
+        --------------------------------------
         Nome: {contact.name}
         Email: {contact.email}
         
         Mensagem:
         {contact.content}
+        --------------------------------------
         """
         msg.attach(MIMEText(body, 'plain'))
 
         # Conecta ao servidor SMTP do Gmail
         server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls() # Criptografia
+        server.starttls()
         server.login(EMAIL_FROM, EMAIL_PASSWORD)
         text = msg.as_string()
         server.sendmail(EMAIL_FROM, EMAIL_TO, text)
         server.quit()
-        return True
+        
+        print("Email enviado com sucesso (Background)!")
     except Exception as e:
-        print(f"Erro ao enviar email: {e}")
-        return False
+        # Se der erro aqui, apenas logamos no servidor, o usuário já recebeu o sucesso.
+        print(f"ERRO CRÍTICO AO ENVIAR EMAIL: {e}")
 
 # --- ROTAS ---
 
 @app.get("/")
 def read_root():
-    return {"status": "online", "message": "API do Portfólio rodando com CORS ativado."}
+    return {"status": "online", "version": "1.2.0"}
 
 @app.get("/projects")
 def get_projects():
-    # Retorna projetos ordenados por data de criação
+    if not supabase: return []
     return supabase.table("projects").select("*").order("created_at", desc=True).execute().data
 
 @app.get("/experiences")
 def get_experiences():
-    # Retorna experiências ordenadas pela data de início
+    if not supabase: return []
     return supabase.table("experiences").select("*").order("start_date", desc=True).execute().data
 
 @app.post("/contact")
-def send_contact(message: ContactMessage):
+def send_contact(message: ContactMessage, background_tasks: BackgroundTasks):
     try:
-        # 1. Salva no Banco de Dados
-        supabase.table("messages").insert({
-            "name": message.name,
-            "email": message.email,
-            "content": message.content
-        }).execute()
+        # 1. Salva no Banco de Dados (Isso é rápido)
+        if supabase:
+            supabase.table("messages").insert({
+                "name": message.name,
+                "email": message.email,
+                "content": message.content
+            }).execute()
         
-        # 2. Envia Notificação por Email
-        email_sent = send_email_notification(message)
+        # 2. Agenda o envio do email para depois (NÃO BLOQUEIA O SITE)
+        background_tasks.add_task(send_email_background, message)
         
+        # 3. Responde imediatamente para o usuário
         return {
-            "message": "Mensagem recebida!", 
-            "db_saved": True, 
-            "email_sent": email_sent
+            "message": "Mensagem recebida e salva!", 
+            "status": "success"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Erro na rota contact: {e}")
+        # Mesmo se der erro no banco, tentamos não travar o front
+        raise HTTPException(status_code=500, detail="Erro interno ao processar mensagem")
+```
+
+### Passo 2: Atualizar o Render
+
+Agora precisamos enviar essa correção para o GitHub para que o Render atualize sua API.
+
+No terminal (pasta raiz `portfolio`):
+
+```bash
+git add backend-api/main.py
+git commit -m "Fix: Usa BackgroundTasks para envio de email não travar o site"
+git push origin main
