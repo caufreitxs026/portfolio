@@ -1,5 +1,5 @@
 import os
-import requests
+import resend
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client, Client
@@ -11,8 +11,6 @@ load_dotenv()
 # --- CONFIGURAÇÃO SUPABASE ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-# Usamos o email de destino para saber onde entregar
-EMAIL_TO = os.environ.get("EMAIL_TO") 
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     print("Aviso: Variáveis do Supabase não encontradas.")
@@ -21,6 +19,15 @@ try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 except:
     supabase = None
+
+# --- CONFIGURAÇÃO RESEND ---
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+EMAIL_TO = os.environ.get("EMAIL_TO") # Seu email pessoal
+
+if RESEND_API_KEY:
+    resend.api_key = RESEND_API_KEY
+else:
+    print("Aviso: RESEND_API_KEY não encontrada.")
 
 app = FastAPI(title="Portfolio API - Cauã Freitas")
 
@@ -37,51 +44,42 @@ class ContactMessage(BaseModel):
     email: str
     content: str
 
-# --- NOVA FUNÇÃO DE EMAIL (VIA API HTTP) ---
-def send_email_http(contact: ContactMessage):
-    """
-    Envia o email usando uma requisição HTTP POST (Porta 443).
-    Isso contorna o bloqueio de portas SMTP do Render.
-    """
-    print(">>> [HTTP] Iniciando envio via API...")
+# --- FUNÇÃO DE EMAIL (VIA RESEND) ---
+def send_email_resend(contact: ContactMessage):
+    print(">>> [RESEND] Iniciando envio via API...")
     
-    if not EMAIL_TO:
-        print(">>> [HTTP] Erro: EMAIL_TO não configurado.")
+    if not RESEND_API_KEY or not EMAIL_TO:
+        print(">>> [RESEND] Erro: Configurações de email ausentes.")
         return False
 
-    # URL do serviço que vai entregar o email para você
-    url = f"https://formsubmit.co/{EMAIL_TO}"
-    
-    # Dados que vão chegar no seu email
-    payload = {
-        "name": contact.name,
-        "email": contact.email, # O email da pessoa (para você poder responder)
-        "message": contact.content,
-        "_subject": f"Portfolio: Contato de {contact.name}",
-        "_template": "table", # Formata bonito
-        "_captcha": "false"   # Desativa captcha manual
-    }
-
     try:
-        # O Python acessa a URL como se fosse um navegador
-        response = requests.post(url, data=payload)
-        
-        if response.status_code == 200:
-            print(">>> [HTTP] SUCESSO! API respondeu OK.")
-            return True
-        else:
-            print(f">>> [HTTP] Falha na API: {response.status_code} - {response.text}")
-            return False
+        params = {
+            "from": "Portfolio <onboarding@resend.dev>", # Domínio de teste do Resend
+            "to": [EMAIL_TO],
+            "subject": f"Portfolio: Novo contato de {contact.name}",
+            "html": f"""
+            <p><strong>Nova mensagem recebida!</strong></p>
+            <p><strong>Nome:</strong> {contact.name}</p>
+            <p><strong>Email:</strong> {contact.email}</p>
+            <p><strong>Mensagem:</strong></p>
+            <p>{contact.content}</p>
+            """,
+            "reply_to": contact.email
+        }
+
+        email = resend.Emails.send(params)
+        print(f">>> [RESEND] SUCESSO! ID: {email.id}")
+        return True
             
     except Exception as e:
-        print(f">>> [HTTP] Erro de Conexão: {str(e)}")
+        print(f">>> [RESEND] Erro no envio: {str(e)}")
         return False
 
 # --- ROTAS ---
 
 @app.get("/")
 def read_root():
-    return {"status": "online", "method": "http-tunnel"}
+    return {"status": "online"}
 
 @app.get("/projects")
 def get_projects():
@@ -97,7 +95,7 @@ def get_experiences():
 def send_contact(message: ContactMessage):
     print(f"--- ROTA CONTACT CHAMADA: {message.name} ---")
     
-    # 1. Salva no Banco (Sua garantia de dados)
+    # 1. Salva no Banco
     try:
         if supabase:
             supabase.table("messages").insert({
@@ -109,11 +107,10 @@ def send_contact(message: ContactMessage):
     except Exception as db_error:
         print(f"--- Erro banco: {db_error}")
 
-    # 2. Envia Email via HTTP
-    email_sucesso = send_email_http(message)
+    # 2. Envia Email via Resend
+    email_sucesso = send_email_resend(message)
     
     if email_sucesso:
-        return {"status": "success", "message": "Mensagem enviada com sucesso!"}
+        return {"status": "success", "message": "Mensagem enviada!"}
     else:
-        # Mesmo se o email falhar, salvamos no banco, então é um sucesso parcial
-        return {"status": "success", "message": "Mensagem salva no banco!"}
+        return {"status": "success", "message": "Mensagem salva (Email falhou)!"}
