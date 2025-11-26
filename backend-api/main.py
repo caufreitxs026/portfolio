@@ -73,26 +73,33 @@ def send_email_sync(contact: ContactMessage):
         msg.attach(MIMEText(body, 'plain'))
 
         # Conexão Padrão (Porta 587)
-        # Nota: Não usamos SMTP_SSL aqui, usamos SMTP normal e depois "starttls"
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.set_debuglevel(1) 
-        
-        print(">>> [SYNC] Conectado. Iniciando TLS...")
-        server.starttls() # Criptografa a conexão
-        
-        print(">>> [SYNC] Fazendo login...")
-        server.login(EMAIL_FROM, EMAIL_PASSWORD)
-        
-        print(">>> [SYNC] Enviando mensagem...")
-        text = msg.as_string()
-        server.sendmail(EMAIL_FROM, EMAIL_TO, text)
-        
-        server.quit()
-        print(">>> [SYNC] SUCESSO! Email enviado.")
-        return True
+        try:
+            server = smtplib.SMTP('smtp.gmail.com', 587, timeout=10) # Timeout explícito
+            server.set_debuglevel(1) 
+            
+            print(">>> [SYNC] Conectado. Iniciando EHLO...")
+            server.ehlo() # Identificação inicial
+            
+            print(">>> [SYNC] Iniciando TLS...")
+            server.starttls() # Criptografa a conexão
+            server.ehlo() # Re-identificação após TLS (obrigatório)
+            
+            print(">>> [SYNC] Fazendo login...")
+            server.login(EMAIL_FROM, EMAIL_PASSWORD)
+            
+            print(">>> [SYNC] Enviando mensagem...")
+            text = msg.as_string()
+            server.sendmail(EMAIL_FROM, EMAIL_TO, text)
+            
+            server.quit()
+            print(">>> [SYNC] SUCESSO! Email enviado.")
+            return True
+        except Exception as smtp_error:
+             print(f">>> [SYNC] ERRO SMTP ESPECÍFICO: {smtp_error}")
+             return False
         
     except Exception as e:
-        print(f">>> [SYNC] ERRO CRÍTICO: {str(e)}")
+        print(f">>> [SYNC] ERRO CRÍTICO GERAL: {str(e)}")
         return False
 
 # --- ROTAS ---
@@ -135,8 +142,6 @@ def send_contact(message: ContactMessage):
             return {"status": "success", "message": "Recebido e Email Enviado"}
         else:
             print("--- Email falhou, mas salvo no banco. ---")
-            # Retornamos sucesso para o usuário não achar que o site quebrou,
-            # já que a mensagem foi salva no banco.
             return {"status": "partial_success", "message": "Salvo no banco"}
             
     except Exception as e:
