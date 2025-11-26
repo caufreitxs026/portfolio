@@ -130,15 +130,3 @@ def send_contact(message: ContactMessage, background_tasks: BackgroundTasks):
         print(f"Erro na rota contact: {e}")
         # Mesmo se der erro no banco, tentamos não travar o front
         raise HTTPException(status_code=500, detail="Erro interno ao processar mensagem")
-```
-
-### Passo 2: Atualizar o Render
-
-Agora precisamos enviar essa correção para o GitHub para que o Render atualize sua API.
-
-No terminal (pasta raiz `portfolio`):
-
-```bash
-git add backend-api/main.py
-git commit -m "Fix: Usa BackgroundTasks para envio de email não travar o site"
-git push origin main
