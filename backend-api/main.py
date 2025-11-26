@@ -48,59 +48,66 @@ class ContactMessage(BaseModel):
     email: str
     content: str
 
-# --- FUNÇÃO DE EMAIL SÍNCRONA (Porta 587 - STARTTLS) ---
+# --- FUNÇÃO DE EMAIL SÍNCRONA (Tenta porta 2525, depois 587) ---
 def send_email_sync(contact: ContactMessage):
     print(">>> [SYNC] Iniciando envio de email (Bloqueante)...")
     
-    try:
-        if not EMAIL_FROM or not EMAIL_PASSWORD:
-            print(">>> [SYNC] ERRO: Credenciais de email ausentes.")
-            return False
-
-        print(f">>> [SYNC] Tentando conectar ao SMTP (587) com STARTTLS...")
-        
-        # Monta o email
-        msg = MIMEMultipart()
-        msg['From'] = EMAIL_FROM
-        msg['To'] = EMAIL_TO
-        msg['Subject'] = f"Portfolio: Novo contato de {contact.name}"
-
-        body = f"""
-        Nome: {contact.name}
-        Email: {contact.email}
-        Mensagem: {contact.content}
-        """
-        msg.attach(MIMEText(body, 'plain'))
-
-        # Conexão Padrão (Porta 587)
-        try:
-            server = smtplib.SMTP('smtp.gmail.com', 587, timeout=10) # Timeout explícito
-            server.set_debuglevel(1) 
-            
-            print(">>> [SYNC] Conectado. Iniciando EHLO...")
-            server.ehlo() # Identificação inicial
-            
-            print(">>> [SYNC] Iniciando TLS...")
-            server.starttls() # Criptografa a conexão
-            server.ehlo() # Re-identificação após TLS (obrigatório)
-            
-            print(">>> [SYNC] Fazendo login...")
-            server.login(EMAIL_FROM, EMAIL_PASSWORD)
-            
-            print(">>> [SYNC] Enviando mensagem...")
-            text = msg.as_string()
-            server.sendmail(EMAIL_FROM, EMAIL_TO, text)
-            
-            server.quit()
-            print(">>> [SYNC] SUCESSO! Email enviado.")
-            return True
-        except Exception as smtp_error:
-             print(f">>> [SYNC] ERRO SMTP ESPECÍFICO: {smtp_error}")
-             return False
-        
-    except Exception as e:
-        print(f">>> [SYNC] ERRO CRÍTICO GERAL: {str(e)}")
+    if not EMAIL_FROM or not EMAIL_PASSWORD:
+        print(">>> [SYNC] ERRO: Credenciais de email ausentes.")
         return False
+
+    # Monta o email
+    msg = MIMEMultipart()
+    msg['From'] = EMAIL_FROM
+    msg['To'] = EMAIL_TO
+    msg['Subject'] = f"Portfolio: Novo contato de {contact.name}"
+
+    body = f"""
+    Nome: {contact.name}
+    Email: {contact.email}
+    Mensagem: {contact.content}
+    """
+    msg.attach(MIMEText(body, 'plain'))
+    text = msg.as_string()
+
+    # Tenta conectar na porta 2525 primeiro (comum para evitar bloqueios)
+    ports_to_try = [587] # Vamos manter 587 como primária mas com tratamento de erro melhor, ou inverter se quiser
+    
+    # Vamos tentar uma abordagem direta com tratamento de erro
+    try:
+        print(f">>> [SYNC] Tentando conectar ao SMTP (587) com STARTTLS...")
+        server = smtplib.SMTP('smtp.gmail.com', 587, timeout=10)
+        server.set_debuglevel(1)
+        
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        
+        print(">>> [SYNC] Fazendo login...")
+        server.login(EMAIL_FROM, EMAIL_PASSWORD)
+        
+        print(">>> [SYNC] Enviando mensagem...")
+        server.sendmail(EMAIL_FROM, EMAIL_TO, text)
+        
+        server.quit()
+        print(">>> [SYNC] SUCESSO! Email enviado.")
+        return True
+
+    except Exception as e:
+        print(f">>> [SYNC] ERRO na porta 587: {e}")
+        print(">>> [SYNC] Tentando fallback com SSL na porta 465...")
+        
+        try:
+            # Fallback para SSL na porta 465
+            server = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10)
+            server.login(EMAIL_FROM, EMAIL_PASSWORD)
+            server.sendmail(EMAIL_FROM, EMAIL_TO, text)
+            server.quit()
+            print(">>> [SYNC] SUCESSO (Fallback 465)! Email enviado.")
+            return True
+        except Exception as e2:
+            print(f">>> [SYNC] ERRO FINAL (Ambas as portas falharam): {e2}")
+            return False
 
 # --- ROTAS ---
 
