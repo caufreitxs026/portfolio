@@ -2,7 +2,7 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -28,7 +28,7 @@ EMAIL_FROM = os.environ.get("EMAIL_FROM")
 EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
 EMAIL_TO = os.environ.get("EMAIL_TO")
 
-# DEBUG: Imprimir configurações (mas ocultando a senha por segurança)
+# DEBUG: Imprimir configurações
 print(f"DEBUG INICIAL - EMAIL_FROM: {EMAIL_FROM}")
 print(f"DEBUG INICIAL - EMAIL_TO: {EMAIL_TO}")
 print(f"DEBUG INICIAL - Senha Configurada? {'SIM' if EMAIL_PASSWORD else 'NÃO'}")
@@ -48,16 +48,16 @@ class ContactMessage(BaseModel):
     email: str
     content: str
 
-# --- TAREFA DE EMAIL ---
-def send_email_background(contact: ContactMessage):
-    print(">>> [BACKGROUND] Iniciando tarefa de envio de email...")
+# --- FUNÇÃO DE EMAIL (AGORA SÍNCRONA) ---
+def send_email_sync(contact: ContactMessage):
+    print(">>> [SYNC] Iniciando envio de email (Bloqueante)...")
     
     try:
         if not EMAIL_FROM or not EMAIL_PASSWORD:
-            print(">>> [BACKGROUND] ERRO: Credenciais de email ausentes.")
-            return
+            print(">>> [SYNC] ERRO: Credenciais de email ausentes.")
+            return False
 
-        print(f">>> [BACKGROUND] Tentando conectar ao SMTP SSL (465)...")
+        print(f">>> [SYNC] Tentando conectar ao SMTP SSL (465)...")
         
         # Monta o email
         msg = MIMEMultipart()
@@ -74,21 +74,22 @@ def send_email_background(contact: ContactMessage):
 
         # Conexão
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-        # Modo Debug do SMTP para ver a conversa com o Gmail
         server.set_debuglevel(1) 
         
-        print(">>> [BACKGROUND] Conectado. Fazendo login...")
+        print(">>> [SYNC] Conectado. Fazendo login...")
         server.login(EMAIL_FROM, EMAIL_PASSWORD)
         
-        print(">>> [BACKGROUND] Enviando mensagem...")
+        print(">>> [SYNC] Enviando mensagem...")
         text = msg.as_string()
         server.sendmail(EMAIL_FROM, EMAIL_TO, text)
         
         server.quit()
-        print(">>> [BACKGROUND] SUCESSO! Email enviado.")
+        print(">>> [SYNC] SUCESSO! Email enviado.")
+        return True
         
     except Exception as e:
-        print(f">>> [BACKGROUND] ERRO CRÍTICO: {str(e)}")
+        print(f">>> [SYNC] ERRO CRÍTICO: {str(e)}")
+        return False
 
 # --- ROTAS ---
 
@@ -107,7 +108,8 @@ def get_experiences():
     return supabase.table("experiences").select("*").order("start_date", desc=True).execute().data
 
 @app.post("/contact")
-async def send_contact(message: ContactMessage, background_tasks: BackgroundTasks):
+def send_contact(message: ContactMessage):
+    # Removemos 'background_tasks' dos parâmetros e 'async' da definição
     print(f"--- ROTA CONTACT CHAMADA: {message.name} ---")
     
     try:
@@ -121,12 +123,17 @@ async def send_contact(message: ContactMessage, background_tasks: BackgroundTask
             }).execute()
             print("--- Salvo no Supabase com sucesso. ---")
         
-        # 2. Agenda Background Task
-        print("--- Agendando tarefa de email... ---")
-        background_tasks.add_task(send_email_background, message)
-        print("--- Tarefa agendada. Retornando resposta 200. ---")
+        # 2. Envia Email AGORA (o usuário espera terminar)
+        print("--- Enviando email de forma SÍNCRONA... ---")
+        email_sucesso = send_email_sync(message)
         
-        return {"status": "success", "message": "Recebido"}
+        if email_sucesso:
+            print("--- Email enviado. Retornando resposta 200. ---")
+            return {"status": "success", "message": "Recebido e Email Enviado"}
+        else:
+            print("--- Email falhou, mas salvo no banco. ---")
+            return {"status": "partial_success", "message": "Salvo, mas falha no email"}
+            
     except Exception as e:
         print(f"--- ERRO NA ROTA: {e} ---")
         raise HTTPException(status_code=500, detail="Erro interno")
