@@ -8,7 +8,7 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
-# 1. Carrega variáveis do arquivo .env (apenas localmente; no Render usa as vars de ambiente)
+# 1. Carrega variáveis
 load_dotenv()
 
 # --- CONFIGURAÇÃO SUPABASE ---
@@ -18,7 +18,6 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 if not SUPABASE_URL or not SUPABASE_KEY:
     print("Aviso: Variáveis do Supabase não encontradas.")
 
-# Tenta conectar ao Supabase; se falhar (ex: falta de vars), a API continua rodando
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 except:
@@ -29,10 +28,13 @@ EMAIL_FROM = os.environ.get("EMAIL_FROM")
 EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
 EMAIL_TO = os.environ.get("EMAIL_TO")
 
+# DEBUG: Imprimir configurações (mas ocultando a senha por segurança)
+print(f"DEBUG INICIAL - EMAIL_FROM: {EMAIL_FROM}")
+print(f"DEBUG INICIAL - EMAIL_TO: {EMAIL_TO}")
+print(f"DEBUG INICIAL - Senha Configurada? {'SIM' if EMAIL_PASSWORD else 'NÃO'}")
+
 app = FastAPI(title="Portfolio API - Cauã Freitas")
 
-# --- CONFIGURAÇÃO DE CORS ---
-# Permite que o frontend (Vercel ou Localhost) acesse esta API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -41,96 +43,99 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Modelo de Dados para validação
 class ContactMessage(BaseModel):
     name: str
     email: str
     content: str
 
-# --- TAREFA DE EMAIL (RODA EM SEGUNDO PLANO) ---
+# --- TAREFA DE EMAIL ---
 def send_email_background(contact: ContactMessage):
-    """
-    Esta função roda desconectada da resposta do usuário.
-    Se demorar 10 segundos, o usuário não percebe.
-    """
+    print(">>> [BACKGROUND] Iniciando tarefa de envio de email...")
+    
     try:
         if not EMAIL_FROM or not EMAIL_PASSWORD:
-            print("Email não configurado nas variáveis de ambiente.")
+            print(">>> [BACKGROUND] ERRO: Credenciais de email ausentes.")
             return
 
-        print(f"Iniciando envio de email para {EMAIL_TO}...")
-
-        # Monta o corpo do email
+        print(f">>> [BACKGROUND] Tentando conectar ao SMTP SSL (465)...")
+        
+        # Monta o email
         msg = MIMEMultipart()
         msg['From'] = EMAIL_FROM
         msg['To'] = EMAIL_TO
         msg['Subject'] = f"Portfolio: Novo contato de {contact.name}"
 
         body = f"""
-        NOVA MENSAGEM RECEBIDA PELO PORTFÓLIO
-        --------------------------------------
         Nome: {contact.name}
         Email: {contact.email}
-        
-        Mensagem:
-        {contact.content}
-        --------------------------------------
+        Mensagem: {contact.content}
         """
         msg.attach(MIMEText(body, 'plain'))
 
-        # --- CONEXÃO SMTP SEGURA (SSL - Porta 465) ---
-        # Usamos SMTP_SSL direto para evitar bloqueios de porta 587 em nuvens como Render/AWS
+        # Conexão
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        # Modo Debug do SMTP para ver a conversa com o Gmail
+        server.set_debuglevel(1) 
         
+        print(">>> [BACKGROUND] Conectado. Fazendo login...")
         server.login(EMAIL_FROM, EMAIL_PASSWORD)
+        
+        print(">>> [BACKGROUND] Enviando mensagem...")
         text = msg.as_string()
         server.sendmail(EMAIL_FROM, EMAIL_TO, text)
-        server.quit()
         
-        print("Email enviado com sucesso (Background)!")
+        server.quit()
+        print(">>> [BACKGROUND] SUCESSO! Email enviado.")
+        
     except Exception as e:
-        # Se der erro aqui, apenas logamos no servidor, pois o usuário já recebeu o sucesso.
-        print(f"ERRO CRÍTICO AO ENVIAR EMAIL: {e}")
+        print(f">>> [BACKGROUND] ERRO CRÍTICO: {str(e)}")
 
-# --- ROTAS DA API ---
+# --- ROTAS ---
 
 @app.get("/")
 def read_root():
-    return {"status": "online", "version": "1.2.0"}
+    return {"status": "online"}
 
 @app.get("/projects")
 def get_projects():
     if not supabase: return []
-    # Busca projetos ordenados por data de criação (mais recentes primeiro)
     return supabase.table("projects").select("*").order("created_at", desc=True).execute().data
 
 @app.get("/experiences")
 def get_experiences():
     if not supabase: return []
-    # Busca experiências ordenadas pela data de início
     return supabase.table("experiences").select("*").order("start_date", desc=True).execute().data
 
 @app.post("/contact")
-def send_contact(message: ContactMessage, background_tasks: BackgroundTasks):
+async def send_contact(message: ContactMessage, background_tasks: BackgroundTasks):
+    print(f"--- ROTA CONTACT CHAMADA: {message.name} ---")
+    
     try:
-        # 1. Salva no Banco de Dados (Supabase) - Operação Rápida
+        # 1. Salva no Banco
         if supabase:
+            print("--- Salvando no Supabase... ---")
             supabase.table("messages").insert({
                 "name": message.name,
                 "email": message.email,
                 "content": message.content
             }).execute()
+            print("--- Salvo no Supabase com sucesso. ---")
         
-        # 2. Agenda o envio do email para depois (NÃO BLOQUEIA O SITE)
-        # O usuário recebe a resposta de sucesso imediatamente, enquanto o email vai sendo enviado.
+        # 2. Agenda Background Task
+        print("--- Agendando tarefa de email... ---")
         background_tasks.add_task(send_email_background, message)
+        print("--- Tarefa agendada. Retornando resposta 200. ---")
         
-        # 3. Responde imediatamente para o usuário
-        return {
-            "message": "Mensagem recebida e salva!", 
-            "status": "success"
-        }
+        return {"status": "success", "message": "Recebido"}
     except Exception as e:
-        print(f"Erro na rota contact: {e}")
-        # Mesmo se der erro no banco, tentamos não travar o front com erro genérico
-        raise HTTPException(status_code=500, detail="Erro interno ao processar mensagem")
+        print(f"--- ERRO NA ROTA: {e} ---")
+        raise HTTPException(status_code=500, detail="Erro interno")
+```
+
+### Passo 3: Enviar e Monitorar
+
+1.  Atualize o arquivo no seu computador e envie para o GitHub:
+    ```bash
+    git add backend-api/main.py
+    git commit -m "Debug: Adicionando logs detalhados para envio de email"
+    git push origin main
