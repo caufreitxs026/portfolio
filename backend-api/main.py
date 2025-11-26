@@ -130,12 +130,3 @@ async def send_contact(message: ContactMessage, background_tasks: BackgroundTask
     except Exception as e:
         print(f"--- ERRO NA ROTA: {e} ---")
         raise HTTPException(status_code=500, detail="Erro interno")
-```
-
-### Passo 3: Enviar e Monitorar
-
-1.  Atualize o arquivo no seu computador e envie para o GitHub:
-    ```bash
-    git add backend-api/main.py
-    git commit -m "Debug: Adicionando logs detalhados para envio de email"
-    git push origin main
