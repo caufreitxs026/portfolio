@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { Code, Server } from 'lucide-react';
 
-// Importação dos Componentes Modulares
+// Componentes
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
-import ProjectCard from '@/components/ProjectCard';
 import ExperienceItem from '@/components/ExperienceItem';
 import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
+import ProjectCarousel from '@/components/ProjectCarousel';
+import { ProjectSkeleton, ExperienceSkeleton } from '@/components/Skeletons';
 
 // Interfaces
 interface Project {
@@ -34,31 +35,41 @@ interface Experience {
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // Estados de carregamento independentes
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [loadingExperience, setLoadingExperience] = useState(true);
 
-  // Define a URL da API (usa a variável de ambiente ou o localhost como fallback)
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
   useEffect(() => {
-    async function fetchData() {
+    // Função para buscar projetos
+    const fetchProjects = async () => {
       try {
-        // Usa a URL dinâmica nos fetches
-        const [projectsRes, expRes] = await Promise.all([
-            fetch(`${API_URL}/projects`),
-            fetch(`${API_URL}/experiences`)
-        ]);
-        
-        if (projectsRes.ok && expRes.ok) {
-            setProjects(await projectsRes.json());
-            setExperiences(await expRes.json());
-        }
+        const res = await fetch(`${API_URL}/projects`);
+        if (res.ok) setProjects(await res.json());
       } catch (error) {
-        console.error("Erro ao conectar com API:", error);
+        console.error("Erro projetos:", error);
       } finally {
-        setLoading(false);
+        setLoadingProjects(false);
       }
-    }
-    fetchData();
+    };
+
+    // Função para buscar experiências
+    const fetchExperiences = async () => {
+      try {
+        const res = await fetch(`${API_URL}/experiences`);
+        if (res.ok) setExperiences(await res.json());
+      } catch (error) {
+        console.error("Erro experiências:", error);
+      } finally {
+        setLoadingExperience(false);
+      }
+    };
+
+    // Dispara as buscas em paralelo
+    fetchProjects();
+    fetchExperiences();
   }, []);
 
   return (
@@ -67,7 +78,7 @@ export default function Home() {
       <Navbar />
       <Hero />
 
-      {/* Seção de Projetos */}
+      {/* Seção de Projetos (Carrossel) */}
       <section id="projetos" className="py-20 bg-slate-800/50 relative">
         <div className="max-w-6xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-white mb-2">
@@ -77,16 +88,14 @@ export default function Home() {
             Casos reais onde apliquei tecnologia para gerar valor.
           </p>
 
-          {loading ? (
-             <div className="flex justify-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+          {loadingProjects ? (
+             // Mostra Skeleton enquanto carrega
+             <div className="max-w-4xl mx-auto">
+               <ProjectSkeleton />
              </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-8">
-              {projects.map((project, index) => (
-                <ProjectCard key={project.id} project={project} index={index} />
-              ))}
-            </div>
+            // Mostra Carrossel quando pronto
+            <ProjectCarousel projects={projects} />
           )}
         </div>
       </section>
@@ -102,14 +111,23 @@ export default function Home() {
           
           <div className="ml-3 pl-8 relative">
              <div className="absolute left-0 top-2 bottom-0 w-[2px] bg-slate-800/50"></div>
-            {experiences.map((exp, index) => (
-              <ExperienceItem key={exp.id} experience={exp} index={index} />
-            ))}
+            
+            {loadingExperience ? (
+              // Mostra 3 Skeletons de experiência
+              <div className="space-y-12">
+                <ExperienceSkeleton />
+                <ExperienceSkeleton />
+                <ExperienceSkeleton />
+              </div>
+            ) : (
+              experiences.map((exp, index) => (
+                <ExperienceItem key={exp.id} experience={exp} index={index} />
+              ))
+            )}
           </div>
         </div>
       </section>
 
-      {/* Seção de Contato */}
       <section id="contato" className="py-20 bg-slate-800/30">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold text-white mb-6">Vamos Conversar?</h2>
