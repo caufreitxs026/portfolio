@@ -14,7 +14,7 @@ export default function Footer() {
           </span>
           <p className="text-slate-500 text-sm mt-2">
             &copy; {new Date().getFullYear()} Cauã Freitas. <br className="md:hidden"/>
-            Engenharia de Software & Dados.
+            Ciência da Computação & Dados.
           </p>
         </div>
 
