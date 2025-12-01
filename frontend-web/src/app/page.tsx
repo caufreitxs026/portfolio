@@ -8,7 +8,7 @@ import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
 import ProjectCarousel from '@/components/ProjectCarousel';
 import { ProjectSkeleton, ExperienceSkeleton } from '@/components/Skeletons';
-import { useCachedData } from '@/hooks/useCachedData'; // Importa o novo hook
+import { useCachedData } from '@/hooks/useCachedData';
 
 // Interfaces
 interface Project {
@@ -33,10 +33,11 @@ interface Experience {
 export default function Home() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
-  // Usa o Hook de Cache para buscar dados
-  // Se tiver no cache, 'data' vem preenchido e 'loading' pode ser false rapidamente
-  const { data: projects, loading: loadingProjects } = useCachedData<Project[]>('portfolio_projects', `${API_URL}/projects`);
-  const { data: experiences, loading: loadingExperience } = useCachedData<Experience[]>('portfolio_experience', `${API_URL}/experiences`);
+  // --- ALTERAÇÃO DE CACHE ---
+  // Mudamos as chaves para '_v2'. Isso invalida o cache antigo no navegador do usuário
+  // e força o download dos dados novos que você alterou no banco.
+  const { data: projects, loading: loadingProjects } = useCachedData<Project[]>('portfolio_projects_v2', `${API_URL}/projects`);
+  const { data: experiences, loading: loadingExperience } = useCachedData<Experience[]>('portfolio_experience_v2', `${API_URL}/experiences`);
 
   return (
     <main className="min-h-screen text-slate-300 selection:bg-emerald-500 selection:text-white overflow-x-hidden">
