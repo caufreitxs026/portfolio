@@ -1,12 +1,32 @@
 import os
 import resend
-from fastapi import FastAPI, HTTPException
+import sentry_sdk
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client, Client
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
+# Bibliotecas de Rate Limiting (Segurança)
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
 load_dotenv()
+
+# --- CONFIGURAÇÃO SENTRY (MONITORAMENTO) ---
+SENTRY_DSN = os.environ.get("SENTRY_DSN")
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=1.0, # Captura 100% das transações (ajuste se tiver muito tráfego)
+        profiles_sample_rate=1.0,
+    )
+
+# --- CONFIGURAÇÃO RATE LIMITER ---
+# Usa o IP do usuário para contar as requisições
+limiter = Limiter(key_func=get_remote_address)
 
 # --- CONFIGURAÇÃO SUPABASE ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
@@ -21,18 +41,15 @@ except:
     supabase = None
 
 # --- CONFIGURAÇÃO RESEND ---
-# Chave fornecida: re_7hKWQt9L_9HUJKpAbADvVkCHhTpdDhkDE
-# E-mail verificado: cauafreitas026@gmail.com
-
-# Em produção (Render), é melhor usar a variável de ambiente, mas podemos colocar aqui como fallback
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY") or "re_7hKWQt9L_9HUJKpAbADvVkCHhTpdDhkDE"
 resend.api_key = RESEND_API_KEY
-
-# O email de destino DEVE ser o email verificado no Resend (o seu)
-# IMPORTANTE: No plano gratuito, você SÓ pode enviar para este email.
 EMAIL_TO = "cauafreitas026@gmail.com"
 
 app = FastAPI(title="Portfolio API - Cauã Freitas")
+
+# Conecta o Limiter ao FastAPI
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -56,12 +73,9 @@ def send_email_resend(contact: ContactMessage):
         return False
 
     try:
-        # CORREÇÃO AQUI:
-        # O 'from' deve ser o domínio de teste do Resend.
-        # O 'to' DEVE ser o seu e-mail (EMAIL_TO), não o do visitante.
         params = {
             "from": "Portfolio <onboarding@resend.dev>",
-            "to": [EMAIL_TO], # FIXO: Envia apenas para você
+            "to": [EMAIL_TO],
             "subject": f"Portfolio: Novo contato de {contact.name}",
             "html": f"""
             <h3>Nova mensagem recebida!</h3>
@@ -71,7 +85,7 @@ def send_email_resend(contact: ContactMessage):
             <p><strong>Mensagem:</strong></p>
             <p>{contact.content}</p>
             """,
-            "reply_to": contact.email # Quando você clicar em responder, vai para o visitante
+            "reply_to": contact.email
         }
 
         email = resend.Emails.send(params)
@@ -80,6 +94,8 @@ def send_email_resend(contact: ContactMessage):
             
     except Exception as e:
         print(f">>> [RESEND] Erro no envio: {str(e)}")
+        # Envia o erro para o Sentry automaticamente
+        sentry_sdk.capture_exception(e)
         return False
 
 # --- ROTAS ---
@@ -99,7 +115,9 @@ def get_experiences():
     return supabase.table("experiences").select("*").order("start_date", desc=True).execute().data
 
 @app.post("/contact")
-def send_contact(message: ContactMessage):
+@limiter.limit("5/hour") # Limite: 5 mensagens por hora por IP
+def send_contact(request: Request, message: ContactMessage):
+    # O objeto 'request' é necessário para o Rate Limiter identificar o IP
     print(f"--- ROTA CONTACT CHAMADA: {message.name} ---")
     
     # 1. Salva no Banco
@@ -110,9 +128,9 @@ def send_contact(message: ContactMessage):
                 "email": message.email,
                 "content": message.content
             }).execute()
-            print("--- Salvo no Supabase. ---")
     except Exception as db_error:
         print(f"--- Erro banco: {db_error}")
+        sentry_sdk.capture_exception(db_error)
 
     # 2. Envia Email via Resend
     email_sucesso = send_email_resend(message)
