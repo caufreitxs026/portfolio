@@ -4,6 +4,7 @@ supabase
 python-dotenv
 pydantic
 email-validator
+requests
 resend
 slowapi
 sentry-sdk
