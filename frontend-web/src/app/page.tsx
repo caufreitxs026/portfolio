@@ -26,44 +26,47 @@ interface Experience {
 async function getPortfolioData() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   
-  // Se não tiver URL (ex: build time sem env), retorna vazio para não quebrar
+  // LOG DE DEBUG PARA O BUILD (Vai aparecer no log da Vercel)
+  console.log(`[BUILD] Iniciando busca de dados. API_URL: ${API_URL}`);
+
   if (!API_URL) {
-    console.warn("Aviso: NEXT_PUBLIC_API_URL não definida. Retornando dados vazios.");
+    console.warn("[BUILD] Aviso: NEXT_PUBLIC_API_URL não definida. Usando dados vazios.");
     return { projects: [], experiences: [] };
   }
 
   try {
-    console.log(`Buscando dados de: ${API_URL}`);
-    
-    // Adicionei um timeout para não travar o build se a API demorar
-    const fetchWithTimeout = (url: string) => 
-        fetch(url, { next: { revalidate: 3600 } }).catch(err => {
-            console.error(`Erro fetch ${url}:`, err);
-            return null;
-        });
+    // Adicionamos um timeout curto para o build não travar se a API estiver dormindo
+    const fetchWithTimeout = async (url: string) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), 5000); // 5 segundos max
+        try {
+            const res = await fetch(url, { 
+                signal: controller.signal,
+                next: { revalidate: 3600 } 
+            });
+            clearTimeout(id);
+            return res.ok ? await res.json() : [];
+        } catch (err) {
+            clearTimeout(id);
+            console.error(`[BUILD] Erro ao buscar ${url}:`, err);
+            return [];
+        }
+    };
 
-    const [projectsRes, expRes] = await Promise.all([
+    const [projectsData, experiencesData] = await Promise.all([
       fetchWithTimeout(`${API_URL}/projects`),
       fetchWithTimeout(`${API_URL}/experiences`)
     ]);
 
-    let projects: Project[] = [];
-    let experiences: Experience[] = [];
+    // Garante que o retorno seja SEMPRE um array
+    const projects = Array.isArray(projectsData) ? projectsData : [];
+    const experiences = Array.isArray(experiencesData) ? experiencesData : [];
 
-    if (projectsRes && projectsRes.ok) {
-        const data = await projectsRes.json();
-        // Garante que é um array antes de atribuir
-        if (Array.isArray(data)) projects = data;
-    }
-
-    if (expRes && expRes.ok) {
-        const data = await expRes.json();
-        if (Array.isArray(data)) experiences = data;
-    }
-
+    console.log(`[BUILD] Sucesso! Projetos: ${projects.length}, Experiências: ${experiences.length}`);
     return { projects, experiences };
+
   } catch (error) {
-    console.error("Erro crítico ao buscar dados:", error);
+    console.error("[BUILD] Erro crítico desconhecido:", error);
     return { projects: [], experiences: [] };
   }
 }
@@ -71,9 +74,9 @@ async function getPortfolioData() {
 export default async function Page() {
   const data = await getPortfolioData();
   
-  // Segurança extra: Garante que nunca passa undefined para o cliente
-  const safeProjects = Array.isArray(data?.projects) ? data.projects : [];
-  const safeExperiences = Array.isArray(data?.experiences) ? data.experiences : [];
+  // Segunda camada de segurança (Redundância)
+  const safeProjects = data?.projects || [];
+  const safeExperiences = data?.experiences || [];
   
   return <HomeClient projects={safeProjects} experiences={safeExperiences} />;
 }
