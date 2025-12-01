@@ -7,8 +7,6 @@ import ExperienceItem from '@/components/ExperienceItem';
 import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
 import ProjectCarousel from '@/components/ProjectCarousel';
-import { ProjectSkeleton, ExperienceSkeleton } from '@/components/Skeletons';
-import { useCachedData } from '@/hooks/useCachedData';
 
 // Interfaces
 interface Project {
@@ -30,15 +28,12 @@ interface Experience {
   is_current: boolean;
 }
 
-export default function Home() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+interface HomeClientProps {
+  projects: Project[];
+  experiences: Experience[];
+}
 
-  // --- ALTERAÇÃO DE CACHE ---
-  // Mudamos as chaves para '_v2'. Isso invalida o cache antigo no navegador do usuário
-  // e força o download dos dados novos que você alterou no banco.
-  const { data: projects, loading: loadingProjects } = useCachedData<Project[]>('portfolio_projects_v2', `${API_URL}/projects`);
-  const { data: experiences, loading: loadingExperience } = useCachedData<Experience[]>('portfolio_experience_v2', `${API_URL}/experiences`);
-
+export default function HomeClient({ projects, experiences }: HomeClientProps) {
   return (
     <main className="min-h-screen text-slate-300 selection:bg-emerald-500 selection:text-white overflow-x-hidden">
       
@@ -55,13 +50,11 @@ export default function Home() {
             Casos reais onde apliquei tecnologia para gerar valor.
           </p>
 
-          {(loadingProjects && !projects) ? (
-             // Só mostra Skeleton se estiver carregando E não tiver dados no cache
-             <div className="max-w-4xl mx-auto">
-               <ProjectSkeleton />
-             </div>
+          {/* Como os dados já vêm prontos do servidor, não precisamos de loading/skeletons aqui */}
+          {projects.length > 0 ? (
+            <ProjectCarousel projects={projects} />
           ) : (
-            <ProjectCarousel projects={projects || []} />
+            <p className="text-slate-500">Nenhum projeto encontrado no momento.</p>
           )}
         </div>
       </section>
@@ -78,18 +71,9 @@ export default function Home() {
           <div className="ml-3 pl-8 relative">
              <div className="absolute left-0 top-2 bottom-0 w-[2px] bg-slate-800/50"></div>
             
-            {(loadingExperience && !experiences) ? (
-              // Só mostra Skeleton se estiver carregando E não tiver dados no cache
-              <div className="space-y-12">
-                <ExperienceSkeleton />
-                <ExperienceSkeleton />
-                <ExperienceSkeleton />
-              </div>
-            ) : (
-              (experiences || []).map((exp, index) => (
-                <ExperienceItem key={exp.id} experience={exp} index={index} />
-              ))
-            )}
+            {experiences.map((exp, index) => (
+              <ExperienceItem key={exp.id} experience={exp} index={index} />
+            ))}
           </div>
         </div>
       </section>
