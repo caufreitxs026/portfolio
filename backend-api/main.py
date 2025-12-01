@@ -14,18 +14,18 @@ from slowapi.errors import RateLimitExceeded
 
 load_dotenv()
 
-# --- CONFIGURAÇÃO SENTRY (MONITORAMENTO) ---
-SENTRY_DSN = os.environ.get("SENTRY_DSN")
-
-if SENTRY_DSN:
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        traces_sample_rate=1.0, # Captura 100% das transações (ajuste se tiver muito tráfego)
-        profiles_sample_rate=1.0,
-    )
+# --- CONFIGURAÇÃO SENTRY (MONITORIZAÇÃO) ---
+# Inicializa o Sentry com o DSN que você forneceu.
+# Isso vai capturar erros e performance automaticamente.
+sentry_sdk.init(
+    dsn="https://a18546f03b5aa26256d35f6a96245f3f@o4510461419192320.ingest.us.sentry.io/4510461421879296",
+    send_default_pii=True, # Envia dados como IP (útil para debug)
+    traces_sample_rate=1.0, # Captura 100% das transações
+    profiles_sample_rate=1.0,
+)
 
 # --- CONFIGURAÇÃO RATE LIMITER ---
-# Usa o IP do usuário para contar as requisições
+# Usa o IP do utilizador para contar as requisições
 limiter = Limiter(key_func=get_remote_address)
 
 # --- CONFIGURAÇÃO SUPABASE ---
