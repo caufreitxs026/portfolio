@@ -1,20 +1,25 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-// Metadados para SEO e Redes Sociais
+// Pega a URL do site (em produção ou localhost)
+const baseUrl = process.env.NEXT_PUBLIC_API_URL 
+  ? "https://caufreitxs.vercel.app" // Sua URL final da Vercel
+  : "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl), // Define a base para todas as URLs relativas
   title: "Cauã Freitas | Full Stack Developer",
-  description: "Portfólio de Cauã Freitas. Desenvolvedor Full Stack especializado em Python, React e Análise de Dados. Confira meus projetos e trajetória.",
+  description: "Portfólio de Cauã Freitas. Desenvolvedor Full Stack especializado em Python, React e Análise de Dados.",
   keywords: ["Desenvolvedor", "Full Stack", "Python", "React", "Next.js", "Data Science", "Portfólio"],
   authors: [{ name: "Cauã Freitas" }],
   openGraph: {
     title: "Cauã Freitas | Full Stack Developer",
     description: "Transformando dados em inteligência e código em solução.",
-    url: "https://caufreitxs.vercel.app",
+    url: baseUrl,
     siteName: "Portfólio Cauã Freitas",
     images: [
       {
-        url: "/opengraph-image.png", // Imagem que aparece no WhatsApp (crie e coloque na pasta public)
+        url: "/opengraph-image.png", // O Next.js busca automaticamente na pasta public
         width: 1200,
         height: 630,
         alt: "Preview do Portfólio",
