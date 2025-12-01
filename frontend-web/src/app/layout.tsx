@@ -10,11 +10,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Cauã Freitas | Full Stack Developer",
     description: "Transformando dados em inteligência e código em solução.",
-    url: "https://caufreitxs.vercel.app", // Sua URL final
+    url: "https://caufreitxs.vercel.app",
     siteName: "Portfólio Cauã Freitas",
     images: [
       {
-        url: "/opengraph-image.png", // Você precisará criar essa imagem na pasta public
+        url: "/opengraph-image.png", // Imagem que aparece no WhatsApp (crie e coloque na pasta public)
         width: 1200,
         height: 630,
         alt: "Preview do Portfólio",
