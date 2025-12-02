@@ -26,7 +26,6 @@ interface Experience {
 async function getPortfolioData() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
   
-  // LOG DE DEBUG PARA O BUILD (Vai aparecer no log da Vercel)
   console.log(`[BUILD] Iniciando busca de dados. API_URL: ${API_URL}`);
 
   if (!API_URL) {
@@ -35,10 +34,10 @@ async function getPortfolioData() {
   }
 
   try {
-    // Adicionamos um timeout curto para o build não travar se a API estiver dormindo
+    // AUMENTAMOS O TIMEOUT PARA 60 SEGUNDOS (Render Free Tier precisa disso)
     const fetchWithTimeout = async (url: string) => {
         const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), 5000); // 5 segundos max
+        const id = setTimeout(() => controller.abort(), 60000); // 60s
         try {
             const res = await fetch(url, { 
                 signal: controller.signal,
@@ -58,7 +57,6 @@ async function getPortfolioData() {
       fetchWithTimeout(`${API_URL}/experiences`)
     ]);
 
-    // Garante que o retorno seja SEMPRE um array
     const projects = Array.isArray(projectsData) ? projectsData : [];
     const experiences = Array.isArray(experiencesData) ? experiencesData : [];
 
@@ -74,9 +72,8 @@ async function getPortfolioData() {
 export default async function Page() {
   const data = await getPortfolioData();
   
-  // Segunda camada de segurança (Redundância)
-  const safeProjects = data?.projects || [];
-  const safeExperiences = data?.experiences || [];
+  const safeProjects = Array.isArray(data?.projects) ? data.projects : [];
+  const safeExperiences = Array.isArray(data?.experiences) ? data.experiences : [];
   
   return <HomeClient projects={safeProjects} experiences={safeExperiences} />;
 }
