@@ -37,7 +37,7 @@ export default function ScrollProgress() {
     <>
       {/* Barra de Progresso no Topo */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-emerald-500 origin-left z-50"
+        className="fixed top-0 left-0 right-0 h-1 bg-emerald-500 origin-left z-[100]"
         style={{ scaleX }}
       />
 
@@ -50,7 +50,7 @@ export default function ScrollProgress() {
           pointerEvents: isVisible ? 'auto' : 'none'
         }}
         onClick={scrollToTop}
-        className="fixed bottom-8 right-8 p-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full shadow-lg z-40 transition-colors duration-300"
+        className="fixed bottom-8 right-8 p-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full shadow-lg z-40 transition-colors duration-300 border border-emerald-400/30 backdrop-blur-sm"
         whileHover={{ y: -5 }}
         whileTap={{ scale: 0.9 }}
       >
