@@ -13,7 +13,6 @@ interface ProjectProps {
     image_url: string;
     repo_link: string;
   };
-  // index não é estritamente necessário aqui se não for usado para delay
 }
 
 export default function ProjectCard3D({ project }: ProjectProps) {
@@ -67,8 +66,8 @@ export default function ProjectCard3D({ project }: ProjectProps) {
         style={{ transform: "translateZ(75px)", transformStyle: "preserve-3d" }} 
         className="absolute inset-4 grid place-content-center rounded-xl shadow-lg"
       >
-        {/* Conteúdo do Card Flutuando */}
         <div className="h-full flex flex-col justify-between">
+            {/* Área da Imagem */}
             <div className="relative h-40 w-full overflow-hidden rounded-lg mb-4 border border-slate-700/50">
                 {project.image_url ? (
                     <img 
@@ -81,13 +80,14 @@ export default function ProjectCard3D({ project }: ProjectProps) {
                         <Code className="text-slate-600" size={40} />
                     </div>
                 )}
-                {/* Overlay com Botão */}
+                
+                {/* Botão GitHub */}
                 <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
                     {project.repo_link && (
                         <a 
                             href={project.repo_link} 
                             target="_blank"
-                            className="p-3 bg-white text-slate-950 rounded-full hover:scale-110 transition-transform"
+                            className="p-3 bg-white text-slate-950 rounded-full hover:scale-110 transition-transform cursor-pointer"
                             title="Ver Código"
                         >
                             <Github size={20} />
@@ -96,6 +96,7 @@ export default function ProjectCard3D({ project }: ProjectProps) {
                 </div>
             </div>
 
+            {/* Título e Descrição */}
             <div>
                 <h3 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">
                     {project.title}
@@ -105,9 +106,10 @@ export default function ProjectCard3D({ project }: ProjectProps) {
                 </p>
             </div>
 
-            <div className="flex flex-wrap gap-2 mt-auto">
-                {project.tech_stack?.slice(0, 3).map((tech, i) => (
-                    <span key={i} className="text-xs font-mono px-2 py-1 rounded bg-slate-800 text-emerald-400/80 border border-slate-700">
+            {/* Tech Stack - SEM LIMITES (.slice removido) */}
+            <div className="flex flex-wrap gap-2 mt-auto content-start max-h-[80px] overflow-y-auto pr-1 scrollbar-hide">
+                {project.tech_stack?.map((tech, i) => (
+                    <span key={i} className="text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded bg-slate-800 text-emerald-400 border border-slate-700 hover:bg-emerald-900/30 transition-colors">
                         {tech}
                     </span>
                 ))}
@@ -115,7 +117,6 @@ export default function ProjectCard3D({ project }: ProjectProps) {
         </div>
       </div>
       
-      {/* Fundo do Card (Base) */}
       <div className="absolute inset-0 z-[-1] rounded-xl bg-gradient-to-br from-slate-800 to-slate-950 opacity-50" />
     </motion.div>
   );
