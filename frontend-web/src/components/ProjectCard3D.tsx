@@ -68,7 +68,7 @@ export default function ProjectCard3D({ project }: ProjectProps) {
       >
         <div className="h-full flex flex-col justify-between">
             {/* Área da Imagem */}
-            <div className="relative h-40 w-full overflow-hidden rounded-lg mb-4 border border-slate-700/50">
+            <div className="relative h-40 w-full overflow-hidden rounded-lg mb-4 border border-slate-700/50 group-image">
                 {project.image_url ? (
                     <img 
                         src={project.image_url} 
@@ -81,19 +81,24 @@ export default function ProjectCard3D({ project }: ProjectProps) {
                     </div>
                 )}
                 
-                {/* Botão GitHub */}
-                <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
-                    {project.repo_link && (
+                {/* Botão GitHub - AGORA SEMPRE VISÍVEL E NO TOPO */}
+                {project.repo_link && (
+                    <div 
+                        style={{ transform: "translateZ(100px)" }} 
+                        className="absolute top-2 right-2 z-20"
+                    >
                         <a 
                             href={project.repo_link} 
                             target="_blank"
-                            className="p-3 bg-white text-slate-950 rounded-full hover:scale-110 transition-transform cursor-pointer"
-                            title="Ver Código"
+                            className="flex items-center justify-center p-2 bg-slate-950/80 text-white rounded-full border border-slate-700 hover:bg-emerald-600 hover:border-emerald-500 hover:scale-110 transition-all shadow-lg backdrop-blur-sm cursor-pointer"
+                            title="Ver Código no GitHub"
+                            // Adicionamos stopPropagation para garantir que o clique no link funcione mesmo com o card mexendo
+                            onClick={(e) => e.stopPropagation()}
                         >
-                            <Github size={20} />
+                            <Github size={18} />
                         </a>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
 
             {/* Título e Descrição */}
@@ -106,7 +111,7 @@ export default function ProjectCard3D({ project }: ProjectProps) {
                 </p>
             </div>
 
-            {/* Tech Stack - SEM LIMITES (.slice removido) */}
+            {/* Tech Stack */}
             <div className="flex flex-wrap gap-2 mt-auto content-start max-h-[80px] overflow-y-auto pr-1 scrollbar-hide">
                 {project.tech_stack?.map((tech, i) => (
                     <span key={i} className="text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded bg-slate-800 text-emerald-400 border border-slate-700 hover:bg-emerald-900/30 transition-colors">
