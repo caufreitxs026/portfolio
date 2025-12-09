@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import ScrollProgress from '@/components/ScrollProgress';
+import CustomCursor from '@/components/CustomCursor';
+import ParticleBackground from '@/components/ParticleBackground';
 
-// Pega a URL do site (em produção ou localhost)
 const baseUrl = process.env.NEXT_PUBLIC_API_URL 
-  ? "https://caufreitxs.vercel.app" // Sua URL final da Vercel
+  ? "https://caufreitxs.vercel.app" 
   : "http://localhost:3000";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(baseUrl), // Define a base para todas as URLs relativas
+  metadataBase: new URL(baseUrl),
   title: "Cauã Freitas | Full Stack Developer",
   description: "Portfólio de Cauã Freitas. Desenvolvedor Full Stack especializado em Python, React e Análise de Dados.",
   keywords: ["Desenvolvedor", "Full Stack", "Python", "React", "Next.js", "Data Science", "Portfólio"],
@@ -19,7 +21,7 @@ export const metadata: Metadata = {
     siteName: "Portfólio Cauã Freitas",
     images: [
       {
-        url: "/opengraph-image.png", // O Next.js busca automaticamente na pasta public
+        url: "/opengraph-image.png",
         width: 1200,
         height: 630,
         alt: "Preview do Portfólio",
@@ -45,9 +47,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="scroll-smooth">
-      <body className="bg-slate-950 text-slate-300 antialiased">
-        {children}
+    <html lang="pt-BR" className="scroll-smooth cursor-none">
+      <body className="bg-slate-950 text-slate-300 antialiased relative selection:bg-emerald-500 selection:text-white">
+        
+        {/* Componentes de UI Global */}
+        <ScrollProgress />
+        <CustomCursor />
+        
+        {/* Fundo Interativo (fixo no fundo) */}
+        <div className="fixed inset-0 z-[-1] pointer-events-none">
+            <ParticleBackground />
+        </div>
+        
+        {/* Conteúdo Principal */}
+        <div className="relative z-10 flex flex-col min-h-screen">
+          {children}
+        </div>
       </body>
     </html>
   );
