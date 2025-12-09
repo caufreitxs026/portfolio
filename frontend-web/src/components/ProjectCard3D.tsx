@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Github, ExternalLink, Code } from 'lucide-react';
+import { Github, Code } from 'lucide-react';
 
 interface ProjectProps {
   project: {
@@ -13,6 +13,7 @@ interface ProjectProps {
     image_url: string;
     repo_link: string;
   };
+  // index não é estritamente necessário aqui se não for usado para delay
 }
 
 export default function ProjectCard3D({ project }: ProjectProps) {
