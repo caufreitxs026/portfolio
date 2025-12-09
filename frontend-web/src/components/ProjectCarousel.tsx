@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import ProjectCard from './ProjectCard';
+import ProjectCard3D from './ProjectCard3D'; // Importa o novo card
 
 interface Project {
   id: number;
@@ -21,7 +21,6 @@ interface ProjectCarouselProps {
 export default function ProjectCarousel({ projects }: ProjectCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Se não houver projetos, não renderiza nada
   if (!projects || projects.length === 0) return null;
 
   const nextSlide = () => {
@@ -33,50 +32,46 @@ export default function ProjectCarousel({ projects }: ProjectCarouselProps) {
   };
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto">
-      {/* Container do Slide */}
-      <div className="overflow-hidden relative min-h-[450px]">
+    <div className="relative w-full max-w-lg mx-auto py-10 perspective-1000"> {/* Max-w ajustado para focar no card 3D */}
+      
+      <div className="relative min-h-[450px] flex items-center justify-center">
         <AnimatePresence mode='wait'>
           <motion.div
             key={currentIndex}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.3 }}
-            className="w-full"
+            initial={{ opacity: 0, scale: 0.8, rotateY: 90 }}
+            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+            exit={{ opacity: 0, scale: 0.8, rotateY: -90 }}
+            transition={{ duration: 0.4, type: "spring" }}
+            className="w-full h-[450px]" // Altura fixa para o efeito 3D
           >
-            <ProjectCard project={projects[currentIndex]} index={currentIndex} />
+            <ProjectCard3D project={projects[currentIndex]} />
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Botões de Navegação (Só aparecem se tiver mais de 1 projeto) */}
       {projects.length > 1 && (
         <>
           <button 
             onClick={prevSlide}
-            className="absolute top-1/2 -left-4 md:-left-12 -translate-y-1/2 p-2 bg-slate-800/80 hover:bg-emerald-600 text-white rounded-full transition shadow-lg border border-slate-700 z-10"
-            aria-label="Anterior"
+            className="absolute top-1/2 -left-4 md:-left-16 -translate-y-1/2 p-3 bg-slate-800/80 hover:bg-emerald-600 text-white rounded-full transition shadow-lg border border-slate-700 z-10 hover:scale-110 cursor-pointer"
           >
             <ChevronLeft size={24} />
           </button>
           
           <button 
             onClick={nextSlide}
-            className="absolute top-1/2 -right-4 md:-right-12 -translate-y-1/2 p-2 bg-slate-800/80 hover:bg-emerald-600 text-white rounded-full transition shadow-lg border border-slate-700 z-10"
-            aria-label="Próximo"
+            className="absolute top-1/2 -right-4 md:-right-16 -translate-y-1/2 p-3 bg-slate-800/80 hover:bg-emerald-600 text-white rounded-full transition shadow-lg border border-slate-700 z-10 hover:scale-110 cursor-pointer"
           >
             <ChevronRight size={24} />
           </button>
 
-          {/* Indicadores (Bolinhas) */}
-          <div className="flex justify-center gap-2 mt-6">
+          <div className="flex justify-center gap-3 mt-8">
             {projects.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  idx === currentIndex ? 'bg-emerald-400 w-6' : 'bg-slate-700 hover:bg-slate-600'
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  idx === currentIndex ? 'bg-emerald-400 w-8' : 'bg-slate-700 w-2 hover:bg-slate-500'
                 }`}
               />
             ))}
