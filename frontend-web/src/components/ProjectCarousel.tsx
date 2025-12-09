@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import ProjectCard3D from './ProjectCard3D'; // Importa o novo card
+// IMPORT ATUALIZADO AQUI
+import ProjectCard3D from './ProjectCard3D'; 
 
 interface Project {
   id: number;
@@ -32,7 +33,7 @@ export default function ProjectCarousel({ projects }: ProjectCarouselProps) {
   };
 
   return (
-    <div className="relative w-full max-w-lg mx-auto py-10 perspective-1000"> {/* Max-w ajustado para focar no card 3D */}
+    <div className="relative w-full max-w-lg mx-auto py-10 perspective-1000"> 
       
       <div className="relative min-h-[450px] flex items-center justify-center">
         <AnimatePresence mode='wait'>
@@ -42,8 +43,9 @@ export default function ProjectCarousel({ projects }: ProjectCarouselProps) {
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
             exit={{ opacity: 0, scale: 0.8, rotateY: -90 }}
             transition={{ duration: 0.4, type: "spring" }}
-            className="w-full h-[450px]" // Altura fixa para o efeito 3D
+            className="w-full h-[450px]"
           >
+            {/* COMPONENTE ATUALIZADO AQUI */}
             <ProjectCard3D project={projects[currentIndex]} />
           </motion.div>
         </AnimatePresence>
