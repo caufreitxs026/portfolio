@@ -12,7 +12,6 @@ import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
 import ProjectCarousel from '@/components/ProjectCarousel';
 import TechWordle from '@/components/TechWordle';
-// import Chatbot from '@/components/Chatbot'; // Removido
 import { ProjectSkeleton, ExperienceSkeleton } from '@/components/Skeletons';
 import { usePortfolioData } from '@/hooks/usePortfolioData';
 
@@ -38,8 +37,9 @@ export default function Home() {
       <Hero />
 
       {/* --- BOTÕES FLUTUANTES --- */}
-      
+
       {/* Botão do Jogo (GameHub) */}
+      {/* Posicionado ACIMA do botão de "Voltar ao Topo" (que geralmente fica no bottom-8) */}
       <AnimatePresence>
         {!isGameOpen && (
           <motion.button
@@ -47,18 +47,17 @@ export default function Home() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setIsGameOpen(true)}
-            // Posição: bottom-8 right-8 (Canto inferior direito padrão)
             className={`
-              fixed bottom-8 right-8 p-3 w-12 h-12 flex items-center justify-center rounded-full shadow-2xl z-[90] transition-all duration-300 border backdrop-blur-md group
+              fixed bottom-24 right-8 p-3 w-14 h-14 flex items-center justify-center rounded-full shadow-2xl z-[90] transition-all duration-300 border backdrop-blur-md group
               ${isSecretMode 
-                ? 'bg-black/90 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white shadow-pink-500/30 ring-2 ring-pink-500/20' 
-                : 'bg-emerald-600 hover:bg-emerald-500 border-emerald-400/30 text-white shadow-emerald-500/30'}
+                ? 'bg-black/90 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white shadow-pink-500/40 ring-2 ring-pink-500/20' 
+                : 'bg-slate-900/90 border-emerald-500/50 text-emerald-400 hover:bg-emerald-600 hover:text-white shadow-emerald-500/40 ring-1 ring-emerald-500/30'}
             `}
             title={isSecretMode ? "SYSTEM HACK" : "Jogar Code Breaker"}
             whileHover={{ scale: 1.1, rotate: 15 }}
             whileTap={{ scale: 0.9 }}
           >
-            <Gamepad2 size={24} />
+            <Gamepad2 size={28} />
           </motion.button>
         )}
       </AnimatePresence>
@@ -74,8 +73,11 @@ export default function Home() {
              <Code className="text-emerald-400"/> Projetos em Destaque
           </h2>
           <p className="text-slate-400 mb-12">Casos reais onde apliquei tecnologia para gerar valor.</p>
+
           {loading ? (
-             <div className="max-w-4xl mx-auto"><ProjectSkeleton /></div>
+             <div className="max-w-4xl mx-auto">
+               <ProjectSkeleton />
+             </div>
           ) : projects && projects.length > 0 ? (
             <ProjectCarousel projects={projects} />
           ) : (
@@ -93,10 +95,15 @@ export default function Home() {
                 <Server className="text-emerald-400"/> Experiência Profissional
              </h2>
           </div>
+          
           <div className="ml-3 pl-8 relative">
              <div className="absolute left-0 top-2 bottom-0 w-[2px] bg-slate-800/50"></div>
+            
             {loading ? (
-              <div className="space-y-12"><ExperienceSkeleton /><ExperienceSkeleton /></div>
+              <div className="space-y-12">
+                <ExperienceSkeleton />
+                <ExperienceSkeleton />
+              </div>
             ) : (
               (experiences || []).map((exp: any, index: number) => (
                 <ExperienceItem key={exp.id} experience={exp} index={index} />
