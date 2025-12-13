@@ -30,7 +30,6 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     setMounted(true);
     if (typeof document !== 'undefined') {
-      // Verifica a classe de controle que adicionamos no EffectsWrapper
       const secretActive = document.body.classList.contains('secret-active');
       setIsSecretMode(secretActive);
       document.body.style.overflow = 'hidden';
@@ -43,7 +42,7 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
   const gameWords = useMemo(() => isSecretMode ? SECRET_WORDS : NORMAL_WORDS, [isSecretMode]);
 
   useEffect(() => {
-    if (gameWords.length > 0 && !targetWord) {
+    if (gameWords.length > 0) {
       startNewGame();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -145,6 +144,7 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
         h-full max-h-[90vh] sm:h-auto
       `}>
         
+        {/* Cabeçalho Fixo */}
         <div className="flex-shrink-0 p-4 border-b border-white/10 flex justify-between items-center bg-black/20 rounded-t-xl">
             <div className="flex items-center gap-2">
                 <div className={`p-2 rounded-lg ${isSecretMode ? 'bg-pink-500/20 text-pink-500' : 'bg-emerald-500/20 text-emerald-500'}`}>
@@ -170,6 +170,7 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
             </div>
         </div>
 
+        {/* Tutorial (Expansível) */}
         <AnimatePresence>
           {showHelp && (
             <motion.div 
@@ -197,6 +198,7 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
           )}
         </AnimatePresence>
 
+        {/* Área do Jogo (Rolável) */}
         <div className="flex-1 overflow-y-auto py-4 px-2 custom-scrollbar flex flex-col items-center justify-center bg-black/10">
           <div className="w-full max-w-sm">
             {guesses.map((g, i) => renderRow(g, false))}
@@ -205,7 +207,9 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
+        {/* Rodapé Fixo (Status + Teclado) */}
         <div className="flex-shrink-0 p-3 border-t border-white/10 bg-black/30 rounded-b-xl">
+            {/* Mensagem de Vitória/Derrota */}
             {gameState !== 'playing' && (
               <div className="text-center animate-fade-in mb-3 p-2 rounded bg-black/40 border border-white/10">
                 <p className={`font-bold text-sm sm:text-base mb-1 ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'}`}>
@@ -226,6 +230,7 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
               </div>
             )}
 
+            {/* Teclado */}
             <div className="grid grid-cols-10 gap-1 select-none">
               {['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'].map((row, i) => (
                 <div key={i} className="col-span-10 flex justify-center gap-1">
