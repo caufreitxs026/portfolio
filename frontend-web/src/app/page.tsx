@@ -38,7 +38,8 @@ export default function Home() {
       <Hero />
 
       {/* Botão Flutuante do Jogo 
-          Ajustado para right-24 para não sobrepor o botão de "Voltar ao Topo" (que fica no right-8)
+          Ajustado para ter o mesmo tamanho visual do botão 'Scroll to Top'
+          (p-3, size 24) e posição alinhada (right-20 para dar espaço ao outro botão).
       */}
       <AnimatePresence>
         {!isGameOpen && (
@@ -48,16 +49,16 @@ export default function Home() {
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setIsGameOpen(true)}
             className={`
-              fixed bottom-8 right-24 p-4 rounded-full shadow-2xl z-40 transition-all duration-300 border backdrop-blur-md group
+              fixed bottom-8 right-24 p-3 rounded-full shadow-2xl z-[90] transition-all duration-300 border backdrop-blur-md group
               ${isSecretMode 
                 ? 'bg-black/80 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white shadow-pink-500/30' 
-                : 'bg-slate-800/80 border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white shadow-emerald-500/30'}
+                : 'bg-emerald-600 hover:bg-emerald-500 border-emerald-400/30 text-white shadow-emerald-500/30'}
             `}
             title="Hacker the System (Jogar)"
             whileHover={{ scale: 1.1, rotate: 15 }}
             whileTap={{ scale: 0.9 }}
           >
-            <Gamepad2 size={28} />
+            <Gamepad2 size={24} />
           </motion.button>
         )}
       </AnimatePresence>
