@@ -25,9 +25,8 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
   const [gameState, setGameState] = useState<'playing' | 'won' | 'lost'>('playing');
   const [isSecretMode, setIsSecretMode] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [showHelp, setShowHelp] = useState(false); // Estado para o tutorial
+  const [showHelp, setShowHelp] = useState(false);
 
-  // Setup inicial
   useEffect(() => {
     setMounted(true);
     if (typeof document !== 'undefined') {
@@ -40,14 +39,14 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
-  // Seleção de palavras reativa ao modo
   const gameWords = useMemo(() => isSecretMode ? SECRET_WORDS : NORMAL_WORDS, [isSecretMode]);
 
-  // Reinicia o jogo quando o modo muda ou ao montar
   useEffect(() => {
-    startNewGame();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSecretMode]); 
+    if (gameWords.length > 0 && !targetWord) {
+      startNewGame();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameWords]);
 
   const startNewGame = () => {
     if (gameWords.length === 0) return;
@@ -140,36 +139,27 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
       style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%' }}
     >
       <div className={`
-        relative rounded-xl p-4 sm:p-6 shadow-2xl w-full max-w-lg border flex flex-col max-h-[95vh]
+        relative rounded-xl shadow-2xl w-full max-w-lg border flex flex-col
         ${isSecretMode ? 'bg-black border-pink-500 shadow-pink-500/20' : 'bg-slate-900 border-emerald-500/30'}
+        h-[85vh] sm:h-auto sm:max-h-[90vh]
       `}>
-        {/* Botões de Topo */}
-        <div className="absolute top-3 right-3 flex gap-2 z-20">
-          <button 
-            onClick={() => setShowHelp(!showHelp)} 
-            className="text-slate-400 hover:text-white transition-colors p-2"
-            title="Como Jogar"
-          >
-            <HelpCircle size={24} />
-          </button>
-          <button 
-            onClick={onClose} 
-            className="text-slate-400 hover:text-white transition-colors p-2"
-            title="Fechar"
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        {/* Cabeçalho */}
-        <div className="text-center mb-4 mt-2 flex-shrink-0">
-          <h2 className={`
-            text-xl sm:text-2xl font-bold font-mono flex items-center justify-center gap-2
-            ${isSecretMode ? 'text-pink-500 glitch-text' : 'text-emerald-400'}
-          `}>
-            {isSecretMode ? <ShieldAlert size={24} /> : <Terminal size={24} />}
-            {isSecretMode ? 'SYSTEM HACK' : 'CODE BREAKER'}
-          </h2>
+        {/* Cabeçalho Fixo */}
+        <div className="flex-shrink-0 p-4 border-b border-white/10 flex justify-between items-center">
+            <h2 className={`
+              text-xl font-bold font-mono flex items-center gap-2
+              ${isSecretMode ? 'text-pink-500 glitch-text' : 'text-emerald-400'}
+            `}>
+              {isSecretMode ? <ShieldAlert size={20} /> : <Terminal size={20} />}
+              {isSecretMode ? 'SYSTEM HACK' : 'CODE BREAKER'}
+            </h2>
+            <div className="flex gap-2">
+              <button onClick={() => setShowHelp(!showHelp)} className="text-slate-400 hover:text-white transition-colors">
+                <HelpCircle size={20} />
+              </button>
+              <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+                <X size={20} />
+              </button>
+            </div>
         </div>
 
         {/* Tutorial (Toggle) */}
@@ -179,83 +169,85 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="bg-slate-800/50 rounded-lg p-4 mb-4 text-sm text-slate-300 overflow-hidden flex-shrink-0"
+              className="bg-slate-800/50 p-4 text-sm text-slate-300 overflow-hidden flex-shrink-0 border-b border-white/5"
             >
-              <p className="font-bold mb-2 text-white">Como Hackear:</p>
-              <ul className="space-y-1">
+              <p className="font-bold mb-2 text-white">Guia de Cores:</p>
+              <ul className="space-y-1 text-xs sm:text-sm">
                 <li className="flex items-center gap-2">
                   <span className={`w-3 h-3 rounded ${isSecretMode ? 'bg-pink-600' : 'bg-emerald-600'}`}></span> 
                   Letra certa no lugar certo.
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded bg-yellow-600"></span> 
-                  Letra existe, mas lugar errado.
+                  Letra certa, lugar errado.
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded bg-slate-700"></span> 
-                  Letra não existe na senha.
+                  Letra não existe.
                 </li>
               </ul>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Área do Jogo */}
-        <div className="flex-1 overflow-y-auto min-h-0 py-2 custom-scrollbar">
-          <div className="flex flex-col justify-center min-h-full">
-            {guesses.map((g, i) => renderRow(g, false))}
-            {gameState === 'playing' && renderRow(currentGuess, true)}
-            {[...Array(Math.max(0, MAX_ATTEMPTS - 1 - guesses.length))].map((_, i) => renderRow('', false))}
-          </div>
+        {/* Área do Jogo (Rolável) */}
+        <div className="flex-1 overflow-y-auto py-4 px-2 custom-scrollbar flex flex-col items-center">
+          {guesses.map((g, i) => renderRow(g, false))}
+          {gameState === 'playing' && renderRow(currentGuess, true)}
+          {[...Array(Math.max(0, MAX_ATTEMPTS - 1 - guesses.length))].map((_, i) => renderRow('', false))}
         </div>
 
-        {/* Status e Reiniciar */}
-        {gameState !== 'playing' && (
-          <div className="text-center animate-fade-in my-3 flex-shrink-0">
-            <p className={`font-bold text-lg mb-2 ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'}`}>
-              {gameState === 'won' 
-                ? (isSecretMode ? 'ROOT ACCESS GRANTED!' : 'ACESSO CONCEDIDO!') 
-                : `SENHA: ${targetWord}`
-              }
-            </p>
-            <button 
-              onClick={startNewGame}
-              className={`
-                flex items-center gap-2 px-6 py-2 rounded-lg text-white font-bold shadow-lg transition mx-auto text-sm
-                ${isSecretMode ? 'bg-pink-600 hover:bg-pink-500' : 'bg-emerald-600 hover:bg-emerald-500'}
-              `}
-            >
-              <RotateCcw size={18} /> Reiniciar
-            </button>
-          </div>
-        )}
-
-        {/* Teclado Virtual */}
-        <div className="mt-auto pt-2 grid grid-cols-10 gap-1 flex-shrink-0">
-          {['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'].map((row, i) => (
-            <div key={i} className="col-span-10 flex justify-center gap-1">
-              {row.split('').map(char => (
-                <button
-                  key={char}
-                  onClick={() => handleKeyDown(char)}
-                  className={`w-7 h-9 sm:w-9 sm:h-11 text-[10px] sm:text-sm text-slate-300 rounded font-bold transition-colors
-                    ${isSecretMode ? 'bg-slate-800 hover:bg-pink-900/50' : 'bg-slate-800 hover:bg-slate-700'}
+        {/* Rodapé Fixo (Status + Teclado) */}
+        <div className="flex-shrink-0 p-4 border-t border-white/10 bg-black/20">
+            {/* Status e Reiniciar */}
+            {gameState !== 'playing' && (
+              <div className="text-center animate-fade-in mb-3">
+                <p className={`font-bold text-lg mb-2 ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'}`}>
+                  {gameState === 'won' 
+                    ? (isSecretMode ? 'ROOT ACCESS GRANTED!' : 'ACESSO CONCEDIDO!') 
+                    : `SENHA: ${targetWord}`
+                  }
+                </p>
+                <button 
+                  onClick={startNewGame}
+                  className={`
+                    flex items-center gap-2 px-6 py-2 rounded-lg text-white font-bold shadow-lg transition mx-auto text-sm
+                    ${isSecretMode ? 'bg-pink-600 hover:bg-pink-500' : 'bg-emerald-600 hover:bg-emerald-500'}
                   `}
                 >
-                  {char}
+                  <RotateCcw size={16} /> Reiniciar Jogo
                 </button>
+              </div>
+            )}
+
+            {/* Teclado Virtual */}
+            <div className="grid grid-cols-10 gap-1 select-none">
+              {['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'].map((row, i) => (
+                <div key={i} className="col-span-10 flex justify-center gap-1">
+                  {row.split('').map(char => (
+                    <button
+                      key={char}
+                      onClick={() => handleKeyDown(char)}
+                      className={`
+                        h-9 sm:h-10 flex-1 min-w-[20px] max-w-[40px] text-xs sm:text-sm text-slate-300 rounded font-bold transition-colors active:scale-95
+                        ${isSecretMode ? 'bg-slate-800 hover:bg-pink-900/50' : 'bg-slate-800 hover:bg-slate-700'}
+                      `}
+                    >
+                      {char}
+                    </button>
+                  ))}
+                </div>
               ))}
+              <div className="col-span-10 flex justify-center gap-2 mt-1">
+                <button onClick={() => handleKeyDown('BACKSPACE')} className="px-3 py-2 bg-slate-800 text-slate-300 rounded text-xs font-bold hover:bg-red-900/50 transition-colors flex-1 max-w-[100px]">DEL</button>
+                <button 
+                    onClick={() => handleKeyDown('ENTER')} 
+                    className={`px-3 py-2 text-white rounded text-xs font-bold transition-colors flex-1 max-w-[100px] ${isSecretMode ? 'bg-pink-700 hover:bg-pink-600' : 'bg-emerald-700 hover:bg-emerald-600'}`}
+                >
+                    ENTER
+                </button>
+              </div>
             </div>
-          ))}
-          <div className="col-span-10 flex justify-center gap-2 mt-1">
-             <button onClick={() => handleKeyDown('BACKSPACE')} className="px-4 py-2 bg-slate-800 text-slate-300 rounded text-xs font-bold hover:bg-red-900/50 transition-colors">DEL</button>
-             <button 
-                onClick={() => handleKeyDown('ENTER')} 
-                className={`px-4 py-2 text-white rounded text-xs font-bold transition-colors ${isSecretMode ? 'bg-pink-700 hover:bg-pink-600' : 'bg-emerald-700 hover:bg-emerald-600'}`}
-             >
-                ENTER
-             </button>
-          </div>
         </div>
 
       </div>
