@@ -23,10 +23,12 @@ export default function Home() {
   useEffect(() => {
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
+        // Verifica a classe secret-active que o EffectsWrapper coloca no body
         setIsSecretMode(document.body.classList.contains('secret-active'));
       }
     };
 
+    // Verifica a cada 1s se o modo mudou (simples e eficaz)
     const interval = setInterval(checkSecretMode, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -38,8 +40,10 @@ export default function Home() {
       <Hero />
 
       {/* Botão Flutuante do Jogo 
-          Ajustado para ter o mesmo tamanho visual do botão 'Scroll to Top'
-          (p-3, size 24) e posição alinhada (right-20 para dar espaço ao outro botão).
+          - Posição: right-24 (para não ficar em cima do botão 'Voltar ao Topo' que é right-8)
+          - Tamanho: p-3 (igual ao botão de voltar)
+          - Ícone: size={24} (igual ao botão de voltar)
+          - Z-Index: 90 (para ficar abaixo de modais mas acima do conteúdo)
       */}
       <AnimatePresence>
         {!isGameOpen && (
@@ -48,13 +52,15 @@ export default function Home() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setIsGameOpen(true)}
+            // AQUI ESTÁ O SEGREDO: Usamos 'fixed' sempre.
+            // No modo secreto, usamos cores rosa/preto. No normal, verde/slate.
             className={`
               fixed bottom-8 right-24 p-3 rounded-full shadow-2xl z-[90] transition-all duration-300 border backdrop-blur-md group
               ${isSecretMode 
-                ? 'bg-black/80 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white shadow-pink-500/30' 
+                ? 'bg-black/90 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white shadow-pink-500/30 ring-2 ring-pink-500/20' 
                 : 'bg-emerald-600 hover:bg-emerald-500 border-emerald-400/30 text-white shadow-emerald-500/30'}
             `}
-            title="Hacker the System (Jogar)"
+            title={isSecretMode ? "SYSTEM HACK" : "Jogar Code Breaker"}
             whileHover={{ scale: 1.1, rotate: 15 }}
             whileTap={{ scale: 0.9 }}
           >
