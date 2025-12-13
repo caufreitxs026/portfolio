@@ -3,6 +3,7 @@ import "./globals.css";
 import ScrollProgress from '@/components/ScrollProgress';
 import CustomCursor from '@/components/CustomCursor';
 import ParticleBackground from '@/components/ParticleBackground';
+import EffectsWrapper from '@/components/EffectsWrapper'; // Importa o wrapper
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL 
   ? "https://caufreitxs.vercel.app" 
@@ -50,16 +51,16 @@ export default function RootLayout({
     <html lang="pt-BR" className="scroll-smooth cursor-none">
       <body className="bg-slate-950 text-slate-300 antialiased relative selection:bg-emerald-500 selection:text-white">
         
-        {/* Componentes de UI Global */}
+        {/* Lógica de Efeitos (Cliente) */}
+        <EffectsWrapper />
+
         <ScrollProgress />
         <CustomCursor />
         
-        {/* Fundo Interativo (fixo no fundo) */}
         <div className="fixed inset-0 z-[-1] pointer-events-none">
             <ParticleBackground />
         </div>
         
-        {/* Conteúdo Principal */}
         <div className="relative z-10 flex flex-col min-h-screen">
           {children}
         </div>
