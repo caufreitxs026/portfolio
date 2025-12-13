@@ -6,39 +6,14 @@ import { X, RotateCcw, Terminal, ShieldAlert } from 'lucide-react';
 
 // Palavras Padrão (6 letras)
 const NORMAL_WORDS = [
-  'PYTHON',
-  'DOCKER',
-  'CODING',
-  'DEPLOY',
-  'SERVER',
-  'NEXTJS',
-  'UBUNTU',
-  'GOLANG',
-  'REACTS',
-  'NODEJS',
-  'SCRIPT',
-  'KERNEL',
-  'CLIENT',
-  'APIKEY'
+  'PYTHON', 'DOCKER', 'CODING', 'DEPLOY', 'SERVER', 'NEXTJS', 'UBUNTU', 
+  'GOLANG', 'REACTS', 'NODEJS', 'SCRIPT', 'KERNEL', 'CLIENT', 'APIKEY'
 ];
 
 // Palavras do Modo Secreto (6 letras)
 const SECRET_WORDS = [
-  'MATRIX',
-  'ACCESS',
-  'SECURE',
-  'HACKER',
-  'BYPASS',
-  'HIDDEN',
-  'SYSTEM',
-  'TROJAN',
-  'BINARY',
-  'ROOTED',
-  'KEYLOG',
-  'BOTNET',
-  'INJECT',
-  'DECODE',
-  'ENCODE'
+  'MATRIX', 'ACCESS', 'SECURE', 'HACKER', 'BYPASS', 'HIDDEN', 'SYSTEM', 
+  'TROJAN', 'BINARY', 'ROOTED', 'KEYLOG', 'BOTNET', 'INJECT', 'DECODE', 'ENCODE'
 ];
 
 const MAX_ATTEMPTS = 6;
@@ -56,7 +31,7 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
     if (typeof document !== 'undefined') {
       const secretActive = document.body.classList.contains('secret-mode');
       setIsSecretMode(secretActive);
-      // Bloqueia o scroll da página enquanto o jogo estiver aberto
+      // Bloqueia o scroll da página principal enquanto o jogo estiver aberto
       document.body.style.overflow = 'hidden';
     }
     return () => {
@@ -65,10 +40,8 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
-  // Seleciona a lista de palavras baseada no modo
   const gameWords = useMemo(() => isSecretMode ? SECRET_WORDS : NORMAL_WORDS, [isSecretMode]);
 
-  // Inicia o jogo apenas depois de saber o modo (para evitar hidratação incorreta)
   useEffect(() => {
     if (gameWords.length > 0 && !targetWord) {
       startNewGame();
@@ -136,7 +109,7 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
               initial={isCurrent && char !== ' ' ? { scale: 1.2 } : { scale: 1 }}
               animate={{ scale: 1 }}
               className={`
-                w-10 h-10 sm:w-12 sm:h-12 border-2 flex items-center justify-center text-xl font-bold rounded font-mono
+                w-8 h-8 sm:w-10 sm:h-10 border-2 flex items-center justify-center text-lg font-bold rounded font-mono
                 ${isCurrent ? 'border-current text-white' : ''}
                 ${status === 'neutral' && !isCurrent ? 'border-slate-700 text-slate-500' : ''}
                 ${status === 'correct' ? 'bg-emerald-600 border-emerald-600 text-white' : ''}
@@ -154,70 +127,68 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4 overflow-hidden h-screen w-screen"
     >
       <div className={`
-        relative rounded-xl p-6 shadow-2xl max-w-lg w-full border flex flex-col max-h-[90vh] overflow-y-auto
+        relative rounded-xl p-4 sm:p-6 shadow-2xl w-full max-w-lg border flex flex-col max-h-[95vh]
         ${isSecretMode ? 'bg-black border-pink-500 shadow-pink-500/20' : 'bg-slate-900 border-emerald-500/30'}
       `}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors z-10">
+        {/* Botão de Fechar */}
+        <button onClick={onClose} className="absolute top-3 right-3 text-slate-400 hover:text-white transition-colors z-20 p-2">
           <X size={24} />
         </button>
 
-        <div className="text-center mb-6">
+        {/* Cabeçalho */}
+        <div className="text-center mb-4 mt-2">
           <h2 className={`
-            text-2xl font-bold font-mono flex items-center justify-center gap-2
+            text-xl sm:text-2xl font-bold font-mono flex items-center justify-center gap-2
             ${isSecretMode ? 'text-pink-500 glitch-text' : 'text-emerald-400'}
           `}>
             {isSecretMode ? <ShieldAlert size={24} /> : <Terminal size={24} />}
             {isSecretMode ? 'SYSTEM HACK' : 'CODE BREAKER'}
           </h2>
-          <p className="text-slate-400 text-sm mt-1">
-            {isSecretMode ? 'Acesso root detectado. Descriptografe a senha.' : 'Descubra a palavra secreta do sistema.'}
+          <p className="text-slate-400 text-xs sm:text-sm mt-1">
+            {isSecretMode ? 'Acesso root detectado.' : 'Descubra a senha.'}
           </p>
         </div>
 
-        <div className="mb-6 flex-grow flex flex-col justify-center">
+        {/* Área do Jogo (Rolável se necessário, mas tenta caber) */}
+        <div className="flex-1 overflow-y-auto min-h-0 flex flex-col justify-center py-2">
           {guesses.map((g, i) => renderRow(g, false))}
           {gameState === 'playing' && renderRow(currentGuess, true)}
           {[...Array(Math.max(0, MAX_ATTEMPTS - 1 - guesses.length))].map((_, i) => renderRow('', false))}
         </div>
 
+        {/* Área de Status e Botão de Reiniciar */}
         {gameState !== 'playing' && (
-          <div className="text-center animate-fade-in mb-4">
-            {gameState === 'won' ? (
-              <p className={`font-bold text-xl mb-4 ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'}`}>
-                {isSecretMode ? 'ROOT ACCESS GRANTED! 🔓' : 'ACESSO CONCEDIDO! 🔓'}
-              </p>
-            ) : (
-              <p className="text-red-400 font-bold text-xl mb-4">
-                FALHA NO SISTEMA. A senha era: {targetWord}
-              </p>
-            )}
+          <div className="text-center animate-fade-in my-2">
+            <p className={`font-bold text-lg mb-2 ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'}`}>
+              {gameState === 'won' ? (isSecretMode ? 'ROOT ACCESS GRANTED!' : 'ACESSO CONCEDIDO!') : `SENHA: ${targetWord}`}
+            </p>
             <button 
               onClick={startNewGame}
               className={`
-                flex items-center gap-2 px-6 py-3 rounded-lg text-white font-bold shadow-lg transition mx-auto
+                flex items-center gap-2 px-6 py-2 rounded-lg text-white font-bold shadow-lg transition mx-auto text-sm
                 ${isSecretMode ? 'bg-pink-600 hover:bg-pink-500 shadow-pink-900/20' : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20'}
               `}
             >
-              <RotateCcw size={20} /> Reiniciar
+              <RotateCcw size={18} /> Reiniciar
             </button>
           </div>
         )}
 
-        {/* Teclado Virtual */}
-        <div className="mt-auto grid grid-cols-10 gap-1 sm:gap-2">
+        {/* Teclado Virtual (Fixo no fundo) */}
+        <div className="mt-auto pt-2 grid grid-cols-10 gap-1">
           {['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'].map((row, i) => (
             <div key={i} className="col-span-10 flex justify-center gap-1">
               {row.split('').map(char => (
                 <button
                   key={char}
                   onClick={() => handleKeyDown(char)}
-                  className={`w-7 h-9 sm:w-8 sm:h-10 text-xs sm:text-sm text-slate-300 rounded font-bold transition-colors
+                  className={`w-7 h-8 sm:w-8 sm:h-10 text-[10px] sm:text-xs text-slate-300 rounded font-bold transition-colors
                     ${isSecretMode ? 'bg-slate-800 hover:bg-pink-900/50' : 'bg-slate-800 hover:bg-slate-700'}
                   `}
                 >
@@ -226,11 +197,11 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
               ))}
             </div>
           ))}
-          <div className="col-span-10 flex justify-center gap-2 mt-2">
-             <button onClick={() => handleKeyDown('BACKSPACE')} className="px-4 py-2 bg-slate-800 text-slate-300 rounded text-xs hover:bg-red-900/50 transition-colors">DEL</button>
+          <div className="col-span-10 flex justify-center gap-2 mt-1">
+             <button onClick={() => handleKeyDown('BACKSPACE')} className="px-3 py-2 bg-slate-800 text-slate-300 rounded text-xs font-bold hover:bg-red-900/50 transition-colors">DEL</button>
              <button 
                 onClick={() => handleKeyDown('ENTER')} 
-                className={`px-4 py-2 text-white rounded text-xs font-bold transition-colors ${isSecretMode ? 'bg-pink-700 hover:bg-pink-600' : 'bg-emerald-700 hover:bg-emerald-600'}`}
+                className={`px-3 py-2 text-white rounded text-xs font-bold transition-colors ${isSecretMode ? 'bg-pink-700 hover:bg-pink-600' : 'bg-emerald-700 hover:bg-emerald-600'}`}
              >
                 ENTER
              </button>
