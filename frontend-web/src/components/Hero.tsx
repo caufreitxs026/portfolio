@@ -21,7 +21,7 @@ export default function Hero() {
             OPEN TO WORK
           </div>
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Olá, sou <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">Cauã.</span>
+            Olá, sou <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">Cauã Freitas.</span>
           </h1>
           <p className="text-xl text-slate-400 mb-8 max-w-lg leading-relaxed">
             Desenvolvedor Full Stack focado em resolver problemas reais. Especialista em transformar dados brutos em inteligência com Python e criar interfaces modernas com React.
