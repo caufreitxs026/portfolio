@@ -1,10 +1,11 @@
 'use client';
 
 import { Github, Linkedin, Mail } from 'lucide-react';
+import ApiStatus from './ApiStatus'; // Importa o novo componente
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-950 border-t border-slate-900 py-12">
+    <footer className="bg-slate-950 border-t border-slate-900 py-12 relative z-10">
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
         
         {/* Lado Esquerdo: Marca e Copyright */}
@@ -16,6 +17,11 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Cauã Freitas. <br className="md:hidden"/>
             Ciência da Computação & Dados.
           </p>
+          
+          {/* Status da API (Mobile: abaixo do texto / Desktop: abaixo do texto também) */}
+          <div className="mt-4 inline-block">
+            <ApiStatus />
+          </div>
         </div>
 
         {/* Lado Direito: Redes Sociais */}
