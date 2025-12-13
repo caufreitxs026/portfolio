@@ -1,4 +1,4 @@
-/* O @import DEVE ser a PRIMEIRA linha do arquivo, antes de tudo */
+/* Importação da Fonte */
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;700&display=swap');
 
 @tailwind base;
@@ -21,6 +21,19 @@ body {
     rgb(var(--background-start-rgb));
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
+  transition: filter 0.5s ease-in-out; /* Suaviza a troca de tema */
+}
+
+/* --- MODO SECRETO (KONAMI CODE) --- */
+.secret-mode {
+  /* Gira as cores 280 graus (Verde vira Roxo/Rosa Cyberpunk) */
+  filter: hue-rotate(280deg) contrast(1.2) saturate(1.2); 
+}
+
+/* Opcional: Alterar a seleção de texto no modo secreto */
+.secret-mode ::selection {
+  background: #f472b6; /* Rosa */
+  color: white;
 }
 
 /* Utilitários personalizados */
@@ -34,4 +47,13 @@ body {
 
 @keyframes blink {
   50% { opacity: 0; }
+}
+
+/* Esconde scrollbar mas permite rolar (para áreas de texto/código) */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
