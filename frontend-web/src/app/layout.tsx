@@ -3,7 +3,7 @@ import "./globals.css";
 import ScrollProgress from '@/components/ScrollProgress';
 import CustomCursor from '@/components/CustomCursor';
 import ParticleBackground from '@/components/ParticleBackground';
-import EffectsWrapper from '@/components/EffectsWrapper'; // Importa o wrapper
+import EffectsWrapper from '@/components/EffectsWrapper';
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL 
   ? "https://caufreitxs.vercel.app" 
@@ -51,19 +51,25 @@ export default function RootLayout({
     <html lang="pt-BR" className="scroll-smooth cursor-none">
       <body className="bg-slate-950 text-slate-300 antialiased relative selection:bg-emerald-500 selection:text-white">
         
-        {/* Lógica de Efeitos (Cliente) */}
         <EffectsWrapper />
-
         <ScrollProgress />
         <CustomCursor />
         
+        {/* Fundo fica fora do filtro para não bugar */}
         <div className="fixed inset-0 z-[-1] pointer-events-none">
             <ParticleBackground />
         </div>
         
-        <div className="relative z-10 flex flex-col min-h-screen">
+        {/* WRAPPER DE CONTEÚDO PRINCIPAL
+            É aqui que a classe .secret-mode-content será aplicada pelo EffectsWrapper.
+            Isso isola o filtro do CSS apenas no conteúdo da página, 
+            deixando os Portais (como o Modal do Jogo) livres de interferência.
+        */}
+        <div id="main-content" className="relative z-10 flex flex-col min-h-screen transition-all duration-500">
           {children}
         </div>
+        
+        {/* O Portal do Jogo será injetado no final do body, fora do #main-content */}
       </body>
     </html>
   );
