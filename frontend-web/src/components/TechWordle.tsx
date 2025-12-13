@@ -1,17 +1,15 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom'; // Importação necessária para o Portal
+import { createPortal } from 'react-dom'; 
 import { motion } from 'framer-motion';
 import { X, RotateCcw, Terminal, ShieldAlert } from 'lucide-react';
 
-// Palavras Padrão (6 letras)
 const NORMAL_WORDS = [
   'PYTHON', 'DOCKER', 'CODING', 'DEPLOY', 'SERVER', 'NEXTJS', 'UBUNTU', 
   'GOLANG', 'REACTS', 'NODEJS', 'SCRIPT', 'KERNEL', 'CLIENT', 'APIKEY'
 ];
 
-// Palavras do Modo Secreto (6 letras)
 const SECRET_WORDS = [
   'MATRIX', 'ACCESS', 'SECURE', 'HACKER', 'BYPASS', 'HIDDEN', 'SYSTEM', 
   'TROJAN', 'BINARY', 'ROOTED', 'KEYLOG', 'BOTNET', 'INJECT', 'DECODE', 'ENCODE'
@@ -26,27 +24,16 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
   const [currentGuess, setCurrentGuess] = useState('');
   const [gameState, setGameState] = useState<'playing' | 'won' | 'lost'>('playing');
   const [isSecretMode, setIsSecretMode] = useState(false);
-  
-  // Estados para controle de renderização segura (Portal)
   const [mounted, setMounted] = useState(false);
-  const [scrollOffset, setScrollOffset] = useState(0);
 
-  // Setup inicial ao abrir o modal
   useEffect(() => {
     setMounted(true);
     if (typeof document !== 'undefined') {
       const secretActive = document.body.classList.contains('secret-mode');
       setIsSecretMode(secretActive);
-      
-      // Captura a posição atual do scroll para fixar o modal corretamente
-      setScrollOffset(window.scrollY);
-      
-      // Bloqueia o scroll da página
       document.body.style.overflow = 'hidden';
     }
-    
     return () => {
-      // Restaura o scroll ao fechar
       document.body.style.overflow = 'auto';
     };
   }, []);
@@ -136,36 +123,32 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
     );
   };
 
-  // Se não montou ainda, não renderiza nada (evita erro de hidratação)
   if (!mounted) return null;
 
-  // Renderiza via Portal direto no Body para evitar problemas de z-index e layout
   return createPortal(
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      // Correção do Posicionamento:
-      // Usamos 'absolute' com 'top' dinâmico quando em modo secreto para compensar o filtro do body
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4"
       style={{
-        position: isSecretMode ? 'absolute' : 'fixed',
-        top: isSecretMode ? scrollOffset : 0,
+        // Garante que o modal ocupe a tela inteira visível, ignorando scroll
+        position: 'fixed',
+        top: 0,
         left: 0,
-        height: '100vh',
-        width: '100vw'
+        width: '100%',
+        height: '100%'
       }}
-      className="z-[9999] flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4 overflow-hidden"
     >
       <div className={`
-        relative rounded-xl p-4 sm:p-6 shadow-2xl w-full max-w-lg border flex flex-col max-h-[90vh]
+        relative rounded-xl p-4 sm:p-6 shadow-2xl w-full max-w-lg border flex flex-col
         ${isSecretMode ? 'bg-black border-pink-500 shadow-pink-500/20' : 'bg-slate-900 border-emerald-500/30'}
+        max-h-[90vh] 
       `}>
-        {/* Botão de Fechar */}
         <button onClick={onClose} className="absolute top-3 right-3 text-slate-400 hover:text-white transition-colors z-20 p-2">
           <X size={24} />
         </button>
 
-        {/* Cabeçalho */}
         <div className="text-center mb-2 mt-1 flex-shrink-0">
           <h2 className={`
             text-xl sm:text-2xl font-bold font-mono flex items-center justify-center gap-2
@@ -179,7 +162,6 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
           </p>
         </div>
 
-        {/* Área do Jogo */}
         <div className="flex-1 overflow-y-auto min-h-0 py-2 custom-scrollbar">
           <div className="flex flex-col justify-center min-h-full">
             {guesses.map((g, i) => renderRow(g, false))}
@@ -188,7 +170,6 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        {/* Área de Status e Botão */}
         <div className="flex-shrink-0 mt-2">
             {gameState !== 'playing' && (
             <div className="text-center animate-fade-in mb-2">
@@ -207,7 +188,6 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
             </div>
             )}
 
-            {/* Teclado Virtual */}
             <div className="pt-2 grid grid-cols-10 gap-1">
             {['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'].map((row, i) => (
                 <div key={i} className="col-span-10 flex justify-center gap-1">
@@ -238,6 +218,6 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
 
       </div>
     </motion.div>,
-    document.body // Alvo do Portal
+    document.body
   );
 }
