@@ -1,4 +1,3 @@
-/* Importação da Fonte */
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;700&display=swap');
 
 @tailwind base;
@@ -7,8 +6,8 @@
 
 :root {
   --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 15, 23, 42; /* Slate 900 */
-  --background-end-rgb: 2, 6, 23;     /* Slate 950 */
+  --background-start-rgb: 15, 23, 42; 
+  --background-end-rgb: 2, 6, 23;     
 }
 
 body {
@@ -21,22 +20,22 @@ body {
     rgb(var(--background-start-rgb));
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
-  transition: filter 0.5s ease-in-out; /* Suaviza a troca de tema */
+  /* Removemos a transição de filtro do body para evitar problemas com fixed */
 }
 
-/* --- MODO SECRETO (KONAMI CODE) --- */
-.secret-mode {
-  /* Gira as cores 280 graus (Verde vira Roxo/Rosa Cyberpunk) */
-  filter: hue-rotate(280deg) contrast(1.2) saturate(1.2); 
+/* Aplica o modo secreto APENAS em elementos marcados, não no body inteiro.
+   Isso evita que modais com 'position: fixed' quebrem.
+*/
+.secret-mode-content {
+  filter: hue-rotate(280deg) contrast(1.2) saturate(1.2);
+  transition: filter 0.5s ease-in-out;
 }
 
-/* Opcional: Alterar a seleção de texto no modo secreto */
-.secret-mode ::selection {
-  background: #f472b6; /* Rosa */
+.secret-mode-content ::selection {
+  background: #f472b6; 
   color: white;
 }
 
-/* Utilitários personalizados */
 .font-mono {
   font-family: 'Fira Code', monospace;
 }
@@ -49,11 +48,25 @@ body {
   50% { opacity: 0; }
 }
 
-/* Esconde scrollbar mas permite rolar (para áreas de texto/código) */
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
 }
 .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
+
+/* Custom Scrollbar para o jogo */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
