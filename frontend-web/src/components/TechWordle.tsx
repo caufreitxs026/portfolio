@@ -5,10 +5,41 @@ import { motion } from 'framer-motion';
 import { X, RotateCcw, Terminal, ShieldAlert } from 'lucide-react';
 
 // Palavras Padrão (6 letras)
-const NORMAL_WORDS = ['PYTHON', 'DOCKER', 'CODING', 'DEPLOY', 'SERVER', 'NEXTJS', 'UBUNTU', 'GOLANG'];
+const NORMAL_WORDS = [
+  'PYTHON',
+  'DOCKER',
+  'CODING',
+  'DEPLOY',
+  'SERVER',
+  'NEXTJS',
+  'UBUNTU',
+  'GOLANG',
+  'REACTS',
+  'NODEJS',
+  'SCRIPT',
+  'KERNEL',
+  'CLIENT',
+  'APIKEY'
+];
 
 // Palavras do Modo Secreto (6 letras)
-const SECRET_WORDS = ['MATRIX', 'ACCESS', 'SECURE', 'HACKER', 'BYPASS', 'HIDDEN', 'SYSTEM', 'TROJAN', 'BINARY'];
+const SECRET_WORDS = [
+  'MATRIX',
+  'ACCESS',
+  'SECURE',
+  'HACKER',
+  'BYPASS',
+  'HIDDEN',
+  'SYSTEM',
+  'TROJAN',
+  'BINARY',
+  'ROOTED',
+  'KEYLOG',
+  'BOTNET',
+  'INJECT',
+  'DECODE',
+  'ENCODE'
+];
 
 const MAX_ATTEMPTS = 6;
 const WORD_LENGTH = 6;
@@ -25,7 +56,13 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
     if (typeof document !== 'undefined') {
       const secretActive = document.body.classList.contains('secret-mode');
       setIsSecretMode(secretActive);
+      // Bloqueia o scroll da página enquanto o jogo estiver aberto
+      document.body.style.overflow = 'hidden';
     }
+    return () => {
+      // Restaura o scroll ao fechar
+      document.body.style.overflow = 'auto';
+    };
   }, []);
 
   // Seleciona a lista de palavras baseada no modo
@@ -93,9 +130,6 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
             else status = 'absent';
           }
 
-          // Cores adaptadas: No modo secreto (que inverte cores), usamos cores que contrastam bem
-          // Emerald vira Roxo/Rosa no filtro global
-          
           return (
             <motion.div
               key={i}
@@ -123,13 +157,13 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 overflow-hidden"
     >
       <div className={`
-        relative rounded-xl p-6 shadow-2xl max-w-lg w-full border
+        relative rounded-xl p-6 shadow-2xl max-w-lg w-full border flex flex-col max-h-[90vh] overflow-y-auto
         ${isSecretMode ? 'bg-black border-pink-500 shadow-pink-500/20' : 'bg-slate-900 border-emerald-500/30'}
       `}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors z-10">
           <X size={24} />
         </button>
 
@@ -146,14 +180,14 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
           </p>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-6 flex-grow flex flex-col justify-center">
           {guesses.map((g, i) => renderRow(g, false))}
           {gameState === 'playing' && renderRow(currentGuess, true)}
           {[...Array(Math.max(0, MAX_ATTEMPTS - 1 - guesses.length))].map((_, i) => renderRow('', false))}
         </div>
 
         {gameState !== 'playing' && (
-          <div className="text-center animate-fade-in">
+          <div className="text-center animate-fade-in mb-4">
             {gameState === 'won' ? (
               <p className={`font-bold text-xl mb-4 ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'}`}>
                 {isSecretMode ? 'ROOT ACCESS GRANTED! 🔓' : 'ACESSO CONCEDIDO! 🔓'}
@@ -176,14 +210,16 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
         )}
 
         {/* Teclado Virtual */}
-        <div className="mt-6 grid grid-cols-10 gap-1 sm:gap-2">
+        <div className="mt-auto grid grid-cols-10 gap-1 sm:gap-2">
           {['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'].map((row, i) => (
             <div key={i} className="col-span-10 flex justify-center gap-1">
               {row.split('').map(char => (
                 <button
                   key={char}
                   onClick={() => handleKeyDown(char)}
-                  className="w-7 h-9 sm:w-8 sm:h-10 text-xs sm:text-sm bg-slate-800 text-slate-300 rounded hover:bg-slate-700 font-bold transition-colors"
+                  className={`w-7 h-9 sm:w-8 sm:h-10 text-xs sm:text-sm text-slate-300 rounded font-bold transition-colors
+                    ${isSecretMode ? 'bg-slate-800 hover:bg-pink-900/50' : 'bg-slate-800 hover:bg-slate-700'}
+                  `}
                 >
                   {char}
                 </button>
