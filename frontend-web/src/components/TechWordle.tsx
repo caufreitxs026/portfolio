@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom'; 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, RotateCcw, Terminal, ShieldAlert, HelpCircle } from 'lucide-react';
+import { X, RotateCcw, Terminal, ShieldAlert, HelpCircle, Delete } from 'lucide-react';
 
 const NORMAL_WORDS = ['PYTHON', 'DOCKER', 'CODING', 'DEPLOY', 'SERVER', 'NEXTJS', 'UBUNTU', 'GOLANG', 'REACTS', 'NODEJS'];
 const SECRET_WORDS = ['MATRIX', 'ACCESS', 'SECURE', 'HACKER', 'BYPASS', 'HIDDEN', 'SYSTEM', 'TROJAN', 'BINARY', 'ROOTED'];
@@ -27,7 +27,9 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
       setIsSecretMode(secretActive);
       document.body.style.overflow = 'hidden';
     }
-    return () => document.body.style.overflow = 'auto';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
   }, []);
 
   const gameWords = useMemo(() => isSecretMode ? SECRET_WORDS : NORMAL_WORDS, [isSecretMode]);
@@ -70,6 +72,21 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener('keydown', listener);
   }, [currentGuess, gameState]);
 
+  // Função auxiliar para verificar status da letra no teclado
+  const getKeyStatus = (key: string) => {
+    let status = 'neutral';
+    for (const guess of guesses) {
+      for (let i = 0; i < guess.length; i++) {
+        if (guess[i] === key) {
+          if (targetWord[i] === key) return 'correct'; // Prioridade máxima
+          if (targetWord.includes(key) && status !== 'correct') status = 'present';
+          if (!targetWord.includes(key) && status === 'neutral') status = 'absent';
+        }
+      }
+    }
+    return status;
+  };
+
   const renderRow = (guess: string | undefined, isCurrent: boolean) => {
     const letters = (guess || '').padEnd(WORD_LENGTH, ' ').split('');
     return (
@@ -81,21 +98,23 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
             else if (targetWord.includes(char)) status = 'present';
             else status = 'absent';
           }
-          let bgColor = isSecretMode ? 'border-pink-500/20' : 'border-slate-700';
-          if (status === 'correct') bgColor = isSecretMode ? 'bg-pink-600 border-pink-600 shadow-lg shadow-pink-500/40' : 'bg-emerald-600 border-emerald-600 shadow-lg shadow-emerald-500/40';
-          if (status === 'present') bgColor = 'bg-yellow-600 border-yellow-600';
-          if (status === 'absent') bgColor = 'bg-slate-800 border-slate-800 opacity-50';
+
+          let styleClass = '';
+          if (status === 'correct') styleClass = isSecretMode ? 'bg-pink-600 border-pink-500 text-white shadow-[0_0_15px_rgba(236,72,153,0.5)]' : 'bg-emerald-600 border-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]';
+          else if (status === 'present') styleClass = 'bg-yellow-600 border-yellow-500 text-white';
+          else if (status === 'absent') styleClass = 'bg-slate-800/50 border-slate-700 text-slate-500';
+          else if (isCurrent && char !== ' ') styleClass = isSecretMode ? 'border-pink-500 text-pink-100 bg-pink-900/20' : 'border-emerald-500 text-emerald-100 bg-emerald-900/20';
+          else styleClass = 'border-slate-700/50 text-slate-400 bg-slate-900/30';
 
           return (
             <motion.div
               key={i}
-              initial={isCurrent && char !== ' ' ? { scale: 1.1, borderColor: isSecretMode ? '#ec4899' : '#10b981' } : { scale: 1 }}
-              animate={{ scale: 1 }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: i * 0.05 }}
               className={`
-                w-9 h-11 sm:w-12 sm:h-14 border-2 flex items-center justify-center text-xl sm:text-2xl font-bold rounded-lg font-mono transition-all
-                ${isCurrent ? (isSecretMode ? 'border-pink-500 text-pink-100' : 'border-emerald-500 text-emerald-100') : ''}
-                ${status === 'neutral' && !isCurrent ? 'text-slate-600' : 'text-white'}
-                ${bgColor}
+                w-10 h-12 sm:w-12 sm:h-14 border-2 flex items-center justify-center text-xl sm:text-2xl font-bold rounded-md font-mono
+                ${styleClass}
               `}
             >
               {char}
@@ -110,31 +129,32 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
 
   return createPortal(
     <motion.div 
-      initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-      animate={{ opacity: 1, backdropFilter: "blur(12px)" }}
-      exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/80 p-4 w-screen h-screen"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/60 backdrop-blur-xl p-4 w-screen h-screen"
     >
       <div className={`
         relative rounded-2xl shadow-2xl w-full max-w-lg border flex flex-col overflow-hidden
-        ${isSecretMode ? 'bg-black/90 border-pink-500/50 shadow-pink-500/20' : 'bg-slate-900/90 border-emerald-500/50 shadow-emerald-500/20'}
-        max-h-[90vh] backdrop-blur-xl ring-1 ring-white/10
+        ${isSecretMode ? 'bg-black/80 border-pink-500/30 shadow-pink-500/10' : 'bg-slate-900/80 border-emerald-500/30 shadow-emerald-500/10'}
+        h-[85vh] sm:h-auto ring-1 ring-white/5
       `}>
         {/* Header */}
-        <div className={`flex-shrink-0 p-4 border-b flex justify-between items-center ${isSecretMode ? 'border-pink-500/20 bg-pink-950/30' : 'border-emerald-500/20 bg-emerald-950/30'}`}>
+        <div className={`flex-shrink-0 p-4 border-b flex justify-between items-center ${isSecretMode ? 'border-pink-500/10 bg-pink-900/10' : 'border-emerald-500/10 bg-emerald-900/10'}`}>
             <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${isSecretMode ? 'bg-pink-500/20 text-pink-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                    {isSecretMode ? <ShieldAlert size={24} /> : <Terminal size={24} />}
+                <div className={`p-2 rounded-lg ${isSecretMode ? 'bg-pink-500/10 text-pink-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                    {isSecretMode ? <ShieldAlert size={20} /> : <Terminal size={20} />}
                 </div>
                 <div>
-                    <h2 className={`text-xl font-bold font-mono tracking-wide ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'}`}>
+                    <h2 className={`text-lg font-bold font-mono tracking-wider ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'}`}>
                         {isSecretMode ? 'SYSTEM HACK' : 'CODE BREAKER'}
                     </h2>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-widest">Adivinhe a senha</p>
                 </div>
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => setShowHelp(!showHelp)} className="text-slate-400 hover:text-white p-2 hover:bg-white/10 rounded-full transition"><HelpCircle size={22} /></button>
-              <button onClick={onClose} className="text-slate-400 hover:text-white p-2 hover:bg-white/10 rounded-full transition"><X size={22} /></button>
+            <div className="flex gap-1">
+              <button onClick={() => setShowHelp(!showHelp)} className="text-slate-400 hover:text-white p-2 hover:bg-white/5 rounded-full transition"><HelpCircle size={20} /></button>
+              <button onClick={onClose} className="text-slate-400 hover:text-white p-2 hover:bg-white/5 rounded-full transition"><X size={20} /></button>
             </div>
         </div>
 
@@ -145,21 +165,20 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="bg-slate-950/80 px-6 py-4 text-sm text-slate-300 border-b border-white/5"
+              className="bg-slate-950/50 px-6 py-3 text-sm text-slate-300 border-b border-white/5"
             >
-              <p className="font-bold mb-3 text-white text-xs uppercase tracking-wider">Protocolo:</p>
               <ul className="space-y-2 text-xs font-mono">
-                <li className="flex items-center gap-3"><span className={`w-4 h-4 rounded shadow ${isSecretMode ? 'bg-pink-600' : 'bg-emerald-600'}`}></span> <span className="text-white font-bold">CORRETO</span></li>
-                <li className="flex items-center gap-3"><span className="w-4 h-4 rounded bg-yellow-600 shadow"></span> <span className="text-white">POSIÇÃO ERRADA</span></li>
-                <li className="flex items-center gap-3"><span className="w-4 h-4 rounded bg-slate-700 shadow"></span> <span className="text-slate-500">INCORRETO</span></li>
+                <li className="flex items-center gap-3"><span className={`w-3 h-3 rounded shadow ${isSecretMode ? 'bg-pink-600' : 'bg-emerald-600'}`}></span> <span className="text-white font-bold">Letra certa</span></li>
+                <li className="flex items-center gap-3"><span className="w-3 h-3 rounded bg-yellow-600 shadow"></span> <span className="text-white">Posição errada</span></li>
+                <li className="flex items-center gap-3"><span className="w-3 h-3 rounded bg-slate-700 shadow"></span> <span className="text-slate-500">Incorreto</span></li>
               </ul>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Game Area */}
-        <div className="flex-1 overflow-y-auto py-6 px-4 custom-scrollbar flex flex-col items-center justify-start bg-gradient-to-b from-transparent to-black/40">
-          <div className="w-full max-w-sm space-y-1">
+        <div className="flex-1 overflow-y-auto py-4 px-2 custom-scrollbar flex flex-col items-center justify-center bg-gradient-to-b from-transparent to-black/20">
+          <div className="w-full max-w-sm space-y-1.5">
             {guesses.map((g, i) => renderRow(g, false))}
             {gameState === 'playing' && renderRow(currentGuess, true)}
             {[...Array(Math.max(0, MAX_ATTEMPTS - 1 - guesses.length))].map((_, i) => renderRow('', false))}
@@ -167,29 +186,46 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Footer & Keyboard */}
-        <div className={`flex-shrink-0 p-4 border-t backdrop-blur-md ${isSecretMode ? 'bg-pink-950/20 border-pink-500/20' : 'bg-emerald-950/20 border-emerald-500/20'}`}>
+        <div className={`flex-shrink-0 p-3 border-t backdrop-blur-md ${isSecretMode ? 'bg-pink-950/10 border-pink-500/10' : 'bg-emerald-950/10 border-emerald-500/10'}`}>
             {gameState !== 'playing' && (
-              <div className={`text-center animate-fade-in mb-4 p-3 rounded-lg border ${isSecretMode ? 'bg-pink-500/10 border-pink-500/30' : 'bg-emerald-500/10 border-emerald-500/30'}`}>
-                <p className={`font-bold text-lg mb-2 ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'} font-mono`}>
-                  {gameState === 'won' ? (isSecretMode ? 'SYSTEM UNLOCKED! 🔓' : 'ACCESS GRANTED! 🔓') : `SENHA: ${targetWord}`}
+              <div className={`text-center animate-fade-in mb-3 p-2 rounded-lg border ${isSecretMode ? 'bg-pink-500/10 border-pink-500/20' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
+                <p className={`font-bold text-base mb-2 ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'} font-mono`}>
+                  {gameState === 'won' ? 'ACESSO LIBERADO 🔓' : `SENHA: ${targetWord}`}
                 </p>
-                <button onClick={startNewGame} className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-bold shadow-lg transition w-full hover:scale-[1.02] active:scale-[0.98] ${isSecretMode ? 'bg-pink-600 hover:bg-pink-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
-                  <RotateCcw size={18} /> REINICIAR
+                <button onClick={startNewGame} className={`flex items-center justify-center gap-2 px-6 py-2 rounded-md text-white font-bold shadow-lg transition w-full hover:scale-[1.02] active:scale-[0.98] text-xs uppercase ${isSecretMode ? 'bg-pink-600 hover:bg-pink-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
+                  <RotateCcw size={16} /> JOGAR NOVAMENTE
                 </button>
               </div>
             )}
 
-            <div className="grid grid-cols-10 gap-1.5 select-none">
+            <div className="grid grid-cols-10 gap-1 select-none">
               {['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'].map((row, i) => (
-                <div key={i} className="col-span-10 flex justify-center gap-1.5">
-                  {row.split('').map(char => (
-                    <button key={char} onClick={() => handleKeyDown(char)} className={`h-10 sm:h-12 flex-1 min-w-[24px] text-xs sm:text-sm text-slate-300 rounded-md font-bold transition-all active:scale-95 border-b-4 border-black/40 shadow-sm ${isSecretMode ? 'bg-slate-800 hover:bg-pink-600 hover:text-white' : 'bg-slate-800 hover:bg-emerald-600 hover:text-white'}`}>{char}</button>
-                  ))}
+                <div key={i} className="col-span-10 flex justify-center gap-1">
+                  {row.split('').map(char => {
+                    const status = getKeyStatus(char);
+                    let keyColor = isSecretMode ? 'bg-slate-800 hover:bg-pink-900/40 text-slate-300' : 'bg-slate-800 hover:bg-emerald-900/40 text-slate-300';
+                    if (status === 'correct') keyColor = isSecretMode ? 'bg-pink-600 text-white border-pink-500' : 'bg-emerald-600 text-white border-emerald-500';
+                    if (status === 'present') keyColor = 'bg-yellow-600 text-white border-yellow-500';
+                    if (status === 'absent') keyColor = 'bg-slate-900 text-slate-600 border-slate-800';
+
+                    return (
+                      <button 
+                        key={char} 
+                        onClick={() => handleKeyDown(char)} 
+                        className={`
+                          h-9 flex-1 min-w-[20px] text-[10px] sm:text-xs rounded font-bold transition-all active:scale-90 border-b-2 border-transparent
+                          ${keyColor}
+                        `}
+                      >
+                        {char}
+                      </button>
+                    );
+                  })}
                 </div>
               ))}
-              <div className="col-span-10 flex justify-center gap-2 mt-2">
-                <button onClick={() => handleKeyDown('BACKSPACE')} className="h-10 px-4 bg-slate-700 text-white rounded-md text-xs font-bold hover:bg-red-600/80 transition-colors flex-1 max-w-[100px] border-b-4 border-black/40 active:border-b-0 active:translate-y-1">DEL</button>
-                <button onClick={() => handleKeyDown('ENTER')} className={`h-10 px-4 text-white rounded-md text-xs font-bold transition-colors flex-1 max-w-[100px] border-b-4 border-black/40 active:border-b-0 active:translate-y-1 ${isSecretMode ? 'bg-pink-700 hover:bg-pink-600' : 'bg-emerald-700 hover:bg-emerald-600'}`}>ENTER</button>
+              <div className="col-span-10 flex justify-center gap-2 mt-1">
+                <button onClick={() => handleKeyDown('BACKSPACE')} className="h-9 px-3 bg-slate-700 text-white rounded text-[10px] font-bold hover:bg-red-600/80 transition-colors flex-1 max-w-[80px] border-b-2 border-black/20 active:border-b-0 active:translate-y-px">DEL</button>
+                <button onClick={() => handleKeyDown('ENTER')} className={`h-9 px-3 text-white rounded text-[10px] font-bold transition-colors flex-1 max-w-[80px] border-b-2 border-black/20 active:border-b-0 active:translate-y-px ${isSecretMode ? 'bg-pink-700 hover:bg-pink-600' : 'bg-emerald-700 hover:bg-emerald-600'}`}>ENTER</button>
               </div>
             </div>
         </div>
