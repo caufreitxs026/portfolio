@@ -85,7 +85,7 @@ export default function Home() {
              <div className="max-w-4xl mx-auto">
                <ProjectSkeleton />
              </div>
-          ) : projects.length > 0 ? (
+          ) : projects && projects.length > 0 ? (
             <ProjectCarousel projects={projects} />
           ) : (
             <div className="text-center py-20 text-slate-500 bg-slate-900/50 rounded-xl border border-slate-800">
@@ -112,7 +112,7 @@ export default function Home() {
                 <ExperienceSkeleton />
               </div>
             ) : (
-              experiences.map((exp: any, index: number) => (
+              (experiences || []).map((exp: any, index: number) => (
                 <ExperienceItem key={exp.id} experience={exp} index={index} />
               ))
             )}
