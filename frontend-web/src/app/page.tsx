@@ -20,17 +20,13 @@ export default function Home() {
   const [isGameOpen, setIsGameOpen] = useState(false);
   const [isSecretMode, setIsSecretMode] = useState(false);
 
-  // Detecta mudança de modo para ajustar estilo do botão flutuante se necessário
   useEffect(() => {
-    // Observer para detectar a classe no body
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
         setIsSecretMode(document.body.classList.contains('secret-active'));
       }
     };
 
-    // Checa inicial e configura um intervalo curto ou listener (simplificado aqui com intervalo)
-    // O ideal seria um contexto, mas para manter simples com a arquitetura atual:
     const interval = setInterval(checkSecretMode, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -42,8 +38,7 @@ export default function Home() {
       <Hero />
 
       {/* Botão Flutuante do Jogo 
-          - Só aparece se o jogo NÃO estiver aberto (!isGameOpen)
-          - Muda de cor se estiver no modo secreto
+          Ajustado para right-24 para não sobrepor o botão de "Voltar ao Topo" (que fica no right-8)
       */}
       <AnimatePresence>
         {!isGameOpen && (
@@ -53,7 +48,7 @@ export default function Home() {
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setIsGameOpen(true)}
             className={`
-              fixed bottom-8 right-8 p-4 rounded-full shadow-2xl z-40 transition-all duration-300 border backdrop-blur-md group
+              fixed bottom-8 right-24 p-4 rounded-full shadow-2xl z-40 transition-all duration-300 border backdrop-blur-md group
               ${isSecretMode 
                 ? 'bg-black/80 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white shadow-pink-500/30' 
                 : 'bg-slate-800/80 border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white shadow-emerald-500/30'}
@@ -67,12 +62,10 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Modal do Jogo */}
       <AnimatePresence>
         {isGameOpen && <TechWordle onClose={() => setIsGameOpen(false)} />}
       </AnimatePresence>
 
-      {/* Seção de Projetos */}
       <section id="projetos" className="py-20 bg-slate-800/50 relative">
         <div className="max-w-6xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
@@ -96,7 +89,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Seção de Experiência */}
       <section id="experiencia" className="py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="mb-12">
