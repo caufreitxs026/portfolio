@@ -12,6 +12,7 @@ import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
 import ProjectCarousel from '@/components/ProjectCarousel';
 import TechWordle from '@/components/TechWordle';
+import Chatbot from '@/components/Chatbot'; // Novo componente
 import { ProjectSkeleton, ExperienceSkeleton } from '@/components/Skeletons';
 import { usePortfolioData } from '@/hooks/usePortfolioData';
 
@@ -23,12 +24,10 @@ export default function Home() {
   useEffect(() => {
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
-        // Verifica a classe secret-active que o EffectsWrapper coloca no body
         setIsSecretMode(document.body.classList.contains('secret-active'));
       }
     };
 
-    // Verifica a cada 1s se o modo mudou (simples e eficaz)
     const interval = setInterval(checkSecretMode, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -39,11 +38,13 @@ export default function Home() {
       <Navbar />
       <Hero />
 
-      {/* Botão Flutuante do Jogo 
-          - Posição: right-24 (para não ficar em cima do botão 'Voltar ao Topo' que é right-8)
-          - Tamanho: p-3 (igual ao botão de voltar)
-          - Ícone: size={24} (igual ao botão de voltar)
-          - Z-Index: 90 (para ficar abaixo de modais mas acima do conteúdo)
+      {/* --- BOTÕES FLUTUANTES --- */}
+      
+      {/* 1. Chatbot */}
+      <Chatbot />
+
+      {/* 2. Botão do Jogo (Acima do botão "Voltar ao Topo") 
+          Posição: bottom-24 right-8 (empilhado verticalmente)
       */}
       <AnimatePresence>
         {!isGameOpen && (
@@ -52,10 +53,8 @@ export default function Home() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setIsGameOpen(true)}
-            // AQUI ESTÁ O SEGREDO: Usamos 'fixed' sempre.
-            // No modo secreto, usamos cores rosa/preto. No normal, verde/slate.
             className={`
-              fixed bottom-8 right-24 p-3 rounded-full shadow-2xl z-[90] transition-all duration-300 border backdrop-blur-md group
+              fixed bottom-24 right-8 p-3 rounded-full shadow-2xl z-[90] transition-all duration-300 border backdrop-blur-md group
               ${isSecretMode 
                 ? 'bg-black/90 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white shadow-pink-500/30 ring-2 ring-pink-500/20' 
                 : 'bg-emerald-600 hover:bg-emerald-500 border-emerald-400/30 text-white shadow-emerald-500/30'}
