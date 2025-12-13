@@ -26,16 +26,13 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
   const [gameState, setGameState] = useState<'playing' | 'won' | 'lost'>('playing');
   const [isSecretMode, setIsSecretMode] = useState(false);
 
-  // Detecta se o modo secreto está ativo ao abrir o jogo
   useEffect(() => {
     if (typeof document !== 'undefined') {
       const secretActive = document.body.classList.contains('secret-mode');
       setIsSecretMode(secretActive);
-      // Bloqueia o scroll da página principal enquanto o jogo estiver aberto
       document.body.style.overflow = 'hidden';
     }
     return () => {
-      // Restaura o scroll ao fechar
       document.body.style.overflow = 'auto';
     };
   }, []);
@@ -130,11 +127,14 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4 overflow-hidden h-screen w-screen"
+      // Z-Index alto para garantir que fique acima de tudo
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4 overflow-hidden h-screen w-screen"
     >
       <div className={`
-        relative rounded-xl p-4 sm:p-6 shadow-2xl w-full max-w-lg border flex flex-col max-h-[95vh]
+        relative rounded-xl p-4 sm:p-6 shadow-2xl w-full max-w-lg border flex flex-col
         ${isSecretMode ? 'bg-black border-pink-500 shadow-pink-500/20' : 'bg-slate-900 border-emerald-500/30'}
+        // Garante que o card nunca seja maior que a tela e tenha scroll interno se necessário
+        max-h-[90vh] 
       `}>
         {/* Botão de Fechar */}
         <button onClick={onClose} className="absolute top-3 right-3 text-slate-400 hover:text-white transition-colors z-20 p-2">
@@ -142,7 +142,7 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
         </button>
 
         {/* Cabeçalho */}
-        <div className="text-center mb-4 mt-2">
+        <div className="text-center mb-2 mt-1 flex-shrink-0">
           <h2 className={`
             text-xl sm:text-2xl font-bold font-mono flex items-center justify-center gap-2
             ${isSecretMode ? 'text-pink-500 glitch-text' : 'text-emerald-400'}
@@ -155,57 +155,61 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
           </p>
         </div>
 
-        {/* Área do Jogo (Rolável se necessário, mas tenta caber) */}
-        <div className="flex-1 overflow-y-auto min-h-0 flex flex-col justify-center py-2">
-          {guesses.map((g, i) => renderRow(g, false))}
-          {gameState === 'playing' && renderRow(currentGuess, true)}
-          {[...Array(Math.max(0, MAX_ATTEMPTS - 1 - guesses.length))].map((_, i) => renderRow('', false))}
+        {/* Área do Jogo com Scroll Interno se precisar */}
+        <div className="flex-1 overflow-y-auto min-h-0 py-2 custom-scrollbar">
+          <div className="flex flex-col justify-center min-h-full">
+            {guesses.map((g, i) => renderRow(g, false))}
+            {gameState === 'playing' && renderRow(currentGuess, true)}
+            {[...Array(Math.max(0, MAX_ATTEMPTS - 1 - guesses.length))].map((_, i) => renderRow('', false))}
+          </div>
         </div>
 
-        {/* Área de Status e Botão de Reiniciar */}
-        {gameState !== 'playing' && (
-          <div className="text-center animate-fade-in my-2">
-            <p className={`font-bold text-lg mb-2 ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'}`}>
-              {gameState === 'won' ? (isSecretMode ? 'ROOT ACCESS GRANTED!' : 'ACESSO CONCEDIDO!') : `SENHA: ${targetWord}`}
-            </p>
-            <button 
-              onClick={startNewGame}
-              className={`
-                flex items-center gap-2 px-6 py-2 rounded-lg text-white font-bold shadow-lg transition mx-auto text-sm
-                ${isSecretMode ? 'bg-pink-600 hover:bg-pink-500 shadow-pink-900/20' : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20'}
-              `}
-            >
-              <RotateCcw size={18} /> Reiniciar
-            </button>
-          </div>
-        )}
-
-        {/* Teclado Virtual (Fixo no fundo) */}
-        <div className="mt-auto pt-2 grid grid-cols-10 gap-1">
-          {['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'].map((row, i) => (
-            <div key={i} className="col-span-10 flex justify-center gap-1">
-              {row.split('').map(char => (
-                <button
-                  key={char}
-                  onClick={() => handleKeyDown(char)}
-                  className={`w-7 h-8 sm:w-8 sm:h-10 text-[10px] sm:text-xs text-slate-300 rounded font-bold transition-colors
-                    ${isSecretMode ? 'bg-slate-800 hover:bg-pink-900/50' : 'bg-slate-800 hover:bg-slate-700'}
-                  `}
+        {/* Área de Status e Botão de Reiniciar (Fixo no bottom do card) */}
+        <div className="flex-shrink-0 mt-2">
+            {gameState !== 'playing' && (
+            <div className="text-center animate-fade-in mb-2">
+                <p className={`font-bold text-lg mb-2 ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'}`}>
+                {gameState === 'won' ? (isSecretMode ? 'ROOT ACCESS GRANTED!' : 'ACESSO CONCEDIDO!') : `SENHA: ${targetWord}`}
+                </p>
+                <button 
+                onClick={startNewGame}
+                className={`
+                    flex items-center gap-2 px-6 py-2 rounded-lg text-white font-bold shadow-lg transition mx-auto text-sm
+                    ${isSecretMode ? 'bg-pink-600 hover:bg-pink-500 shadow-pink-900/20' : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20'}
+                `}
                 >
-                  {char}
+                <RotateCcw size={18} /> Reiniciar
                 </button>
-              ))}
             </div>
-          ))}
-          <div className="col-span-10 flex justify-center gap-2 mt-1">
-             <button onClick={() => handleKeyDown('BACKSPACE')} className="px-3 py-2 bg-slate-800 text-slate-300 rounded text-xs font-bold hover:bg-red-900/50 transition-colors">DEL</button>
-             <button 
-                onClick={() => handleKeyDown('ENTER')} 
-                className={`px-3 py-2 text-white rounded text-xs font-bold transition-colors ${isSecretMode ? 'bg-pink-700 hover:bg-pink-600' : 'bg-emerald-700 hover:bg-emerald-600'}`}
-             >
-                ENTER
-             </button>
-          </div>
+            )}
+
+            {/* Teclado Virtual */}
+            <div className="pt-2 grid grid-cols-10 gap-1">
+            {['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'].map((row, i) => (
+                <div key={i} className="col-span-10 flex justify-center gap-1">
+                {row.split('').map(char => (
+                    <button
+                    key={char}
+                    onClick={() => handleKeyDown(char)}
+                    className={`w-7 h-8 sm:w-8 sm:h-10 text-[10px] sm:text-xs text-slate-300 rounded font-bold transition-colors
+                        ${isSecretMode ? 'bg-slate-800 hover:bg-pink-900/50' : 'bg-slate-800 hover:bg-slate-700'}
+                    `}
+                    >
+                    {char}
+                    </button>
+                ))}
+                </div>
+            ))}
+            <div className="col-span-10 flex justify-center gap-2 mt-1">
+                <button onClick={() => handleKeyDown('BACKSPACE')} className="px-3 py-2 bg-slate-800 text-slate-300 rounded text-xs font-bold hover:bg-red-900/50 transition-colors">DEL</button>
+                <button 
+                    onClick={() => handleKeyDown('ENTER')} 
+                    className={`px-3 py-2 text-white rounded text-xs font-bold transition-colors ${isSecretMode ? 'bg-pink-700 hover:bg-pink-600' : 'bg-emerald-700 hover:bg-emerald-600'}`}
+                >
+                    ENTER
+                </button>
+            </div>
+            </div>
         </div>
 
       </div>
