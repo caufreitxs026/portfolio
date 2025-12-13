@@ -13,15 +13,17 @@ import Footer from '@/components/Footer';
 import ProjectCarousel from '@/components/ProjectCarousel';
 import TechWordle from '@/components/TechWordle';
 import Chatbot from '@/components/Chatbot';
-import ScrollProgress from '@/components/ScrollProgress'; // Importamos para controlar a visibilidade se necessário, ou controlamos via CSS global
+import ScrollProgress from '@/components/ScrollProgress'; 
 import { ProjectSkeleton, ExperienceSkeleton } from '@/components/Skeletons';
 import { usePortfolioData } from '@/hooks/usePortfolioData';
 
 export default function Home() {
+  // Hook SWR que gerencia o estado de dados, loading e erro
   const { projects, experiences, loading } = usePortfolioData();
   const [isGameOpen, setIsGameOpen] = useState(false);
   const [isSecretMode, setIsSecretMode] = useState(false);
 
+  // Monitora a classe no body para saber se o modo secreto está ativo
   useEffect(() => {
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
@@ -29,6 +31,7 @@ export default function Home() {
       }
     };
 
+    // Verifica a cada 1s se o modo mudou (simples e eficaz)
     const interval = setInterval(checkSecretMode, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -39,35 +42,39 @@ export default function Home() {
       <Navbar />
       <Hero />
 
-      {/* --- BOTÕES FLUTUANTES (Escondidos se o jogo estiver aberto) --- */}
+      {/* --- BOTÕES FLUTUANTES --- */}
+
+      {/* 1. Chatbot */}
+      {/* O Chatbot tem seu próprio posicionamento interno */}
+      <Chatbot />
+
+      {/* 2. Botão do Jogo (Acima do botão "Voltar ao Topo") 
+          Posição: bottom-24 right-8 (empilhado verticalmente)
+      */}
       <AnimatePresence>
         {!isGameOpen && (
-          <>
-            {/* 1. Chatbot */}
-            <div className="z-[80] relative"> 
-               {/* Wrapper para garantir z-index correto em relação ao resto */}
-               <Chatbot />
-            </div>
-
-            {/* 2. Botão do Jogo */}
-            <motion.button
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              onClick={() => setIsGameOpen(true)}
-              className={`
-                fixed bottom-24 right-8 p-3 rounded-full shadow-2xl z-[90] transition-all duration-300 border backdrop-blur-md group
-                ${isSecretMode 
-                  ? 'bg-black/90 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white shadow-pink-500/30 ring-2 ring-pink-500/20' 
-                  : 'bg-emerald-600 hover:bg-emerald-500 border-emerald-400/30 text-white shadow-emerald-500/30'}
-              `}
-              title={isSecretMode ? "SYSTEM HACK" : "Jogar Code Breaker"}
-              whileHover={{ scale: 1.1, rotate: 15 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Gamepad2 size={24} />
-            </motion.button>
-          </>
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            onClick={() => setIsGameOpen(true)}
+            // CORREÇÃO DE ESTILO E POSIÇÃO:
+            // - fixed: garante que fique na tela, não no rodapé
+            // - bottom-24 right-8: alinhado verticalmente com o botão de voltar (que é bottom-8 right-8)
+            // - p-3: mesmo padding do botão de voltar
+            // - w-12 h-12: tamanho explícito para garantir igualdade
+            className={`
+              fixed bottom-24 right-8 p-3 w-12 h-12 flex items-center justify-center rounded-full shadow-2xl z-[90] transition-all duration-300 border backdrop-blur-md group
+              ${isSecretMode 
+                ? 'bg-black/90 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white shadow-pink-500/30 ring-2 ring-pink-500/20' 
+                : 'bg-emerald-600 hover:bg-emerald-500 border-emerald-400/30 text-white shadow-emerald-500/30'}
+            `}
+            title={isSecretMode ? "SYSTEM HACK" : "Jogar Code Breaker"}
+            whileHover={{ scale: 1.1, rotate: 15 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Gamepad2 size={24} />
+          </motion.button>
         )}
       </AnimatePresence>
 
@@ -76,6 +83,7 @@ export default function Home() {
         {isGameOpen && <TechWordle onClose={() => setIsGameOpen(false)} />}
       </AnimatePresence>
 
+      {/* Seção de Projetos */}
       <section id="projetos" className="py-20 bg-slate-800/50 relative">
         <div className="max-w-6xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
@@ -99,6 +107,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Seção de Experiência */}
       <section id="experiencia" className="py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="mb-12">
