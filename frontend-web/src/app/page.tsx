@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Code, Server, Gamepad2 } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 // Componentes
 import Navbar from '@/components/Navbar';
@@ -11,14 +11,29 @@ import ExperienceItem from '@/components/ExperienceItem';
 import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
 import ProjectCarousel from '@/components/ProjectCarousel';
-import TechWordle from '@/components/TechWordle'; // Jogo Novo
+import TechWordle from '@/components/TechWordle';
 import { ProjectSkeleton, ExperienceSkeleton } from '@/components/Skeletons';
 import { usePortfolioData } from '@/hooks/usePortfolioData';
 
 export default function Home() {
-  // Usa o Hook com SWR (garante dados ou loading)
   const { projects, experiences, loading } = usePortfolioData();
   const [isGameOpen, setIsGameOpen] = useState(false);
+  const [isSecretMode, setIsSecretMode] = useState(false);
+
+  // Detecta mudança de modo para ajustar estilo do botão flutuante se necessário
+  useEffect(() => {
+    // Observer para detectar a classe no body
+    const checkSecretMode = () => {
+      if (typeof document !== 'undefined') {
+        setIsSecretMode(document.body.classList.contains('secret-active'));
+      }
+    };
+
+    // Checa inicial e configura um intervalo curto ou listener (simplificado aqui com intervalo)
+    // O ideal seria um contexto, mas para manter simples com a arquitetura atual:
+    const interval = setInterval(checkSecretMode, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <main className="min-h-screen text-slate-300 selection:bg-emerald-500 selection:text-white overflow-x-hidden">
@@ -26,14 +41,31 @@ export default function Home() {
       <Navbar />
       <Hero />
 
-      {/* Botão Flutuante do Jogo */}
-      <button
-        onClick={() => setIsGameOpen(true)}
-        className="fixed bottom-24 right-8 p-3 bg-slate-800 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-full shadow-lg z-40 transition-all duration-300 border border-emerald-500/30 backdrop-blur-md group"
-        title="Hack the System (Jogar)"
-      >
-        <Gamepad2 size={24} className="group-hover:rotate-12 transition-transform" />
-      </button>
+      {/* Botão Flutuante do Jogo 
+          - Só aparece se o jogo NÃO estiver aberto (!isGameOpen)
+          - Muda de cor se estiver no modo secreto
+      */}
+      <AnimatePresence>
+        {!isGameOpen && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            onClick={() => setIsGameOpen(true)}
+            className={`
+              fixed bottom-8 right-8 p-4 rounded-full shadow-2xl z-40 transition-all duration-300 border backdrop-blur-md group
+              ${isSecretMode 
+                ? 'bg-black/80 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white shadow-pink-500/30' 
+                : 'bg-slate-800/80 border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white shadow-emerald-500/30'}
+            `}
+            title="Hacker the System (Jogar)"
+            whileHover={{ scale: 1.1, rotate: 15 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Gamepad2 size={28} />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Modal do Jogo */}
       <AnimatePresence>
@@ -59,7 +91,6 @@ export default function Home() {
           ) : (
             <div className="text-center py-20 text-slate-500 bg-slate-900/50 rounded-xl border border-slate-800">
               <p>Carregando dados do servidor...</p>
-              {/* Se demorar muito, o usuário sabe que está tentando */}
             </div>
           )}
         </div>
