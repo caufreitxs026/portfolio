@@ -14,26 +14,21 @@ from slowapi.errors import RateLimitExceeded
 
 load_dotenv()
 
-# --- CONFIGURAÇÃO SENTRY (MONITORIZAÇÃO) ---
-# Inicializa o Sentry com o DSN que você forneceu.
-# Isso vai capturar erros e performance automaticamente.
-sentry_sdk.init(
-    dsn="https://a18546f03b5aa26256d35f6a96245f3f@o4510461419192320.ingest.us.sentry.io/4510461421879296",
-    send_default_pii=True, # Envia dados como IP (útil para debug)
-    traces_sample_rate=1.0, # Captura 100% das transações
-    profiles_sample_rate=1.0,
-)
+# --- CONFIGURAÇÃO SENTRY ---
+SENTRY_DSN = os.environ.get("SENTRY_DSN")
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+    )
 
 # --- CONFIGURAÇÃO RATE LIMITER ---
-# Usa o IP do utilizador para contar as requisições
 limiter = Limiter(key_func=get_remote_address)
 
 # --- CONFIGURAÇÃO SUPABASE ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-
-if not SUPABASE_URL or not SUPABASE_KEY:
-    print("Aviso: Variáveis do Supabase não encontradas.")
 
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -47,7 +42,7 @@ EMAIL_TO = "cauafreitas026@gmail.com"
 
 app = FastAPI(title="Portfolio API - Cauã Freitas")
 
-# Conecta o Limiter ao FastAPI
+# Conecta o Limiter
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -64,13 +59,9 @@ class ContactMessage(BaseModel):
     email: str
     content: str
 
-# --- FUNÇÃO DE EMAIL (VIA RESEND) ---
 def send_email_resend(contact: ContactMessage):
     print(">>> [RESEND] Iniciando envio via API...")
-    
-    if not RESEND_API_KEY:
-        print(">>> [RESEND] Erro: API Key ausente.")
-        return False
+    if not RESEND_API_KEY: return False
 
     try:
         params = {
@@ -87,14 +78,11 @@ def send_email_resend(contact: ContactMessage):
             """,
             "reply_to": contact.email
         }
-
         email = resend.Emails.send(params)
         print(f">>> [RESEND] SUCESSO! ID: {email.id}")
         return True
-            
     except Exception as e:
         print(f">>> [RESEND] Erro no envio: {str(e)}")
-        # Envia o erro para o Sentry automaticamente
         sentry_sdk.capture_exception(e)
         return False
 
@@ -103,6 +91,12 @@ def send_email_resend(contact: ContactMessage):
 @app.get("/")
 def read_root():
     return {"status": "online"}
+
+# --- ROTA ANTI-SLEEP (NOVA) ---
+# Esta rota será chamada a cada 14 min pelo cron-job para manter o Render acordado
+@app.get("/health-check")
+def health_check():
+    return {"status": "awake", "message": "Server is up and running!"}
 
 @app.get("/projects")
 def get_projects():
@@ -115,12 +109,10 @@ def get_experiences():
     return supabase.table("experiences").select("*").order("start_date", desc=True).execute().data
 
 @app.post("/contact")
-@limiter.limit("5/hour") # Limite: 5 mensagens por hora por IP
+@limiter.limit("5/hour")
 def send_contact(request: Request, message: ContactMessage):
-    # O objeto 'request' é necessário para o Rate Limiter identificar o IP
     print(f"--- ROTA CONTACT CHAMADA: {message.name} ---")
     
-    # 1. Salva no Banco
     try:
         if supabase:
             supabase.table("messages").insert({
@@ -132,7 +124,6 @@ def send_contact(request: Request, message: ContactMessage):
         print(f"--- Erro banco: {db_error}")
         sentry_sdk.capture_exception(db_error)
 
-    # 2. Envia Email via Resend
     email_sucesso = send_email_resend(message)
     
     if email_sucesso:
