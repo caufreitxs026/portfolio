@@ -36,17 +36,14 @@ interface Props {
 
 export default function CompetenceSection({ skills, certificates, isSecretMode }: Props) {
   return (
-    <section className="py-24 relative w-full overflow-hidden z-10">
+    <section className="py-24 relative w-full overflow-hidden">
         {/* Background Decorativo para ambientação */}
         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[120px] -z-10 opacity-10 pointer-events-none ${isSecretMode ? 'bg-pink-900' : 'bg-emerald-900'}`}></div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-6">
             
-            {/* Ajustes de Layout:
-              - Aumentei a altura desktop para 700px (lg:h-[700px]) para mais espaço.
-              - Adicionei mb-16 para garantir que a próxima seção não "cole" no rodapé desta.
-            */}
-            <div className="grid lg:grid-cols-3 gap-6 lg:h-[700px] mb-16">
+            {/* Grid com Altura Fixa para Estabilidade do 3D */}
+            <div className="grid lg:grid-cols-3 gap-6 lg:h-[600px]">
                 
                 {/* ÁREA 3D (Neural Nexus) */}
                 <div className="lg:col-span-2 h-[400px] lg:h-full w-full relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/50 shadow-2xl backdrop-blur-sm group">
