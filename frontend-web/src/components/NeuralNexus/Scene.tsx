@@ -2,7 +2,7 @@
 
 import { useRef, useMemo, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Text, Html, OrbitControls, Float, Stars } from '@react-three/drei';
+import { Text, OrbitControls, Stars, Float } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface Skill {
@@ -19,18 +19,22 @@ interface Props {
 
 function Word({ children, ...props }: any) {
   const color = new THREE.Color();
-  const fontProps = { font: '/Inter-Bold.woff', fontSize: 2.5, letterSpacing: -0.05, lineHeight: 1, 'material-toneMapped': false };
+  const fontProps = { fontSize: 2.5, letterSpacing: -0.05, lineHeight: 1, 'material-toneMapped': false };
   const ref = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   
   const over = (e: any) => {
     e.stopPropagation();
     setHovered(true);
-    document.body.style.cursor = 'pointer';
+    if (typeof document !== 'undefined') {
+        document.body.style.cursor = 'pointer';
+    }
   }
   const out = () => {
     setHovered(false);
-    document.body.style.cursor = 'auto';
+    if (typeof document !== 'undefined') {
+        document.body.style.cursor = 'auto';
+    }
   }
 
   // Animação suave da cor no hover
@@ -81,21 +85,24 @@ function Cloud({ skills, isSecretMode }: { skills: Skill[], isSecretMode: boolea
   const words = useMemo(() => {
     const temp = [];
     const spherical = new THREE.Spherical();
-    const phiSpan = Math.PI / (skills.length + 1);
-    const thetaSpan = (Math.PI * 2) / skills.length;
+    // Garante que skills existam para evitar divisão por zero
+    const count = skills.length || 1; 
 
-    for (let i = 0; i < skills.length; i++) {
-        // Distribuição Fibonacci Sphere simplificada para espalhar
-        const phi = Math.acos(-1 + (2 * i) / skills.length);
-        const theta = Math.sqrt(skills.length * Math.PI) * phi;
+    for (let i = 0; i < count; i++) {
+        // Distribuição Fibonacci Sphere para espalhar uniformemente
+        const phi = Math.acos(-1 + (2 * i) / count);
+        const theta = Math.sqrt(count * Math.PI) * phi;
         
         // Posição
         const vec = new THREE.Vector3().setFromSpherical(spherical.set(10, phi, theta)); // Raio 10
-        temp.push({ 
-            pos: vec, 
-            word: skills[i].name, 
-            level: skills[i].level 
-        });
+        
+        if (skills[i]) {
+            temp.push({ 
+                pos: vec, 
+                word: skills[i].name, 
+                level: skills[i].level 
+            });
+        }
     }
     return temp;
   }, [skills]);
@@ -124,14 +131,16 @@ function Lines({ points, color }: { points: THREE.Vector3[], color: string }) {
     const geometry = useMemo(() => {
         const geo = new THREE.BufferGeometry();
         const linePoints = [];
-        // Conecta cada ponto a 2 outros aleatórios
+        // Conecta cada ponto a vizinhos próximos na lista
         for(let i=0; i<points.length; i++) {
             const next = (i + 1) % points.length;
             const skip = (i + 3) % points.length;
+            
             linePoints.push(points[i]);
             linePoints.push(points[next]);
             
-            if(i % 2 === 0) {
+            // Adiciona conexões extras para densidade se houver pontos suficientes
+            if(points.length > 5 && i % 2 === 0) {
                  linePoints.push(points[i]);
                  linePoints.push(points[skip]);
             }
