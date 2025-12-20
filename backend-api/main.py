@@ -6,8 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client, Client
 from dotenv import load_dotenv
 from pydantic import BaseModel
-
-# Bibliotecas de Rate Limiting (Segurança)
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -19,6 +17,7 @@ SENTRY_DSN = os.environ.get("SENTRY_DSN")
 if SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
+        send_default_pii=True,
         traces_sample_rate=1.0,
         profiles_sample_rate=1.0,
     )
@@ -42,7 +41,6 @@ EMAIL_TO = "cauafreitas026@gmail.com"
 
 app = FastAPI(title="Portfolio API - Cauã Freitas")
 
-# Conecta o Limiter
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -60,29 +58,18 @@ class ContactMessage(BaseModel):
     content: str
 
 def send_email_resend(contact: ContactMessage):
-    print(">>> [RESEND] Iniciando envio via API...")
     if not RESEND_API_KEY: return False
-
     try:
         params = {
             "from": "Portfolio <onboarding@resend.dev>",
             "to": [EMAIL_TO],
             "subject": f"Portfolio: Novo contato de {contact.name}",
-            "html": f"""
-            <h3>Nova mensagem recebida!</h3>
-            <p><strong>Nome:</strong> {contact.name}</p>
-            <p><strong>Email do Visitante:</strong> {contact.email}</p>
-            <hr />
-            <p><strong>Mensagem:</strong></p>
-            <p>{contact.content}</p>
-            """,
+            "html": f"<h3>Mensagem de {contact.name}</h3><p>{contact.content}</p><p>Email: {contact.email}</p>",
             "reply_to": contact.email
         }
-        email = resend.Emails.send(params)
-        print(f">>> [RESEND] SUCESSO! ID: {email.id}")
+        resend.Emails.send(params)
         return True
     except Exception as e:
-        print(f">>> [RESEND] Erro no envio: {str(e)}")
         sentry_sdk.capture_exception(e)
         return False
 
@@ -92,11 +79,9 @@ def send_email_resend(contact: ContactMessage):
 def read_root():
     return {"status": "online"}
 
-# --- ROTA ANTI-SLEEP (NOVA) ---
-# Esta rota será chamada a cada 14 min pelo cron-job para manter o Render acordado
 @app.get("/health-check")
 def health_check():
-    return {"status": "awake", "message": "Server is up and running!"}
+    return {"status": "awake"}
 
 @app.get("/projects")
 def get_projects():
@@ -108,11 +93,20 @@ def get_experiences():
     if not supabase: return []
     return supabase.table("experiences").select("*").order("start_date", desc=True).execute().data
 
+# NOVAS ROTAS PARA COMPETÊNCIAS E CERTIFICADOS
+@app.get("/skills")
+def get_skills():
+    if not supabase: return []
+    return supabase.table("skills").select("*").order("display_order", desc=False).execute().data
+
+@app.get("/certificates")
+def get_certificates():
+    if not supabase: return []
+    return supabase.table("certificates").select("*").order("display_order", desc=False).execute().data
+
 @app.post("/contact")
 @limiter.limit("5/hour")
 def send_contact(request: Request, message: ContactMessage):
-    print(f"--- ROTA CONTACT CHAMADA: {message.name} ---")
-    
     try:
         if supabase:
             supabase.table("messages").insert({
@@ -121,12 +115,7 @@ def send_contact(request: Request, message: ContactMessage):
                 "content": message.content
             }).execute()
     except Exception as db_error:
-        print(f"--- Erro banco: {db_error}")
         sentry_sdk.capture_exception(db_error)
 
     email_sucesso = send_email_resend(message)
-    
-    if email_sucesso:
-        return {"status": "success", "message": "Mensagem enviada!"}
-    else:
-        return {"status": "success", "message": "Mensagem salva (Email falhou)!"}
+    return {"status": "success", "message": "Mensagem processada"}
