@@ -24,9 +24,15 @@ export default function CertificatesHUD({ certificates, isSecretMode }: { certif
 
   // Verifica se há conteúdo suficiente para scroll
   useEffect(() => {
-    if (scrollRef.current) {
-      setCanScroll(scrollRef.current.scrollHeight > scrollRef.current.clientHeight);
-    }
+    const checkScroll = () => {
+      if (scrollRef.current) {
+        setCanScroll(scrollRef.current.scrollHeight > scrollRef.current.clientHeight);
+      }
+    };
+
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
   }, [certificates]);
 
   return (
@@ -45,7 +51,7 @@ export default function CertificatesHUD({ certificates, isSecretMode }: { certif
         </div>
         <div className="flex flex-col items-end">
           <span className="text-[10px] text-slate-500 font-mono animate-pulse">● SYSTEM ONLINE</span>
-          <span className="text-[10px] text-slate-600 font-mono">v.2.4.0</span>
+          <span className="text-[10px] text-slate-600 font-mono">v.2.4.1</span>
         </div>
       </div>
 
@@ -98,25 +104,24 @@ export default function CertificatesHUD({ certificates, isSecretMode }: { certif
         ))}
       </div>
 
-      {/* Indicador de Scroll (Se necessário) */}
-      {canScroll && (
-        <div className="flex-shrink-0 pt-3 border-t border-white/5 flex justify-center">
-             <motion.div 
-               animate={{ y: [0, 3, 0] }}
-               transition={{ repeat: Infinity, duration: 2 }}
-               className="text-slate-600"
-             >
-                <ChevronDown size={14} />
-             </motion.div>
+      {/* Rodapé Fixo (Sempre Visível) */}
+      <div className="flex-shrink-0 mt-3 pt-3 border-t border-white/5 flex justify-between items-center text-[10px] text-slate-600 font-mono">
+        <span>TOTAL ENTRIES: {certificates.length}</span>
+        
+        <div className="flex items-center gap-3">
+          {canScroll && (
+            <motion.div 
+               animate={{ y: [0, 2, 0] }}
+               transition={{ repeat: Infinity, duration: 1.5 }}
+               className={`flex items-center gap-1 ${isSecretMode ? 'text-pink-500/70' : 'text-emerald-500/70'}`}
+            >
+               <span>SCROLL</span>
+               <ChevronDown size={10} />
+            </motion.div>
+          )}
+          <span>EOS</span>
         </div>
-      )}
-      
-      {!canScroll && (
-         <div className="flex-shrink-0 mt-3 pt-3 border-t border-white/5 flex justify-between text-[10px] text-slate-600 font-mono">
-           <span>TOTAL ENTRIES: {certificates.length}</span>
-           <span>END OF STREAM</span>
-         </div>
-      )}
+      </div>
     </div>
   );
 }
