@@ -46,10 +46,10 @@ export default function CompetenceSection({ skills, certificates, isSecretMode }
             <div className="grid lg:grid-cols-3 gap-8 h-auto">
                 
                 {/* ÁREA 3D (Neural Nexus) 
-                    Definimos a altura fixa AQUI (h-[500px] mobile, lg:h-[600px] desktop).
+                    Definimos a altura fixa AQUI (h-[600px] mobile, lg:h-[700px] desktop).
                     Isso garante que o espaço seja reservado fisicamente.
                 */}
-                <div className="lg:col-span-2 h-[500px] lg:h-[600px] w-full relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/50 shadow-2xl backdrop-blur-sm group">
+                <div className="lg:col-span-2 h-[600px] lg:h-[700px] w-full relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/50 shadow-2xl backdrop-blur-sm group">
                     <div className="absolute top-5 left-6 z-10 pointer-events-none select-none">
                         <h2 className={`text-2xl font-bold font-mono tracking-tighter ${isSecretMode ? 'text-pink-500' : 'text-emerald-400'}`}>
                             NEURAL NEXUS
@@ -77,7 +77,7 @@ export default function CompetenceSection({ skills, certificates, isSecretMode }
                     Também definimos a altura fixa AQUI para alinhar com o 3D.
                     O componente CertificatesHUD usará h-full e ativará o scroll interno.
                 */}
-                <div className="h-[500px] lg:h-[600px] w-full">
+                <div className="h-[600px] lg:h-[700px] w-full">
                     <CertificatesHUD certificates={certificates} isSecretMode={isSecretMode} />
                 </div>
 
