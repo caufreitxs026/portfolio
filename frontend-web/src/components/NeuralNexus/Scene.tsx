@@ -44,10 +44,14 @@ function Word({ children, ...props }: any) {
         ref.current.quaternion.copy(camera.quaternion);
         
         // Interpolação de cor
-        ref.current.material.color.lerp(
-            color.set(hovered ? props.hoverColor : props.baseColor), 
-            0.1
-        );
+        // Correção de Tipo: Casting para MeshStandardMaterial para acessar .color
+        const material = ref.current.material as THREE.MeshStandardMaterial;
+        if (material && material.color) {
+            material.color.lerp(
+                color.set(hovered ? props.hoverColor : props.baseColor), 
+                0.1
+            );
+        }
     }
   });
 
