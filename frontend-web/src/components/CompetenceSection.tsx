@@ -36,19 +36,17 @@ interface Props {
 
 export default function CompetenceSection({ skills, certificates, isSecretMode }: Props) {
   return (
-    <section className="py-24 relative w-full overflow-hidden z-20 mb-32">
+    <section className="py-24 relative w-full overflow-hidden">
         {/* Background Decorativo para ambientação */}
         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[120px] -z-10 opacity-10 pointer-events-none ${isSecretMode ? 'bg-pink-900' : 'bg-emerald-900'}`}></div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-6">
             
-            {/* Grid com Altura Ajustada:
-               lg:h-[600px] é suficiente para mostrar o conteúdo e evita que o rodapé seja empurrado para fora da viewport em telas menores.
-            */}
-            <div className="grid lg:grid-cols-3 gap-8 lg:h-[600px] h-auto">
+            {/* Grid com Altura Fixa para Estabilidade do 3D */}
+            <div className="grid lg:grid-cols-3 gap-6 lg:h-[600px]">
                 
                 {/* ÁREA 3D (Neural Nexus) */}
-                <div className="lg:col-span-2 h-[450px] lg:h-full w-full relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/50 shadow-2xl backdrop-blur-sm group">
+                <div className="lg:col-span-2 h-[400px] lg:h-full w-full relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/50 shadow-2xl backdrop-blur-sm group">
                     <div className="absolute top-5 left-6 z-10 pointer-events-none select-none">
                         <h2 className={`text-2xl font-bold font-mono tracking-tighter ${isSecretMode ? 'text-pink-500' : 'text-emerald-400'}`}>
                             NEURAL NEXUS
@@ -60,12 +58,12 @@ export default function CompetenceSection({ skills, certificates, isSecretMode }
                     </div>
                     
                     {/* O Canvas 3D */}
-                    <div className="absolute inset-0 cursor-move z-0">
+                    <div className="absolute inset-0 cursor-move">
                         <NeuralScene skills={skills} isSecretMode={isSecretMode} />
                     </div>
 
                     {/* Instruções de Uso */}
-                    <div className="absolute bottom-4 right-6 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity duration-500 z-10">
+                    <div className="absolute bottom-4 right-6 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity duration-500">
                         <p className="text-[10px] text-slate-500 font-mono uppercase bg-slate-900/80 px-2 py-1 rounded border border-white/5">
                             Drag to Rotate • Scroll to Zoom
                         </p>
