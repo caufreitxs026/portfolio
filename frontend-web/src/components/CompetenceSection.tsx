@@ -3,12 +3,12 @@
 import dynamic from 'next/dynamic';
 import CertificatesHUD from './NeuralNexus/CertificatesHUD';
 
-// Importação dinâmica para o Canvas 3D (essencial para Next.js não quebrar no server-side)
+// Importação dinâmica para o Canvas 3D
 const NeuralScene = dynamic(() => import('./NeuralNexus/Scene'), { 
     ssr: false,
     loading: () => (
-        <div className="w-full h-full flex items-center justify-center text-emerald-500 font-mono animate-pulse">
-            INITIALIZING NEURAL LINK...
+        <div className="w-full h-full flex items-center justify-center bg-slate-900/20 rounded-2xl border border-slate-800">
+             <span className="text-emerald-500 font-mono text-xs animate-pulse">INITIALIZING NEURAL LINK...</span>
         </div>
     )
 });
@@ -36,18 +36,25 @@ interface Props {
 
 export default function CompetenceSection({ skills, certificates, isSecretMode }: Props) {
   return (
-    <section className="py-20 relative w-full overflow-hidden">
+    <section className="py-24 relative w-full overflow-hidden">
+        {/* Background Decorativo para ambientação */}
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[120px] -z-10 opacity-10 pointer-events-none ${isSecretMode ? 'bg-pink-900' : 'bg-emerald-900'}`}></div>
+
         <div className="max-w-7xl mx-auto px-4 md:px-6">
             
-            <div className="grid lg:grid-cols-3 gap-8 h-[700px] lg:h-[600px]">
+            {/* Grid com Altura Fixa para Estabilidade do 3D */}
+            <div className="grid lg:grid-cols-3 gap-6 lg:h-[600px]">
                 
-                {/* ÁREA 3D (Ocupa 2/3 da tela em desktop) */}
-                <div className="lg:col-span-2 relative h-[400px] lg:h-full w-full rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/50 shadow-2xl">
-                    <div className="absolute top-4 left-6 z-10 pointer-events-none">
+                {/* ÁREA 3D (Neural Nexus) */}
+                <div className="lg:col-span-2 h-[400px] lg:h-full w-full relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/50 shadow-2xl backdrop-blur-sm group">
+                    <div className="absolute top-5 left-6 z-10 pointer-events-none select-none">
                         <h2 className={`text-2xl font-bold font-mono tracking-tighter ${isSecretMode ? 'text-pink-500' : 'text-emerald-400'}`}>
                             NEURAL NEXUS
                         </h2>
-                        <p className="text-xs text-slate-500">INTERACTIVE SKILL MAP</p>
+                        <div className="flex items-center gap-2 mt-1">
+                           <span className={`w-2 h-2 rounded-full ${isSecretMode ? 'bg-pink-500' : 'bg-emerald-500'} animate-pulse`}></span>
+                           <p className="text-[10px] text-slate-500 uppercase tracking-widest">Interactive Skill Map</p>
+                        </div>
                     </div>
                     
                     {/* O Canvas 3D */}
@@ -55,16 +62,16 @@ export default function CompetenceSection({ skills, certificates, isSecretMode }
                         <NeuralScene skills={skills} isSecretMode={isSecretMode} />
                     </div>
 
-                    {/* Instrução */}
-                    <div className="absolute bottom-4 right-6 pointer-events-none">
-                        <p className="text-[10px] text-slate-600 font-mono uppercase">
+                    {/* Instruções de Uso */}
+                    <div className="absolute bottom-4 right-6 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity duration-500">
+                        <p className="text-[10px] text-slate-500 font-mono uppercase bg-slate-900/80 px-2 py-1 rounded border border-white/5">
                             Drag to Rotate • Scroll to Zoom
                         </p>
                     </div>
                 </div>
 
-                {/* HUD DE DADOS (CERTIFICADOS) */}
-                <div className="h-full">
+                {/* HUD DE DADOS (Certificados) */}
+                <div className="h-[500px] lg:h-full w-full">
                     <CertificatesHUD certificates={certificates} isSecretMode={isSecretMode} />
                 </div>
 
