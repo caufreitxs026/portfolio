@@ -36,19 +36,19 @@ interface Props {
 
 export default function CompetenceSection({ skills, certificates, isSecretMode }: Props) {
   return (
-    <section className="py-24 relative w-full overflow-hidden z-20 mb-24">
+    <section className="py-24 relative w-full overflow-hidden z-20 mb-32">
         {/* Background Decorativo para ambientação */}
         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[120px] -z-10 opacity-10 pointer-events-none ${isSecretMode ? 'bg-pink-900' : 'bg-emerald-900'}`}></div>
 
         <div className="max-w-7xl mx-auto px-4 md:px-6">
             
-            {/* Grid com Altura Aumentada para evitar corte do rodapé 
-               lg:h-[750px] garante que o HUD tenha espaço vertical suficiente
+            {/* Grid com Altura Ajustada:
+               lg:h-[600px] é suficiente para mostrar o conteúdo e evita que o rodapé seja empurrado para fora da viewport em telas menores.
             */}
-            <div className="grid lg:grid-cols-3 gap-8 lg:h-[750px] h-auto">
+            <div className="grid lg:grid-cols-3 gap-8 lg:h-[600px] h-auto">
                 
                 {/* ÁREA 3D (Neural Nexus) */}
-                <div className="lg:col-span-2 h-[500px] lg:h-full w-full relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/50 shadow-2xl backdrop-blur-sm group">
+                <div className="lg:col-span-2 h-[450px] lg:h-full w-full relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/50 shadow-2xl backdrop-blur-sm group">
                     <div className="absolute top-5 left-6 z-10 pointer-events-none select-none">
                         <h2 className={`text-2xl font-bold font-mono tracking-tighter ${isSecretMode ? 'text-pink-500' : 'text-emerald-400'}`}>
                             NEURAL NEXUS
@@ -73,7 +73,7 @@ export default function CompetenceSection({ skills, certificates, isSecretMode }
                 </div>
 
                 {/* HUD DE DADOS (Certificados) */}
-                <div className="h-[600px] lg:h-full w-full">
+                <div className="h-[500px] lg:h-full w-full">
                     <CertificatesHUD certificates={certificates} isSecretMode={isSecretMode} />
                 </div>
 
