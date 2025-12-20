@@ -1,6 +1,5 @@
 import useSWR from 'swr';
 
-// Fetcher simples para o SWR usar
 const fetcher = async (url: string) => {
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erro ao buscar dados');
@@ -8,32 +7,25 @@ const fetcher = async (url: string) => {
 };
 
 export function usePortfolioData() {
-  // Pega a URL pública (definida na Vercel) ou usa localhost
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
-  // Configuração do SWR
   const swrConfig = {
-    revalidateOnFocus: false, // Não recarrega ao mudar de aba
-    dedupingInterval: 60000,  // Cache de 1 minuto
-    shouldRetryOnError: true, // Tenta de novo se o Render estiver dormindo
+    revalidateOnFocus: false,
+    dedupingInterval: 60000,
+    shouldRetryOnError: true,
   };
 
-  const { data: projects, error: projectsError, isLoading: projectsLoading } = useSWR(
-    `${API_URL}/projects`,
-    fetcher,
-    swrConfig
-  );
-
-  const { data: experiences, error: experiencesError, isLoading: experiencesLoading } = useSWR(
-    `${API_URL}/experiences`,
-    fetcher,
-    swrConfig
-  );
+  const { data: projects, isLoading: pLoading } = useSWR(`${API_URL}/projects`, fetcher, swrConfig);
+  const { data: experiences, isLoading: eLoading } = useSWR(`${API_URL}/experiences`, fetcher, swrConfig);
+  // Novos Fetchs
+  const { data: skills, isLoading: sLoading } = useSWR(`${API_URL}/skills`, fetcher, swrConfig);
+  const { data: certificates, isLoading: cLoading } = useSWR(`${API_URL}/certificates`, fetcher, swrConfig);
 
   return {
     projects: projects || [],
     experiences: experiences || [],
-    loading: projectsLoading || experiencesLoading,
-    error: projectsError || experiencesError
+    skills: skills || [],
+    certificates: certificates || [],
+    loading: pLoading || eLoading || sLoading || cLoading
   };
 }
