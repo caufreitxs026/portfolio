@@ -1,8 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Award, ExternalLink, Database } from 'lucide-react';
-import { useState } from 'react';
+import { ExternalLink, Database, ChevronDown } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 
 interface Certificate {
   id: number;
@@ -14,27 +14,49 @@ interface Certificate {
 
 export default function CertificatesHUD({ certificates, isSecretMode }: { certificates: Certificate[], isSecretMode: boolean }) {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScroll, setCanScroll] = useState(false);
 
   const accentColor = isSecretMode ? 'text-pink-500' : 'text-emerald-500';
   const borderColor = isSecretMode ? 'border-pink-500/30' : 'border-emerald-500/30';
   const hoverBg = isSecretMode ? 'hover:bg-pink-900/20' : 'hover:bg-emerald-900/20';
+  const scrollbarColor = isSecretMode ? 'scrollbar-thumb-pink-500/20' : 'scrollbar-thumb-emerald-500/20';
+
+  // Verifica se há conteúdo suficiente para scroll
+  useEffect(() => {
+    if (scrollRef.current) {
+      setCanScroll(scrollRef.current.scrollHeight > scrollRef.current.clientHeight);
+    }
+  }, [certificates]);
 
   return (
     <div className={`
-      relative h-full flex flex-col p-6 rounded-2xl border bg-slate-900/40 backdrop-blur-md overflow-hidden
+      relative h-full flex flex-col p-5 rounded-2xl border bg-slate-900/40 backdrop-blur-md overflow-hidden shadow-xl
       ${borderColor}
     `}>
       {/* Cabeçalho do HUD */}
-      <div className="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
+      <div className="flex-shrink-0 flex items-center justify-between mb-4 border-b border-white/5 pb-4">
         <div className="flex items-center gap-2">
             <Database size={18} className={accentColor} />
-            <h3 className="text-white font-mono text-lg font-bold tracking-wider">DATA_VAULT</h3>
+            <div>
+              <h3 className="text-white font-mono text-base font-bold tracking-wider leading-none">DATA_VAULT</h3>
+              <p className="text-[10px] text-slate-500 font-mono mt-1">SECURE ARCHIVE</p>
+            </div>
         </div>
-        <span className="text-xs text-slate-500 font-mono animate-pulse">● LIVE</span>
+        <div className="flex flex-col items-end">
+          <span className="text-[10px] text-slate-500 font-mono animate-pulse">● SYSTEM ONLINE</span>
+          <span className="text-[10px] text-slate-600 font-mono">v.2.4.0</span>
+        </div>
       </div>
 
-      {/* Lista Rolável */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
+      {/* Lista Rolável (Scroll Interno) */}
+      <div 
+        ref={scrollRef}
+        className={`
+          flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar
+          scrollbar-thin scrollbar-track-transparent ${scrollbarColor}
+        `}
+      >
         {certificates.map((cert, i) => (
           <motion.a
             key={cert.id}
@@ -42,39 +64,59 @@ export default function CertificatesHUD({ certificates, isSecretMode }: { certif
             target="_blank"
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.1 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.05 }}
             onMouseEnter={() => setHoveredId(cert.id)}
             onMouseLeave={() => setHoveredId(null)}
             className={`
-              block p-4 rounded-lg border border-slate-800 transition-all duration-300 relative group
+              block p-3 rounded-lg border border-slate-800 transition-all duration-300 relative group
               ${hoverBg}
             `}
           >
-            {/* Marcador Lateral */}
+            {/* Marcador Lateral Ativo */}
             <div className={`
-              absolute left-0 top-0 bottom-0 w-1 transition-all duration-300
+              absolute left-0 top-0 bottom-0 w-[3px] rounded-l-lg transition-all duration-300
               ${hoveredId === cert.id ? (isSecretMode ? 'bg-pink-500' : 'bg-emerald-500') : 'bg-transparent'}
             `}></div>
 
-            <div className="pl-3">
+            <div className="pl-2">
                 <div className="flex justify-between items-start">
-                    <span className="text-xs font-mono text-slate-500 uppercase">{cert.issuer}</span>
-                    <ExternalLink size={14} className={`opacity-0 group-hover:opacity-100 transition-opacity ${accentColor}`} />
+                    <span className={`text-[10px] font-mono uppercase tracking-wide px-1.5 py-0.5 rounded ${isSecretMode ? 'bg-pink-500/10 text-pink-300' : 'bg-emerald-500/10 text-emerald-300'}`}>
+                      {cert.issuer}
+                    </span>
+                    <ExternalLink size={12} className={`opacity-0 group-hover:opacity-100 transition-opacity ${accentColor}`} />
                 </div>
-                <h4 className="text-slate-200 font-bold text-sm mt-1 group-hover:text-white transition-colors">{cert.name}</h4>
-                <p className="text-[10px] text-slate-600 font-mono mt-2 text-right">
-                    {new Date(cert.issue_date).getFullYear()} // AUTH_CODE: {cert.id.toString().padStart(4, '0')}
-                </p>
+                <h4 className="text-slate-200 font-bold text-sm mt-2 group-hover:text-white transition-colors line-clamp-2">
+                  {cert.name}
+                </h4>
+                <div className="flex justify-between items-end mt-2 border-t border-white/5 pt-2">
+                    <span className="text-[10px] text-slate-600 font-mono">Issued: {new Date(cert.issue_date).getFullYear()}</span>
+                    <span className="text-[9px] text-slate-700 font-mono uppercase">ID: {cert.id.toString().padStart(4, '0')}</span>
+                </div>
             </div>
           </motion.a>
         ))}
       </div>
 
-      {/* Rodapé Decorativo */}
-      <div className="mt-4 pt-4 border-t border-white/5 flex justify-between text-[10px] text-slate-600 font-mono">
-        <span>TOTAL ENTRIES: {certificates.length}</span>
-        <span>SYS.V.2.0</span>
-      </div>
+      {/* Indicador de Scroll (Se necessário) */}
+      {canScroll && (
+        <div className="flex-shrink-0 pt-3 border-t border-white/5 flex justify-center">
+             <motion.div 
+               animate={{ y: [0, 3, 0] }}
+               transition={{ repeat: Infinity, duration: 2 }}
+               className="text-slate-600"
+             >
+                <ChevronDown size={14} />
+             </motion.div>
+        </div>
+      )}
+      
+      {!canScroll && (
+         <div className="flex-shrink-0 mt-3 pt-3 border-t border-white/5 flex justify-between text-[10px] text-slate-600 font-mono">
+           <span>TOTAL ENTRIES: {certificates.length}</span>
+           <span>END OF STREAM</span>
+         </div>
+      )}
     </div>
   );
 }
