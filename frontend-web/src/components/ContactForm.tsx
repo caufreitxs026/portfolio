@@ -1,105 +1,256 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Send, CheckCircle, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, CheckCircle2, AlertCircle, Loader2, Mail, User, MessageSquare, Terminal } from 'lucide-react';
 
 export default function ContactForm() {
-  const [form, setForm] = useState({ name: '', email: '', content: '' });
-  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    content: ''
+  });
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [isSecretMode, setIsSecretMode] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Define a URL da API (usa a variável de ambiente ou o localhost como fallback)
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+  // Detecção do Modo Secreto (Hacker Theme)
+  useEffect(() => {
+    const checkSecretMode = () => {
+      if (typeof document !== 'undefined') {
+        setIsSecretMode(document.body.classList.contains('secret-active'));
+      }
+    };
+    // Intervalo para resposta rápida à mudança de tema
+    const interval = setInterval(checkSecretMode, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Configuração de Tema
+  const theme = isSecretMode ? {
+    primary: 'text-pink-400',
+    borderFocus: 'border-pink-500/50',
+    glow: 'shadow-[0_0_20px_rgba(236,72,153,0.15)]',
+    button: 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500',
+    icon: 'text-pink-500',
+    inputBg: 'bg-slate-900/80',
+    label: 'text-pink-300'
+  } : {
+    primary: 'text-emerald-400',
+    borderFocus: 'border-emerald-500/50',
+    glow: 'shadow-[0_0_20px_rgba(16,185,129,0.15)]',
+    button: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500',
+    icon: 'text-emerald-500',
+    inputBg: 'bg-slate-900/80',
+    label: 'text-emerald-300'
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus('sending');
-    
+    if (!formData.name || !formData.email || !formData.content) return;
+
+    setStatus('loading');
+
     try {
-      // Usa a URL dinâmica aqui
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-acxt.onrender.com';
+      
       const res = await fetch(`${API_URL}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(formData),
       });
 
-      if (res.ok) {
-        setStatus('success');
-        setForm({ name: '', email: '', content: '' });
-        setTimeout(() => setStatus('idle'), 5000);
-      } else {
-        setStatus('error');
-      }
+      if (!res.ok) throw new Error('Falha no envio');
+
+      setStatus('success');
+      setFormData({ name: '', email: '', content: '' });
+      
+      // Reseta o status após 5 segundos
+      setTimeout(() => setStatus('idle'), 5000);
+
     } catch (error) {
-        console.error(error);
-        setStatus('error');
+      console.error(error);
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 5000);
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="bg-slate-900/50 backdrop-blur-sm p-8 rounded-2xl border border-slate-800 shadow-xl max-w-2xl mx-auto"
-    >
-      <form onSubmit={handleSubmit} className="space-y-6 text-left">
-        <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-400">Nome</label>
-                <input 
-                  type="text" 
-                  required
-                  value={form.name}
-                  onChange={(e) => setForm({...form, name: e.target.value})}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
-                  placeholder="Seu nome"
-                />
-            </div>
-            <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-400">Email</label>
-                <input 
-                  type="email" 
-                  required
-                  value={form.email}
-                  onChange={(e) => setForm({...form, email: e.target.value})}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
-                  placeholder="seu@email.com"
-                />
-            </div>
-        </div>
+    <div className="w-full max-w-2xl mx-auto relative">
+      
+      {/* Background Glow Decorativo */}
+      <div className={`absolute -inset-1 rounded-2xl blur-xl opacity-20 transition-colors duration-500 ${isSecretMode ? 'bg-pink-600' : 'bg-emerald-600'}`}></div>
+
+      <motion.form 
+        onSubmit={handleSubmit}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="relative bg-slate-950/80 backdrop-blur-xl p-8 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden"
+      >
+        {/* Header Visual do Form (Fake Terminal Bar) */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
         
-        <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-400">Mensagem</label>
-            <textarea 
-              rows={4}
-              required
-              value={form.content}
-              onChange={(e) => setForm({...form, content: e.target.value})}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none"
-              placeholder="Como posso ajudar no seu projeto?"
-            ></textarea>
+        <div className="space-y-6 relative z-10">
+          
+          {/* Campo Nome */}
+          <div className="relative group">
+            <label className={`block text-xs font-mono font-bold uppercase mb-2 ml-1 transition-colors ${focusedField === 'name' ? theme.label : 'text-slate-500'}`}>
+              Identification // Name
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <User size={18} className={`transition-colors duration-300 ${focusedField === 'name' ? theme.icon : 'text-slate-600'}`} />
+              </div>
+              <input
+                type="text"
+                name="name"
+                required
+                value={formData.name}
+                onChange={handleChange}
+                onFocus={() => setFocusedField('name')}
+                onBlur={() => setFocusedField(null)}
+                className={`
+                  w-full pl-12 pr-4 py-4 rounded-xl text-slate-200 placeholder-slate-600 outline-none border transition-all duration-300
+                  ${theme.inputBg} 
+                  ${focusedField === 'name' ? `${theme.borderFocus} ${theme.glow} ring-1 ring-white/5` : 'border-slate-800 hover:border-slate-700'}
+                `}
+                placeholder="Como devo chamá-lo?"
+              />
+            </div>
+          </div>
+
+          {/* Campo Email */}
+          <div className="relative group">
+            <label className={`block text-xs font-mono font-bold uppercase mb-2 ml-1 transition-colors ${focusedField === 'email' ? theme.label : 'text-slate-500'}`}>
+              Contact Channel // Email
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Mail size={18} className={`transition-colors duration-300 ${focusedField === 'email' ? theme.icon : 'text-slate-600'}`} />
+              </div>
+              <input
+                type="email"
+                name="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                onFocus={() => setFocusedField('email')}
+                onBlur={() => setFocusedField(null)}
+                className={`
+                  w-full pl-12 pr-4 py-4 rounded-xl text-slate-200 placeholder-slate-600 outline-none border transition-all duration-300
+                  ${theme.inputBg}
+                  ${focusedField === 'email' ? `${theme.borderFocus} ${theme.glow} ring-1 ring-white/5` : 'border-slate-800 hover:border-slate-700'}
+                `}
+                placeholder="seu@email.com"
+              />
+            </div>
+          </div>
+
+          {/* Campo Mensagem */}
+          <div className="relative group">
+            <label className={`block text-xs font-mono font-bold uppercase mb-2 ml-1 transition-colors ${focusedField === 'content' ? theme.label : 'text-slate-500'}`}>
+              Payload // Message
+            </label>
+            <div className="relative">
+              <div className="absolute top-4 left-0 pl-4 pointer-events-none">
+                <MessageSquare size={18} className={`transition-colors duration-300 ${focusedField === 'content' ? theme.icon : 'text-slate-600'}`} />
+              </div>
+              <textarea
+                name="content"
+                required
+                rows={4}
+                value={formData.content}
+                onChange={handleChange}
+                onFocus={() => setFocusedField('content')}
+                onBlur={() => setFocusedField(null)}
+                className={`
+                  w-full pl-12 pr-4 py-4 rounded-xl text-slate-200 placeholder-slate-600 outline-none border transition-all duration-300 resize-none
+                  ${theme.inputBg}
+                  ${focusedField === 'content' ? `${theme.borderFocus} ${theme.glow} ring-1 ring-white/5` : 'border-slate-800 hover:border-slate-700'}
+                `}
+                placeholder="Descreva seu projeto ou ideia..."
+              />
+            </div>
+          </div>
+
+          {/* Botão de Envio */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={status === 'loading' || status === 'success'}
+            className={`
+              w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden group
+              ${status === 'success' ? 'bg-green-600' : status === 'error' ? 'bg-red-600' : theme.button}
+              disabled:opacity-80 disabled:cursor-not-allowed
+            `}
+          >
+            {/* Background Animation on Hover */}
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 blur-md"></div>
+
+            <AnimatePresence mode="wait">
+              {status === 'loading' ? (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="flex items-center gap-2"
+                >
+                  <Loader2 size={20} className="animate-spin" />
+                  <span>Enviando Dados...</span>
+                </motion.div>
+              ) : status === 'success' ? (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex items-center gap-2"
+                >
+                  <CheckCircle2 size={20} />
+                  <span>Mensagem Recebida!</span>
+                </motion.div>
+              ) : status === 'error' ? (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex items-center gap-2"
+                >
+                  <AlertCircle size={20} />
+                  <span>Erro no Envio</span>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="idle"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="flex items-center gap-2 relative z-10"
+                >
+                  <span>Iniciar Conexão</span>
+                  <Send size={18} className="group-hover:translate-x-1 transition-transform" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
+
         </div>
 
-        <button 
-          type="submit" 
-          disabled={status === 'sending' || status === 'success'}
-          className={`w-full font-bold py-4 rounded-lg transition-all flex justify-center items-center gap-2
-            ${status === 'success' 
-                ? 'bg-green-600 text-white' 
-                : status === 'error'
-                ? 'bg-red-600 text-white'
-                : 'bg-emerald-600 hover:bg-emerald-700 text-white hover:shadow-lg hover:shadow-emerald-900/20'
-            }
-            disabled:opacity-70 disabled:cursor-not-allowed
-          `}
-        >
-          {status === 'sending' && 'Enviando...'}
-          {status === 'idle' && <><Send size={18} /> Enviar Mensagem</>}
-          {status === 'success' && <><CheckCircle size={18} /> Mensagem Enviada!</>}
-          {status === 'error' && <><AlertCircle size={18} /> Erro ao Enviar</>}
-        </button>
-      </form>
-    </motion.div>
+        {/* Decorativo de rodapé */}
+        <div className="mt-6 pt-4 border-t border-slate-800/50 flex justify-between items-center text-[10px] text-slate-600 font-mono">
+           <div className="flex items-center gap-1">
+             <Terminal size={12} />
+             <span>SECURE CHANNEL ENCRYPTED</span>
+           </div>
+           <span>v.3.0.1</span>
+        </div>
+
+      </motion.form>
+    </div>
   );
 }
