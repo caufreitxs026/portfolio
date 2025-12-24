@@ -50,11 +50,11 @@ export default function Hero() {
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isSecretMode ? 'bg-pink-400' : 'bg-emerald-400'}`}></span>
               <span className={`relative inline-flex rounded-full h-2 w-2 ${isSecretMode ? 'bg-pink-500' : 'bg-emerald-500'}`}></span>
             </span>
-            Disponível para novos projetos
+            Open to Work
           </div>
 
           <h1 className="text-4xl lg:text-6xl font-bold text-slate-100 leading-tight mb-6">
-            Transformando <span className={accentColor}>Dados</span> em Soluções Inteligentes
+            Olá, sou <span className={accentColor}>Cauã Freitas</span>
           </h1>
           
           <p className="text-lg text-slate-400 mb-8 max-w-lg leading-relaxed">
