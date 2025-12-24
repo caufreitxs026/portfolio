@@ -54,7 +54,7 @@ export default function Hero() {
           </div>
 
           <h1 className="text-4xl lg:text-6xl font-bold text-slate-100 leading-tight mb-6">
-            Olá, sou <span className={accentColor}>Cauã Freitas</span>
+            Olá, sou <span className={accentColor}>Cauã</span>.
           </h1>
           
           <p className="text-lg text-slate-400 mb-8 max-w-lg leading-relaxed">
