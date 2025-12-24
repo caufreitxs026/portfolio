@@ -32,20 +32,21 @@ export default function Hero() {
     : 'border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400';
 
   return (
-    <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-      {/* Background Glow */}
-      <div className={`absolute top-20 right-0 w-[500px] h-[500px] rounded-full blur-[120px] -z-10 opacity-20 pointer-events-none ${isSecretMode ? 'bg-pink-900' : 'bg-emerald-900'}`}></div>
-      <div className="absolute top-40 left-0 w-[300px] h-[300px] rounded-full bg-blue-900/20 blur-[100px] -z-10 pointer-events-none"></div>
+    <section className="relative pt-24 pb-12 lg:pt-48 lg:pb-32 overflow-hidden">
+      {/* Background Glow - Ajustado para não dominar em mobile */}
+      <div className={`absolute top-20 right-0 w-[300px] h-[300px] lg:w-[500px] lg:h-[500px] rounded-full blur-[80px] lg:blur-[120px] -z-10 opacity-20 pointer-events-none ${isSecretMode ? 'bg-pink-900' : 'bg-emerald-900'}`}></div>
+      <div className="absolute top-40 left-0 w-[200px] h-[200px] lg:w-[300px] lg:h-[300px] rounded-full bg-blue-900/20 blur-[60px] lg:blur-[100px] -z-10 pointer-events-none"></div>
 
-      <div className="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
         
         {/* Lado Esquerdo: Texto */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
+          className="text-center lg:text-left"
         >
-          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700 text-sm font-medium mb-6 ${accentColor}`}>
+          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700 text-xs sm:text-sm font-medium mb-6 ${accentColor}`}>
             <span className="relative flex h-2 w-2">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isSecretMode ? 'bg-pink-400' : 'bg-emerald-400'}`}></span>
               <span className={`relative inline-flex rounded-full h-2 w-2 ${isSecretMode ? 'bg-pink-500' : 'bg-emerald-500'}`}></span>
@@ -53,18 +54,18 @@ export default function Hero() {
             Open to Work
           </div>
 
-          <h1 className="text-4xl lg:text-6xl font-bold text-slate-100 leading-tight mb-6">
+          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-slate-100 leading-tight mb-4 lg:mb-6">
             Olá, sou <span className={accentColor}>Cauã</span>.
           </h1>
           
-          <p className="text-lg text-slate-400 mb-8 max-w-lg leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-400 mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed">
             Desenvolvedor Full Stack e Analista de Dados focado em construir aplicações performáticas e dashboards estratégicos que geram valor real para o negócio.
           </p>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
             <Link 
               href="#projetos"
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 ${buttonPrimary}`}
+              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto ${buttonPrimary}`}
             >
               Ver Projetos <ArrowRight size={18} />
             </Link>
@@ -72,7 +73,7 @@ export default function Hero() {
             <a 
               href="/curriculo.pdf" 
               target="_blank"
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold border transition-all ${buttonSecondary}`}
+              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold border transition-all w-full sm:w-auto ${buttonSecondary}`}
             >
               Currículo <Download size={18} />
             </a>
@@ -84,7 +85,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="relative group"
+          className="relative group mt-8 lg:mt-0 w-full max-w-[calc(100vw-2rem)] mx-auto lg:max-w-none"
         >
           <div className={`absolute -inset-1 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200 ${isSecretMode ? 'bg-gradient-to-r from-pink-600 to-purple-600' : 'bg-gradient-to-r from-emerald-600 to-cyan-600'}`}></div>
           
@@ -103,8 +104,8 @@ export default function Hero() {
             </div>
 
             {/* Conteúdo do Código */}
-            <div className="p-6 overflow-x-auto">
-              <pre className="font-mono text-sm leading-relaxed">
+            <div className="p-4 sm:p-6 overflow-x-auto">
+              <pre className="font-mono text-xs sm:text-sm leading-relaxed">
                 <code className="text-slate-300">
                   <span className="text-purple-400">from</span> developer <span className="text-purple-400">import</span> Caua<br/><br/>
                   <span className="text-slate-500"># Inicializando perfil...</span><br/>
