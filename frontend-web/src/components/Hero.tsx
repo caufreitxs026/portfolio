@@ -110,7 +110,7 @@ export default function Hero() {
                   <span className="text-slate-500"># Inicializando perfil...</span><br/>
                   <span className="text-purple-400">class</span> <span className="text-yellow-300">Profile</span>:<br/>
                   &nbsp;&nbsp;stack = [<span className="text-green-400">'Python'</span>, <span className="text-green-400">'Django'</span>, <span className="text-green-400">'React'</span>, <span className="text-green-400">'Node.js'</span>, <span className="text-green-400">'Java'</span>, <span className="text-green-400">'SQL'</span>]<br/>
-                  &nbsp;&nbsp;current_role = <span className="text-green-400">'Analista de Suporte Computacional'</span> | <span className="text-green-400">'Desenvolvedor Pleno'</span> <br/>
+                  &nbsp;&nbsp;current_role = <span className="text-green-400">'Analista de Suporte'</span> | <span className="text-green-400">'Dev. Pleno'</span><br/>
                   &nbsp;&nbsp;location = <span className="text-green-400">'Feira de Santana, BA'</span><br/><br/>
                   <span className="text-blue-400">&gt;</span> <span className="text-purple-400">print</span>(Profile.stack)<br/>
                   <span className="text-slate-400">['Python', 'Django', 'React', 'Node.js', 'Java', 'SQL']</span>
