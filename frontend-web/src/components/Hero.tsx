@@ -74,7 +74,7 @@ export default function Hero() {
               target="_blank"
               className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold border transition-all ${buttonSecondary}`}
             >
-              Download CV <Download size={18} />
+              Currículo <Download size={18} />
             </a>
           </div>
         </motion.div>
