@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Terminal, ArrowRight, Download } from 'lucide-react';
+import { Terminal, ArrowRight, Download, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -22,103 +22,230 @@ export default function Hero() {
 
   if (!mounted) return null;
 
-  const accentColor = isSecretMode ? 'text-pink-500' : 'text-emerald-400';
-  const buttonPrimary = isSecretMode 
-    ? 'bg-pink-600 hover:bg-pink-700 text-white shadow-pink-500/20' 
-    : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20';
-  
-  const buttonSecondary = isSecretMode
-    ? 'border-pink-500/30 hover:bg-pink-500/10 text-pink-400'
-    : 'border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400';
+  // Configurações de Tema
+  const theme = isSecretMode ? {
+    primary: 'text-pink-500',
+    bgGradient: 'from-pink-500/20 via-purple-500/20 to-transparent',
+    button: 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 shadow-pink-500/25',
+    border: 'border-pink-500/30',
+    textGradient: 'bg-gradient-to-r from-pink-300 via-pink-100 to-white',
+    blob: 'bg-pink-600'
+  } : {
+    primary: 'text-emerald-400',
+    bgGradient: 'from-emerald-500/20 via-cyan-500/20 to-transparent',
+    button: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-500/25',
+    border: 'border-emerald-500/30',
+    textGradient: 'bg-gradient-to-r from-emerald-300 via-emerald-100 to-white',
+    blob: 'bg-emerald-600'
+  };
 
   return (
-    <section className="relative pt-24 pb-12 lg:pt-48 lg:pb-32 overflow-hidden">
-      {/* Background Glow - Ajustado para não dominar em mobile */}
-      <div className={`absolute top-20 right-0 w-[300px] h-[300px] lg:w-[500px] lg:h-[500px] rounded-full blur-[80px] lg:blur-[120px] -z-10 opacity-20 pointer-events-none ${isSecretMode ? 'bg-pink-900' : 'bg-emerald-900'}`}></div>
-      <div className="absolute top-40 left-0 w-[200px] h-[200px] lg:w-[300px] lg:h-[300px] rounded-full bg-blue-900/20 blur-[60px] lg:blur-[100px] -z-10 pointer-events-none"></div>
+    <section className="relative min-h-[90vh] flex items-center pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden bg-transparent">
+      
+      {/* --- BACKGROUND EFFECTS --- */}
+      
+      {/* 1. Grid Pattern Futurista */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] -z-20"></div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      {/* 2. Ambient Glows (Blobs) */}
+      <div className={`absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-[120px] opacity-20 -z-10 animate-pulse-slow ${theme.blob}`}></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-blue-900/10 blur-[100px] -z-10 opacity-30"></div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         
-        {/* Lado Esquerdo: Texto */}
+        {/* --- COLUNA ESQUERDA: TEXTO E CTA --- */}
         <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center lg:text-left"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="flex flex-col items-center lg:items-start text-center lg:text-left z-10"
         >
-          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700 text-xs sm:text-sm font-medium mb-6 ${accentColor}`}>
+          {/* Badge de Status */}
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/80 border border-slate-700/50 backdrop-blur-md text-xs sm:text-sm font-medium mb-8 group cursor-default hover:border-slate-600 transition-colors shadow-lg shadow-black/20`}
+          >
             <span className="relative flex h-2 w-2">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isSecretMode ? 'bg-pink-400' : 'bg-emerald-400'}`}></span>
               <span className={`relative inline-flex rounded-full h-2 w-2 ${isSecretMode ? 'bg-pink-500' : 'bg-emerald-500'}`}></span>
             </span>
-            Open to Work
-          </div>
+            <span className="text-slate-300">Open to Work</span>
+            <ChevronRight size={14} className="text-slate-600 group-hover:text-slate-400 transition-colors" />
+          </motion.div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-slate-100 leading-tight mb-4 lg:mb-6">
-            Olá, sou <span className={accentColor}>Cauã</span>.
+          {/* Título Principal */}
+          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white tracking-tight leading-[1.1] mb-6">
+            Olá, sou <br className="hidden lg:block" />
+            <span className={`bg-clip-text text-transparent ${theme.textGradient}`}>
+              Cauã Freitas.
+            </span>
           </h1>
           
-          <p className="text-base sm:text-lg text-slate-400 mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed">
-            Desenvolvedor Full Stack e Analista de Dados focado em construir aplicações performáticas e dashboards estratégicos que geram valor real para o negócio.
+          {/* Subtítulo / Descrição */}
+          <p className="text-base sm:text-lg text-slate-400 mb-10 max-w-xl leading-relaxed font-light">
+            Desenvolvedor <strong className="text-slate-200 font-medium">Full Stack</strong> e <strong className="text-slate-200 font-medium">Analista de Dados</strong>. 
+            Transformo problemas complexos em aplicações performáticas e dashboards estratégicos.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+          {/* Botões de Ação */}
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Link 
               href="#projetos"
-              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 w-full sm:w-auto ${buttonPrimary}`}
+              className={`
+                group relative flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 overflow-hidden
+                ${theme.button}
+              `}
             >
-              Ver Projetos <ArrowRight size={18} />
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 blur-md"></div>
+              <span className="relative">Ver Projetos</span>
+              <ArrowRight size={18} className="relative group-hover:translate-x-1 transition-transform" />
             </Link>
             
             <a 
               href="/curriculo.pdf" 
               target="_blank"
-              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold border transition-all w-full sm:w-auto ${buttonSecondary}`}
+              className={`
+                flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-slate-300 border border-slate-700/50 hover:border-slate-500 hover:bg-slate-800/50 hover:text-white transition-all duration-300 backdrop-blur-sm
+              `}
             >
-              Currículo <Download size={18} />
+              <span>Currículo</span>
+              <Download size={18} />
             </a>
           </div>
         </motion.div>
 
-        {/* Lado Direito: Code Snippet (Glassmorphism) */}
+        {/* --- COLUNA DIREITA: VISUAL CODE (IDE STYLE) --- */}
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="relative group mt-8 lg:mt-0 w-full max-w-[calc(100vw-2rem)] mx-auto lg:max-w-none"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, delay: 0.3 }}
+          className="relative w-full max-w-[calc(100vw-2rem)] lg:max-w-none mx-auto"
         >
-          <div className={`absolute -inset-1 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200 ${isSecretMode ? 'bg-gradient-to-r from-pink-600 to-purple-600' : 'bg-gradient-to-r from-emerald-600 to-cyan-600'}`}></div>
+          {/* Glow atrás do IDE */}
+          <div className={`absolute -inset-0.5 bg-gradient-to-tr ${theme.bgGradient} rounded-2xl blur-xl opacity-40 animate-pulse-slow`}></div>
           
-          <div className="relative rounded-xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-2xl overflow-hidden">
-            {/* Barra de Título do Editor */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900/50">
+          {/* Container da Janela (IDE) */}
+          <motion.div 
+            className="relative rounded-xl bg-[#0d1117]/95 border border-slate-800/80 shadow-2xl backdrop-blur-2xl overflow-hidden ring-1 ring-white/5"
+            animate={{ y: [0, -10, 0] }}
+            transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+          >
+            {/* Header da Janela (macOS Style) */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/50 bg-[#0d1117]">
               <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]"></div>
+                <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]"></div>
+                <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]"></div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
+              <div className="flex items-center gap-2 text-[10px] sm:text-xs text-slate-500 font-mono opacity-80">
                 <Terminal size={12} />
-                profile.py
+                <span>developer_profile.py</span>
               </div>
+              <div className="w-10"></div> {/* Espaçador para centralizar o título */}
             </div>
 
-            {/* Conteúdo do Código */}
-            <div className="p-4 sm:p-6 overflow-x-auto">
-              <pre className="font-mono text-xs sm:text-sm leading-relaxed">
-                <code className="text-slate-300">
-                  <span className="text-purple-400">from</span> developer <span className="text-purple-400">import</span> Caua<br/><br/>
-                  <span className="text-slate-500"># Inicializando perfil...</span><br/>
-                  <span className="text-purple-400">class</span> <span className="text-yellow-300">Profile</span>:<br/>
-                  &nbsp;&nbsp;stack = [<span className="text-green-400">'Python'</span>, <span className="text-green-400">'Django'</span>, <span className="text-green-400">'React'</span>, <span className="text-green-400">'Node.js'</span>, <span className="text-green-400">'Java'</span>, <span className="text-green-400">'SQL'</span>]<br/>
-                  &nbsp;&nbsp;current_role = <span className="text-green-400">'Analista de Suporte'</span> | <span className="text-green-400">'Dev. Pleno'</span><br/>
-                  &nbsp;&nbsp;location = <span className="text-green-400">'Feira de Santana, BA'</span><br/><br/>
-                  <span className="text-blue-400">&gt;</span> <span className="text-purple-400">print</span>(Profile.stack)<br/>
-                  <span className="text-slate-400">['Python', 'Django', 'React', 'Node.js', 'Java', 'SQL']</span>
-                </code>
-              </pre>
+            {/* Área de Código */}
+            <div className="p-5 sm:p-6 overflow-x-auto custom-scrollbar">
+              <div className="font-mono text-xs sm:text-sm leading-7">
+                
+                {/* Linha 1 */}
+                <div className="flex">
+                  <span className="text-slate-700 w-6 select-none text-right mr-4">1</span>
+                  <div className="whitespace-nowrap">
+                    <span className="text-purple-400">from</span> <span className="text-slate-300">universe</span> <span className="text-purple-400">import</span> <span className="text-yellow-200">Caua</span>
+                  </div>
+                </div>
+
+                {/* Linha 2 (Vazia) */}
+                <div className="flex"><span className="text-slate-700 w-6 select-none text-right mr-4">2</span></div>
+
+                {/* Linha 3 */}
+                <div className="flex">
+                  <span className="text-slate-700 w-6 select-none text-right mr-4">3</span>
+                  <div className="whitespace-nowrap">
+                    <span className="text-slate-500 italic"># Inicializando classe do Desenvolvedor</span>
+                  </div>
+                </div>
+
+                {/* Linha 4 */}
+                <div className="flex">
+                  <span className="text-slate-700 w-6 select-none text-right mr-4">4</span>
+                  <div className="whitespace-nowrap">
+                    <span className="text-purple-400">class</span> <span className="text-yellow-400">Profile</span>:
+                  </div>
+                </div>
+
+                 {/* Linha 5 */}
+                 <div className="flex">
+                  <span className="text-slate-700 w-6 select-none text-right mr-4">5</span>
+                  <div className="whitespace-nowrap pl-4">
+                     <span className="text-blue-300">stack</span> = [
+                  </div>
+                </div>
+
+                {/* Linha 6 (Stacks com Highlight) */}
+                <div className="flex">
+                  <span className="text-slate-700 w-6 select-none text-right mr-4">6</span>
+                  <div className="whitespace-nowrap pl-8">
+                    <span className="text-emerald-400">'Python'</span>, <span className="text-emerald-400">'Django'</span>, <span className="text-emerald-400">'React'</span>,
+                  </div>
+                </div>
+
+                {/* Linha 7 */}
+                <div className="flex">
+                  <span className="text-slate-700 w-6 select-none text-right mr-4">7</span>
+                  <div className="whitespace-nowrap pl-8">
+                    <span className="text-emerald-400">'Node.js'</span>, <span className="text-emerald-400">'Java'</span>, <span className="text-emerald-400">'SQL'</span>
+                  </div>
+                </div>
+
+                {/* Linha 8 */}
+                <div className="flex">
+                  <span className="text-slate-700 w-6 select-none text-right mr-4">8</span>
+                  <div className="whitespace-nowrap pl-4">
+                     ]
+                  </div>
+                </div>
+
+                {/* Linha 9 */}
+                <div className="flex">
+                  <span className="text-slate-700 w-6 select-none text-right mr-4">9</span>
+                  <div className="whitespace-nowrap pl-4">
+                    <span className="text-blue-300">role</span> = <span className="text-orange-300">'Full Stack & Data Analyst'</span>
+                  </div>
+                </div>
+
+                 {/* Linha 10 */}
+                 <div className="flex">
+                  <span className="text-slate-700 w-6 select-none text-right mr-4">10</span>
+                  <div className="whitespace-nowrap pl-4">
+                    <span className="text-blue-300">location</span> = <span className="text-orange-300">'Feira de Santana, BA'</span>
+                  </div>
+                </div>
+
+                {/* Linha 11 (Execução) */}
+                <div className="flex mt-2">
+                  <span className="text-slate-700 w-6 select-none text-right mr-4">11</span>
+                  <div className="whitespace-nowrap">
+                     <span className="text-purple-400">print</span>(<span className="text-blue-300">Profile</span>.stack)
+                  </div>
+                </div>
+
+                {/* Linha 12 (Output Simulado) */}
+                <div className="flex mt-2 border-t border-slate-800/50 pt-2">
+                  <span className="text-slate-700 w-6 select-none text-right mr-4"></span>
+                  <div className="whitespace-nowrap flex items-center gap-2">
+                     <span className="text-emerald-500">➜</span>
+                     <span className="text-slate-400 text-[10px] sm:text-xs">['Python', 'Django', 'React', 'Node.js', 'Java', 'SQL']</span>
+                     <span className="w-2 h-4 bg-slate-500 animate-pulse"></span>
+                  </div>
+                </div>
+
+              </div>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
 
       </div>
