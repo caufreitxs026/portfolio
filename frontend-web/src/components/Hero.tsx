@@ -113,7 +113,7 @@ export default function Hero() {
           transition={{ duration: 0.7, delay: 0.3 }}
           className="relative w-full max-w-[calc(100vw-2rem)] lg:max-w-none mx-auto mt-8 lg:mt-0"
         >
-          <div className={`absolute -inset-0.5 bg-gradient-to-tr ${theme.bgGradient} rounded-2xl blur-xl opacity-40 animate-pulse-slow`}></div>
+          <div className={`absolute -inset-0.5 bg-gradient-to-tr ${theme.bgGradient} rounded-2xl blur-xl opacity-40 anilinha 9 do snippet de códigomate-pulse-slow`}></div>
           
           <motion.div 
             className="relative rounded-xl bg-[#0d1117]/95 border border-slate-800/80 shadow-2xl backdrop-blur-2xl overflow-hidden ring-1 ring-white/5"
@@ -189,7 +189,7 @@ export default function Hero() {
                 <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">9</span>
                   <div className="whitespace-nowrap pl-4">
-                    <span className="text-blue-300">role</span> = <span className="text-orange-300">'Full Stack Developer e Analista de Suporte Computacional'</span>
+                    <span className="text-blue-300">role</span> = <span className="text-orange-300">'Full Stack Developer and Support Analyst'</span>
                   </div>
                 </div>
 
