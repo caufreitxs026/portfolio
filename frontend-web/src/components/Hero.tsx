@@ -4,10 +4,12 @@ import { motion } from 'framer-motion';
 import { Terminal, ArrowRight, Download, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
   const [isSecretMode, setIsSecretMode] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     setMounted(true);
@@ -22,45 +24,36 @@ export default function Hero() {
 
   if (!mounted) return null;
 
-  // Configurações de Tema
   const theme = isSecretMode ? {
-    primary: 'text-pink-500',
-    bgGradient: 'from-pink-500/20 via-purple-500/20 to-transparent',
-    button: 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 shadow-pink-500/25',
-    border: 'border-pink-500/30',
     textGradient: 'bg-gradient-to-r from-pink-300 via-pink-100 to-white',
-    blob: 'bg-pink-600'
+    blob: 'bg-pink-600',
+    button: 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 shadow-pink-500/25',
+    bgGradient: 'from-pink-500/20 via-purple-500/20 to-transparent'
   } : {
-    primary: 'text-emerald-400',
-    bgGradient: 'from-emerald-500/20 via-cyan-500/20 to-transparent',
-    button: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-500/25',
-    border: 'border-emerald-500/30',
     textGradient: 'bg-gradient-to-r from-emerald-300 via-emerald-100 to-white',
-    blob: 'bg-emerald-600'
+    blob: 'bg-emerald-600',
+    button: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-500/25',
+    bgGradient: 'from-emerald-500/20 via-cyan-500/20 to-transparent'
   };
 
   return (
     <section className="relative min-h-[90vh] flex items-center pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden bg-transparent">
       
-      {/* --- BACKGROUND EFFECTS --- */}
-      
-      {/* 1. Grid Pattern Futurista */}
+      {/* Backgrounds */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] -z-20"></div>
-
-      {/* 2. Ambient Glows (Blobs) */}
       <div className={`absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-[120px] opacity-20 -z-10 animate-pulse-slow ${theme.blob}`}></div>
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-blue-900/10 blur-[100px] -z-10 opacity-30"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         
-        {/* --- COLUNA ESQUERDA: TEXTO E CTA --- */}
+        {/* COLUNA ESQUERDA */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="flex flex-col items-center lg:items-start text-center lg:text-left z-10"
         >
-          {/* Badge de Status */}
+          {/* Badge */}
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -71,25 +64,21 @@ export default function Hero() {
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isSecretMode ? 'bg-pink-400' : 'bg-emerald-400'}`}></span>
               <span className={`relative inline-flex rounded-full h-2 w-2 ${isSecretMode ? 'bg-pink-500' : 'bg-emerald-500'}`}></span>
             </span>
-            <span className="text-slate-300">Open to Work</span>
+            <span className="text-slate-300">{t.hero.openToWork}</span>
             <ChevronRight size={14} className="text-slate-600 group-hover:text-slate-400 transition-colors" />
           </motion.div>
 
-          {/* Título Principal */}
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white tracking-tight leading-[1.1] mb-6">
-            Olá, sou <br className="hidden lg:block" />
+            {t.hero.greeting} <br className="hidden lg:block" />
             <span className={`bg-clip-text text-transparent ${theme.textGradient}`}>
               Cauã Freitas.
             </span>
           </h1>
           
-          {/* Subtítulo / Descrição */}
           <p className="text-base sm:text-lg text-slate-400 mb-10 max-w-xl leading-relaxed font-light">
-            Desenvolvedor <strong className="text-slate-200 font-medium">Full Stack</strong> e <strong className="text-slate-200 font-medium">Analista de Dados</strong>. 
-            Transformo problemas complexos em aplicações performáticas e dashboards estratégicos.
+            {t.hero.description}
           </p>
 
-          {/* Botões de Ação */}
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Link 
               href="#projetos"
@@ -99,7 +88,7 @@ export default function Hero() {
               `}
             >
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 blur-md"></div>
-              <span className="relative">Ver Projetos</span>
+              <span className="relative">{t.hero.btnProject}</span>
               <ArrowRight size={18} className="relative group-hover:translate-x-1 transition-transform" />
             </Link>
             
@@ -110,29 +99,26 @@ export default function Hero() {
                 flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-slate-300 border border-slate-700/50 hover:border-slate-500 hover:bg-slate-800/50 hover:text-white transition-all duration-300 backdrop-blur-sm
               `}
             >
-              <span>Currículo</span>
+              <span>{t.hero.btnCv}</span>
               <Download size={18} />
             </a>
           </div>
         </motion.div>
 
-        {/* --- COLUNA DIREITA: VISUAL CODE (IDE STYLE) --- */}
+        {/* COLUNA DIREITA (Visual Code) */}
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7, delay: 0.3 }}
           className="relative w-full max-w-[calc(100vw-2rem)] lg:max-w-none mx-auto"
         >
-          {/* Glow atrás do IDE */}
           <div className={`absolute -inset-0.5 bg-gradient-to-tr ${theme.bgGradient} rounded-2xl blur-xl opacity-40 animate-pulse-slow`}></div>
           
-          {/* Container da Janela (IDE) */}
           <motion.div 
             className="relative rounded-xl bg-[#0d1117]/95 border border-slate-800/80 shadow-2xl backdrop-blur-2xl overflow-hidden ring-1 ring-white/5"
             animate={{ y: [0, -10, 0] }}
             transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
           >
-            {/* Header da Janela (macOS Style) */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/50 bg-[#0d1117]">
               <div className="flex gap-2">
                 <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]"></div>
@@ -143,14 +129,11 @@ export default function Hero() {
                 <Terminal size={12} />
                 <span>developer_profile.py</span>
               </div>
-              <div className="w-10"></div> {/* Espaçador para centralizar o título */}
+              <div className="w-10"></div>
             </div>
 
-            {/* Área de Código */}
             <div className="p-5 sm:p-6 overflow-x-auto custom-scrollbar">
               <div className="font-mono text-xs sm:text-sm leading-7">
-                
-                {/* Linha 1 */}
                 <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">1</span>
                   <div className="whitespace-nowrap">
@@ -158,18 +141,15 @@ export default function Hero() {
                   </div>
                 </div>
 
-                {/* Linha 2 (Vazia) */}
                 <div className="flex"><span className="text-slate-700 w-6 select-none text-right mr-4">2</span></div>
 
-                {/* Linha 3 */}
                 <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">3</span>
                   <div className="whitespace-nowrap">
-                    <span className="text-slate-500 italic"># Inicializando classe do Desenvolvedor</span>
+                    <span className="text-slate-500 italic">{t.hero.codeComment}</span>
                   </div>
                 </div>
 
-                {/* Linha 4 */}
                 <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">4</span>
                   <div className="whitespace-nowrap">
@@ -177,7 +157,6 @@ export default function Hero() {
                   </div>
                 </div>
 
-                 {/* Linha 5 */}
                  <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">5</span>
                   <div className="whitespace-nowrap pl-4">
@@ -185,7 +164,6 @@ export default function Hero() {
                   </div>
                 </div>
 
-                {/* Linha 6 (Stacks com Highlight) */}
                 <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">6</span>
                   <div className="whitespace-nowrap pl-8">
@@ -193,7 +171,6 @@ export default function Hero() {
                   </div>
                 </div>
 
-                {/* Linha 7 */}
                 <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">7</span>
                   <div className="whitespace-nowrap pl-8">
@@ -201,7 +178,6 @@ export default function Hero() {
                   </div>
                 </div>
 
-                {/* Linha 8 */}
                 <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">8</span>
                   <div className="whitespace-nowrap pl-4">
@@ -209,23 +185,20 @@ export default function Hero() {
                   </div>
                 </div>
 
-                {/* Linha 9 */}
                 <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">9</span>
                   <div className="whitespace-nowrap pl-4">
-                    <span className="text-blue-300">role</span> = <span className="text-orange-300">'Full Stack & Data Analyst'</span>
+                    <span className="text-blue-300">role</span> = <span className="text-orange-300">'{t.hero.codeRole}'</span>
                   </div>
                 </div>
 
-                 {/* Linha 10 */}
                  <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">10</span>
                   <div className="whitespace-nowrap pl-4">
-                    <span className="text-blue-300">location</span> = <span className="text-orange-300">'Feira de Santana, BA'</span>
+                    <span className="text-blue-300">location</span> = <span className="text-orange-300">'{t.hero.codeLocation}'</span>
                   </div>
                 </div>
 
-                {/* Linha 11 (Execução) */}
                 <div className="flex mt-2">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">11</span>
                   <div className="whitespace-nowrap">
@@ -233,7 +206,6 @@ export default function Hero() {
                   </div>
                 </div>
 
-                {/* Linha 12 (Output Simulado) */}
                 <div className="flex mt-2 border-t border-slate-800/50 pt-2">
                   <span className="text-slate-700 w-6 select-none text-right mr-4"></span>
                   <div className="whitespace-nowrap flex items-center gap-2">
