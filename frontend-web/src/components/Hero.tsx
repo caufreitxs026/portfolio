@@ -46,12 +46,12 @@ export default function Hero() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         
-        {/* COLUNA ESQUERDA */}
+        {/* COLUNA ESQUERDA - Agora forçada para items-start e text-left */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="flex flex-col items-center lg:items-start text-center lg:text-left z-10"
+          className="flex flex-col items-start text-left z-10"
         >
           {/* Badge */}
           <motion.div 
@@ -79,8 +79,8 @@ export default function Hero() {
             {t.hero.description}
           </p>
 
-          {/* Botões de Ação - Atualizados para Minimalista Mobile */}
-          <div className="flex flex-row gap-3 w-full justify-center lg:justify-start">
+          {/* Botões de Ação - Alinhados à esquerda (justify-start) */}
+          <div className="flex flex-row gap-3 w-full justify-start">
             <Link 
               href="#projetos"
               className={`
@@ -113,7 +113,7 @@ export default function Hero() {
           transition={{ duration: 0.7, delay: 0.3 }}
           className="relative w-full max-w-[calc(100vw-2rem)] lg:max-w-none mx-auto mt-8 lg:mt-0"
         >
-          <div className={`absolute -inset-0.5 bg-gradient-to-tr ${theme.bgGradient} rounded-2xl blur-xl opacity-40 anilinha 9 do snippet de códigomate-pulse-slow`}></div>
+          <div className={`absolute -inset-0.5 bg-gradient-to-tr ${theme.bgGradient} rounded-2xl blur-xl opacity-40 animate-pulse-slow`}></div>
           
           <motion.div 
             className="relative rounded-xl bg-[#0d1117]/95 border border-slate-800/80 shadow-2xl backdrop-blur-2xl overflow-hidden ring-1 ring-white/5"
@@ -189,7 +189,7 @@ export default function Hero() {
                 <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">9</span>
                   <div className="whitespace-nowrap pl-4">
-                    <span className="text-blue-300">role</span> = <span className="text-orange-300">'Full Stack Developer and Support Analyst'</span>
+                    <span className="text-blue-300">role</span> = <span className="text-orange-300">'Full Stack Developer e Support Analyst'</span>
                   </div>
                 </div>
 
