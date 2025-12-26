@@ -209,7 +209,7 @@ export default function TechWordle({ onClose }: { onClose: () => void }) {
             {gameState !== 'playing' && (
               <div className={`text-center animate-fade-in mb-4 p-3 rounded-lg border ${isSecretMode ? 'bg-pink-500/10 border-pink-500/30' : 'bg-emerald-500/10 border-emerald-500/30'}`}>
                 <p className={`font-bold text-lg mb-2 ${isSecretMode ? 'text-pink-400' : 'text-emerald-400'} font-mono`}>
-                  {gameState === 'won' ? (isSecretMode ? 'SYSTEM UNLOCKED! 🔓' : 'ACCESS GRANTED! 🔓') : `SENHA: ${targetWord}`}
+                  {gameState === 'won' ? (isSecretMode ? 'SYSTEM UNLOCKED!' : 'ACCESS GRANTED!') : `SENHA: ${targetWord}`}
                 </p>
                 <button onClick={startNewGame} className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-bold shadow-lg transition w-full hover:scale-[1.02] active:scale-[0.98] ${isSecretMode ? 'bg-pink-600 hover:bg-pink-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}>
                   <RotateCcw size={18} /> REINICIAR
