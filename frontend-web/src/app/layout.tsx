@@ -7,7 +7,7 @@ import EffectsWrapper from "@/components/EffectsWrapper";
 import ParticleBackground from "@/components/ParticleBackground";
 import ScrollProgress from "@/components/ScrollProgress";
 
-// Configuração de Fontes Premium
+// Configuração de Fontes Premium com Swap para performance
 const inter = Inter({ 
   subsets: ["latin"],
   variable: '--font-inter',
@@ -20,11 +20,31 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
+// Metadados Otimizados para SEO e Compartilhamento (Open Graph)
 export const metadata: Metadata = {
-  title: "Cauã Freitas | Full Stack Developer",
-  description: "Desenvolvedor Full Stack e Analista de Dados",
+  metadataBase: new URL('https://caufreitxs.vercel.app'), // Seu domínio real
+  title: {
+    default: "Cauã Freitas | Full Stack & Data Analyst",
+    template: "%s | Cauã Freitas"
+  },
+  description: "Portfólio interativo de Cauã Freitas. Desenvolvedor Full Stack e Analista de Dados focado em soluções de alta performance.",
+  keywords: ["Full Stack", "Data Analyst", "Python", "React", "Developer", "Cauã Freitas"],
+  authors: [{ name: "Cauã Freitas" }],
+  creator: "Cauã Freitas",
   icons: {
-    icon: '/favicon.ico', // Certifique-se de ter um favicon
+    icon: '/favicon.ico',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'pt_BR',
+    url: 'https://caufreitxs.vercel.app',
+    title: 'Cauã Freitas | Digital Portfolio',
+    description: 'Transformando dados em experiências digitais imersivas.',
+    siteName: 'Cauã Freitas Portfolio',
+  },
+  robots: {
+    index: true,
+    follow: true,
   }
 };
 
@@ -35,11 +55,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt" className="scroll-smooth">
-      {/* Classes Globais:
-        - cursor-none: Remove cursor padrão para usar o customizado.
-        - selection: Personaliza a cor de seleção de texto (match com o tema).
-        - antialiased: Renderização de fonte mais nítida.
-      */}
       <body 
         className={`
           ${inter.variable} ${jetbrainsMono.variable} 
@@ -53,13 +68,17 @@ export default function RootLayout({
         <LanguageProvider>
           
           {/* --- CAMADA DE TEXTURA (NOISE) --- */}
-          {/* Adiciona uma textura sutil de granulação para um visual 'film-like' menos digital/plástico */}
+          {/* Adiciona textura granulada para remover o aspecto "plástico" digital */}
           <div 
-            className="fixed inset-0 z-[9998] pointer-events-none opacity-[0.03] mix-blend-overlay"
+            className="fixed inset-0 z-[9998] pointer-events-none opacity-[0.04] mix-blend-overlay"
             style={{ 
               backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` 
             }}
           />
+
+          {/* --- CAMADA DE VINHETA (VIGNETTE) --- */}
+          {/* Escurece as bordas da tela para focar a atenção no centro (Efeito Cinema) */}
+          <div className="fixed inset-0 z-[9997] pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
 
           {/* --- EFEITOS GLOBAIS --- */}
           <EffectsWrapper />
@@ -67,8 +86,8 @@ export default function RootLayout({
           <ScrollProgress />
           <ParticleBackground />
           
-          {/* Conteúdo Principal */}
-          <div className="relative z-10">
+          {/* Conteúdo Principal com Fade-in Suave */}
+          <div className="relative z-10 animate-in fade-in duration-700 ease-out">
             {children}
           </div>
 
