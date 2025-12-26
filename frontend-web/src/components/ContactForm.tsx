@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, CheckCircle2, AlertCircle, Loader2, Mail, User, MessageSquare, Terminal } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -13,22 +14,20 @@ export default function ContactForm() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [isSecretMode, setIsSecretMode] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const { t } = useLanguage();
 
-  // Detecção do Modo Secreto (Hacker Theme)
   useEffect(() => {
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
         setIsSecretMode(document.body.classList.contains('secret-active'));
       }
     };
-    // Intervalo para resposta rápida à mudança de tema
     const interval = setInterval(checkSecretMode, 500);
     return () => clearInterval(interval);
   }, []);
 
   // Configuração de Tema
   const theme = isSecretMode ? {
-    primary: 'text-pink-400',
     borderFocus: 'border-pink-500/50',
     glow: 'shadow-[0_0_20px_rgba(236,72,153,0.15)]',
     button: 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500',
@@ -36,7 +35,6 @@ export default function ContactForm() {
     inputBg: 'bg-slate-900/80',
     label: 'text-pink-300'
   } : {
-    primary: 'text-emerald-400',
     borderFocus: 'border-emerald-500/50',
     glow: 'shadow-[0_0_20px_rgba(16,185,129,0.15)]',
     button: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500',
@@ -64,8 +62,6 @@ export default function ContactForm() {
 
       setStatus('success');
       setFormData({ name: '', email: '', content: '' });
-      
-      // Reseta o status após 5 segundos
       setTimeout(() => setStatus('idle'), 5000);
 
     } catch (error) {
@@ -81,8 +77,6 @@ export default function ContactForm() {
 
   return (
     <div className="w-full max-w-2xl mx-auto relative">
-      
-      {/* Background Glow Decorativo */}
       <div className={`absolute -inset-1 rounded-2xl blur-xl opacity-20 transition-colors duration-500 ${isSecretMode ? 'bg-pink-600' : 'bg-emerald-600'}`}></div>
 
       <motion.form 
@@ -92,15 +86,13 @@ export default function ContactForm() {
         viewport={{ once: true }}
         className="relative bg-slate-950/80 backdrop-blur-xl p-8 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden"
       >
-        {/* Header Visual do Form (Fake Terminal Bar) */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
         
         <div className="space-y-6 relative z-10">
           
-          {/* Campo Nome */}
           <div className="relative group">
             <label className={`block text-xs font-mono font-bold uppercase mb-2 ml-1 transition-colors ${focusedField === 'name' ? theme.label : 'text-slate-500'}`}>
-              Identification // Name
+              {t.contact.nameLabel}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -119,15 +111,14 @@ export default function ContactForm() {
                   ${theme.inputBg} 
                   ${focusedField === 'name' ? `${theme.borderFocus} ${theme.glow} ring-1 ring-white/5` : 'border-slate-800 hover:border-slate-700'}
                 `}
-                placeholder="Como devo chamá-lo?"
+                placeholder={t.contact.namePlaceholder}
               />
             </div>
           </div>
 
-          {/* Campo Email */}
           <div className="relative group">
             <label className={`block text-xs font-mono font-bold uppercase mb-2 ml-1 transition-colors ${focusedField === 'email' ? theme.label : 'text-slate-500'}`}>
-              Contact Channel // Email
+              {t.contact.emailLabel}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -146,15 +137,14 @@ export default function ContactForm() {
                   ${theme.inputBg}
                   ${focusedField === 'email' ? `${theme.borderFocus} ${theme.glow} ring-1 ring-white/5` : 'border-slate-800 hover:border-slate-700'}
                 `}
-                placeholder="seu@email.com"
+                placeholder={t.contact.emailPlaceholder}
               />
             </div>
           </div>
 
-          {/* Campo Mensagem */}
           <div className="relative group">
             <label className={`block text-xs font-mono font-bold uppercase mb-2 ml-1 transition-colors ${focusedField === 'content' ? theme.label : 'text-slate-500'}`}>
-              Payload // Message
+              {t.contact.msgLabel}
             </label>
             <div className="relative">
               <div className="absolute top-4 left-0 pl-4 pointer-events-none">
@@ -173,12 +163,11 @@ export default function ContactForm() {
                   ${theme.inputBg}
                   ${focusedField === 'content' ? `${theme.borderFocus} ${theme.glow} ring-1 ring-white/5` : 'border-slate-800 hover:border-slate-700'}
                 `}
-                placeholder="Descreva seu projeto ou ideia..."
+                placeholder={t.contact.msgPlaceholder}
               />
             </div>
           </div>
 
-          {/* Botão de Envio */}
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -189,7 +178,6 @@ export default function ContactForm() {
               disabled:opacity-80 disabled:cursor-not-allowed
             `}
           >
-            {/* Background Animation on Hover */}
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 blur-md"></div>
 
             <AnimatePresence mode="wait">
@@ -202,7 +190,7 @@ export default function ContactForm() {
                   className="flex items-center gap-2"
                 >
                   <Loader2 size={20} className="animate-spin" />
-                  <span>Enviando Dados...</span>
+                  <span>{t.contact.btnSending}</span>
                 </motion.div>
               ) : status === 'success' ? (
                 <motion.div
@@ -212,7 +200,7 @@ export default function ContactForm() {
                   className="flex items-center gap-2"
                 >
                   <CheckCircle2 size={20} />
-                  <span>Mensagem Recebida!</span>
+                  <span>{t.contact.btnSuccess}</span>
                 </motion.div>
               ) : status === 'error' ? (
                 <motion.div
@@ -222,7 +210,7 @@ export default function ContactForm() {
                   className="flex items-center gap-2"
                 >
                   <AlertCircle size={20} />
-                  <span>Erro no Envio</span>
+                  <span>{t.contact.btnError}</span>
                 </motion.div>
               ) : (
                 <motion.div
@@ -232,7 +220,7 @@ export default function ContactForm() {
                   exit={{ opacity: 0, y: -10 }}
                   className="flex items-center gap-2 relative z-10"
                 >
-                  <span>Iniciar Conexão</span>
+                  <span>{t.contact.btnSend}</span>
                   <Send size={18} className="group-hover:translate-x-1 transition-transform" />
                 </motion.div>
               )}
@@ -241,11 +229,10 @@ export default function ContactForm() {
 
         </div>
 
-        {/* Decorativo de rodapé */}
         <div className="mt-6 pt-4 border-t border-slate-800/50 flex justify-between items-center text-[10px] text-slate-600 font-mono">
            <div className="flex items-center gap-1">
              <Terminal size={12} />
-             <span>SECURE CHANNEL ENCRYPTED</span>
+             <span>{t.contact.secure}</span>
            </div>
            <span>v.3.0.1</span>
         </div>
