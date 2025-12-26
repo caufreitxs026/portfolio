@@ -1,37 +1,26 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-
-const KONAMI_CODE = [
-  'ArrowUp', 'ArrowUp', 
-  'ArrowDown', 'ArrowDown', 
-  'ArrowLeft', 'ArrowRight', 
-  'ArrowLeft', 'ArrowRight', 
-  'b', 'a'
-];
+import { useState, useEffect } from 'react';
 
 export function useKonamiCode() {
+  const [isSecretMode, setIsSecretMode] = useState(false);
   const [input, setInput] = useState<string[]>([]);
-  const [isActivated, setIsActivated] = useState(false);
+  
+  // Sequência: Cima, Cima, Baixo, Baixo, Esquerda, Direita, Esquerda, Direita, B, A
+  const sequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const key = e.key;
+      const newInput = [...input, e.key];
       
-      // Adiciona a tecla pressionada ao array
-      const newInput = [...input, key];
-      
-      // Mantém o array do tamanho do código para comparar
-      if (newInput.length > KONAMI_CODE.length) {
+      // Mantém o tamanho do input igual ao da sequência
+      if (newInput.length > sequence.length) {
         newInput.shift();
       }
-      
       setInput(newInput);
 
       // Verifica se a sequência bate
-      if (JSON.stringify(newInput) === JSON.stringify(KONAMI_CODE)) {
-        setIsActivated(prev => !prev); // Alterna (liga/desliga)
-        setInput([]); // Reseta
+      if (newInput.join('') === sequence.join('')) {
+        setIsSecretMode(prev => !prev);
+        setInput([]); // Reseta após ativação
       }
     };
 
@@ -39,5 +28,5 @@ export function useKonamiCode() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [input]);
 
-  return isActivated;
+  return isSecretMode;
 }
