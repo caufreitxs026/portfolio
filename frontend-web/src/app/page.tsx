@@ -15,22 +15,24 @@ import TechWordle from '@/components/TechWordle';
 import CompetenceSection from '@/components/CompetenceSection';
 import { ProjectSkeleton, ExperienceSkeleton } from '@/components/Skeletons';
 import { usePortfolioData } from '@/hooks/usePortfolioData';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Home() {
   const { projects, experiences, skills, certificates, loading } = usePortfolioData();
   const [isGameOpen, setIsGameOpen] = useState(false);
   const [isSecretMode, setIsSecretMode] = useState(false);
   const [mounted, setMounted] = useState(false);
+  
+  // Hook de Tradução
+  const { t } = useLanguage();
 
   useEffect(() => {
     setMounted(true);
-    // Observer para detectar o modo secreto (tema hacker)
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
         setIsSecretMode(document.body.classList.contains('secret-active'));
       }
     };
-    // Intervalo mais rápido (500ms) para resposta visual ágil
     const interval = setInterval(checkSecretMode, 500);
     return () => clearInterval(interval);
   }, []);
@@ -43,7 +45,7 @@ export default function Home() {
       <Navbar />
       <Hero />
 
-      {/* --- BOTÃO FLUTUANTE DO JOGO (GAMEHUB) --- */}
+      {/* --- BOTÃO FLUTUANTE DO JOGO --- */}
       <AnimatePresence>
         {!isGameOpen && (
           <motion.button
@@ -68,7 +70,6 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Modal do Jogo */}
       <AnimatePresence>
         {isGameOpen && <TechWordle onClose={() => setIsGameOpen(false)} />}
       </AnimatePresence>
@@ -77,9 +78,9 @@ export default function Home() {
       <section id="projetos" className="py-20 bg-slate-800/50 relative">
         <div className="max-w-6xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
-             <Code className="text-emerald-400"/> Projetos em Destaque
+             <Code className="text-emerald-400"/> {t.home.projectsTitle}
           </h2>
-          <p className="text-slate-400 mb-12">Casos reais onde apliquei tecnologia para gerar valor.</p>
+          <p className="text-slate-400 mb-12">{t.home.projectsSubtitle}</p>
 
           {loading ? (
              <div className="max-w-4xl mx-auto">
@@ -89,13 +90,13 @@ export default function Home() {
             <ProjectCarousel projects={projects} />
           ) : (
             <div className="text-center py-20 text-slate-500 bg-slate-900/50 rounded-xl border border-slate-800">
-              <p>Carregando dados do servidor...</p>
+              <p>{t.home.loading}</p>
             </div>
           )}
         </div>
       </section>
 
-      {/* --- SEÇÃO: COMPETÊNCIAS E CERTIFICADOS (3D NEURAL NEXUS) --- */}
+      {/* --- SEÇÃO: COMPETÊNCIAS E CERTIFICADOS --- */}
       <CompetenceSection 
         skills={skills} 
         certificates={certificates} 
@@ -107,7 +108,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="mb-12">
              <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
-                <Server className="text-emerald-400"/> Experiência Profissional
+                <Server className="text-emerald-400"/> {t.home.experienceTitle}
              </h2>
           </div>
           
@@ -130,9 +131,9 @@ export default function Home() {
 
       <section id="contato" className="py-20 bg-slate-800/30">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">Vamos Conversar?</h2>
+          <h2 className="text-3xl font-bold text-white mb-6">{t.home.contactTitle}</h2>
           <p className="text-slate-400 mb-12">
-            Estou disponível para novos desafios. Envie uma mensagem.
+            {t.home.contactSubtitle}
           </p>
           <ContactForm />
         </div>
