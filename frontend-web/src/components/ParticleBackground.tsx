@@ -1,22 +1,52 @@
 'use client';
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim"; 
 import type { Engine } from "tsparticles-engine";
 
 export default function ParticleBackground() {
+  const [isSecretMode, setIsSecretMode] = useState(false);
+
+  // Inicialização da Engine
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadSlim(engine);
   }, []);
+
+  // Detecta mudança de tema para atualizar cor das partículas
+  useEffect(() => {
+    const checkSecretMode = () => {
+      if (typeof document !== 'undefined') {
+        setIsSecretMode(document.body.classList.contains('secret-active'));
+      }
+    };
+    checkSecretMode();
+
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class') {
+            checkSecretMode();
+          }
+        });
+    });
+    
+    if (typeof document !== 'undefined') {
+        observer.observe(document.body, { attributes: true });
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Cores dinâmicas
+  const color = isSecretMode ? "#ec4899" : "#10b981"; // Pink-500 vs Emerald-500
 
   return (
     <Particles
       id="tsparticles"
       init={particlesInit}
-      className="absolute top-0 left-0 w-full h-full -z-10"
+      className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none"
       options={{
-        fullScreen: { enable: false },
+        fullScreen: { enable: true, zIndex: -1 }, // Garante que fique atrás de tudo
         background: {
           color: {
             value: "transparent",
@@ -27,7 +57,7 @@ export default function ParticleBackground() {
           events: {
             onHover: {
               enable: true,
-              mode: "grab",
+              mode: "grab", // Efeito de teia ao passar o mouse
             },
             resize: true,
           },
@@ -36,17 +66,17 @@ export default function ParticleBackground() {
               distance: 140,
               links: {
                 opacity: 0.5,
-                color: "#10b981"
+                color: color // Link reativo
               },
             },
           },
         },
         particles: {
           color: {
-            value: "#10b981",
+            value: color, // Partícula reativa
           },
           links: {
-            color: "#10b981",
+            color: color, // Linha reativa
             distance: 150,
             enable: true,
             opacity: 0.15,
@@ -59,15 +89,15 @@ export default function ParticleBackground() {
               default: "bounce",
             },
             random: false,
-            speed: 0.8,
+            speed: 0.8, // Movimento lento e elegante
             straight: false,
           },
           number: {
             density: {
               enable: true,
-              area: 800,
+              area: 1000, // Menos denso para visual clean
             },
-            value: 30,
+            value: 40,
           },
           opacity: {
             value: 0.3,
@@ -76,7 +106,7 @@ export default function ParticleBackground() {
             type: "circle",
           },
           size: {
-            value: { min: 1, max: 3 },
+            value: { min: 1, max: 2 },
           },
         },
         detectRetina: true,
