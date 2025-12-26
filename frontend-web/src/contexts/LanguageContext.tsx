@@ -1,10 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 type Language = 'pt' | 'en';
 
-// Dicionário de Traduções
 const translations = {
   pt: {
     nav: {
@@ -13,24 +12,40 @@ const translations = {
       contact: 'Contato',
     },
     hero: {
+      openToWork: 'Disponível para Projetos',
+      greeting: 'Olá, sou',
       role: 'Desenvolvedor Full Stack & Analista de Dados',
-      description: 'Transformo problemas complexos em aplicações performáticas e dashboards estratégicos.',
+      description: 'Desenvolvedor Full Stack e Analista de Dados focado em construir aplicações performáticas e dashboards estratégicos que geram valor real para o negócio.',
       btnProject: 'Ver Projetos',
       btnCv: 'Currículo',
-      openToWork: 'Disponível para Projetos'
+      codeComment: '# Inicializando perfil...',
+      codeRole: 'Analista de Suporte',
+      codeLocation: 'Feira de Santana, BA'
+    },
+    home: {
+      projectsTitle: 'Projetos em Destaque',
+      projectsSubtitle: 'Casos reais onde apliquei tecnologia para gerar valor.',
+      loading: 'Carregando dados do servidor...',
+      experienceTitle: 'Experiência Profissional',
+      contactTitle: 'Vamos Conversar?',
+      contactSubtitle: 'Estou disponível para novos desafios. Envie uma mensagem.'
     },
     contact: {
-      title: 'Vamos Conversar?',
-      subtitle: 'Estou disponível para novos desafios. Envie uma mensagem.',
       nameLabel: 'Identificação // Nome',
       namePlaceholder: 'Como devo chamá-lo?',
       emailLabel: 'Canal de Contato // Email',
+      emailPlaceholder: 'seu@email.com',
       msgLabel: 'Payload // Mensagem',
       msgPlaceholder: 'Descreva seu projeto ou ideia...',
       btnSend: 'Iniciar Conexão',
       btnSending: 'Enviando Dados...',
       btnSuccess: 'Mensagem Recebida!',
-      btnError: 'Erro no Envio'
+      btnError: 'Erro no Envio',
+      secure: 'CANAL SEGURO CRIPTOGRAFADO'
+    },
+    footer: {
+      rights: 'Todos os direitos reservados.',
+      developed: 'Desenvolvido com'
     }
   },
   en: {
@@ -40,24 +55,40 @@ const translations = {
       contact: 'Contact',
     },
     hero: {
+      openToWork: 'Open to Work',
+      greeting: 'Hi, I am',
       role: 'Full Stack Developer & Data Analyst',
-      description: 'I transform complex problems into high-performance applications and strategic dashboards.',
+      description: 'Full Stack Developer and Data Analyst focused on building high-performance applications and strategic dashboards that generate real business value.',
       btnProject: 'View Projects',
       btnCv: 'Resume',
-      openToWork: 'Open to Work'
+      codeComment: '# Initializing profile...',
+      codeRole: 'Support Analyst',
+      codeLocation: 'Bahia, Brazil'
+    },
+    home: {
+      projectsTitle: 'Featured Projects',
+      projectsSubtitle: 'Real cases where I applied technology to generate value.',
+      loading: 'Loading server data...',
+      experienceTitle: 'Professional Experience',
+      contactTitle: 'Let\'s Talk?',
+      contactSubtitle: 'I am available for new challenges. Send me a message.'
     },
     contact: {
-      title: 'Let\'s Talk?',
-      subtitle: 'I am available for new challenges. Send me a message.',
       nameLabel: 'Identification // Name',
       namePlaceholder: 'How should I call you?',
       emailLabel: 'Contact Channel // Email',
+      emailPlaceholder: 'your@email.com',
       msgLabel: 'Payload // Message',
       msgPlaceholder: 'Describe your project or idea...',
       btnSend: 'Init Connection',
       btnSending: 'Sending Data...',
       btnSuccess: 'Message Received!',
-      btnError: 'Sending Error'
+      btnError: 'Sending Error',
+      secure: 'SECURE CHANNEL ENCRYPTED'
+    },
+    footer: {
+      rights: 'All rights reserved.',
+      developed: 'Developed with'
     }
   }
 };
