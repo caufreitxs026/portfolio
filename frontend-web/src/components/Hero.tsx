@@ -9,7 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
   const [isSecretMode, setIsSecretMode] = useState(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage(); // Adicionado language aqui
 
   useEffect(() => {
     setMounted(true);
@@ -23,6 +23,9 @@ export default function Hero() {
   }, []);
 
   if (!mounted) return null;
+
+  // Lógica para alternar o arquivo de currículo
+  const resumeUrl = language === 'pt' ? '/curriculo.pdf' : '/curriculo_en.pdf';
 
   const theme = isSecretMode ? {
     textGradient: 'bg-gradient-to-r from-pink-300 via-pink-100 to-white',
@@ -46,7 +49,7 @@ export default function Hero() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         
-        {/* COLUNA ESQUERDA - Agora forçada para items-start e text-left */}
+        {/* COLUNA ESQUERDA */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -79,7 +82,7 @@ export default function Hero() {
             {t.hero.description}
           </p>
 
-          {/* Botões de Ação - Alinhados à esquerda (justify-start) */}
+          {/* Botões de Ação */}
           <div className="flex flex-row gap-3 w-full justify-start">
             <Link 
               href="#projetos"
@@ -94,7 +97,7 @@ export default function Hero() {
             </Link>
             
             <a 
-              href="/curriculo.pdf" 
+              href={resumeUrl} 
               target="_blank"
               className={`
                 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-slate-300 text-sm sm:text-base border border-slate-700/50 hover:border-slate-500 hover:bg-slate-800/50 hover:text-white transition-all duration-300 backdrop-blur-sm
@@ -189,7 +192,7 @@ export default function Hero() {
                 <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">9</span>
                   <div className="whitespace-nowrap pl-4">
-                    <span className="text-blue-300">role</span> = <span className="text-orange-300">'Full Stack Developer and Support Analyst'</span>
+                    <span className="text-blue-300">role</span> = <span className="text-orange-300">'Full Stack Developer e Analista de Suporte Computacional'</span>
                   </div>
                 </div>
 
