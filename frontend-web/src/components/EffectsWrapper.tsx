@@ -9,17 +9,11 @@ export default function EffectsWrapper() {
   const { playSound } = useSoundEffects();
 
   useEffect(() => {
-    // Busca o elemento principal de conteúdo
-    const mainContent = document.getElementById('main-content');
-    
+    // Gerencia a classe global no Body para que todos os componentes (Navbar, Hero, Particles) saibam o estado
     if (isSecretMode) {
-      // Aplica o filtro apenas no conteúdo, não no body inteiro
-      mainContent?.classList.add('secret-mode-content');
-      // Adiciona uma classe no body apenas para controle de estado (sem estilo visual que quebre layout)
       document.body.classList.add('secret-active'); 
       playSound('success'); 
     } else {
-      mainContent?.classList.remove('secret-mode-content');
       document.body.classList.remove('secret-active');
     }
   }, [isSecretMode, playSound]);
@@ -27,6 +21,7 @@ export default function EffectsWrapper() {
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
+      // Toca som apenas em elementos interativos
       if (target.closest('a') || target.closest('button')) {
         playSound('click');
       }
