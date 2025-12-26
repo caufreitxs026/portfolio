@@ -79,28 +79,29 @@ export default function Hero() {
             {t.hero.description}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          {/* Botões de Ação - Atualizados para Minimalista Mobile */}
+          <div className="flex flex-row gap-3 w-full justify-center lg:justify-start">
             <Link 
               href="#projetos"
               className={`
-                group relative flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 overflow-hidden
+                group relative flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white text-sm sm:text-base transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 overflow-hidden
                 ${theme.button}
               `}
             >
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 blur-md"></div>
-              <span className="relative">{t.hero.btnProject}</span>
-              <ArrowRight size={18} className="relative group-hover:translate-x-1 transition-transform" />
+              <span className="relative whitespace-nowrap">{t.hero.btnProject}</span>
+              <ArrowRight size={16} className="relative group-hover:translate-x-1 transition-transform" />
             </Link>
             
             <a 
               href="/curriculo.pdf" 
               target="_blank"
               className={`
-                flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-slate-300 border border-slate-700/50 hover:border-slate-500 hover:bg-slate-800/50 hover:text-white transition-all duration-300 backdrop-blur-sm
+                flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-slate-300 text-sm sm:text-base border border-slate-700/50 hover:border-slate-500 hover:bg-slate-800/50 hover:text-white transition-all duration-300 backdrop-blur-sm
               `}
             >
-              <span>{t.hero.btnCv}</span>
-              <Download size={18} />
+              <span className="whitespace-nowrap">{t.hero.btnCv}</span>
+              <Download size={16} />
             </a>
           </div>
         </motion.div>
@@ -110,7 +111,7 @@ export default function Hero() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7, delay: 0.3 }}
-          className="relative w-full max-w-[calc(100vw-2rem)] lg:max-w-none mx-auto"
+          className="relative w-full max-w-[calc(100vw-2rem)] lg:max-w-none mx-auto mt-8 lg:mt-0"
         >
           <div className={`absolute -inset-0.5 bg-gradient-to-tr ${theme.bgGradient} rounded-2xl blur-xl opacity-40 animate-pulse-slow`}></div>
           
