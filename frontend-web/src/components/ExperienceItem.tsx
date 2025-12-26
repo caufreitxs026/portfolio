@@ -1,61 +1,118 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Calendar, Building2, Briefcase } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface ExperienceProps {
   experience: {
     id: number;
-    role: string;
     company: string;
+    role: string;
     start_date: string;
     end_date?: string;
     description: string;
-    is_current: boolean;
+    location?: string;
   };
   index: number;
 }
 
 export default function ExperienceItem({ experience, index }: ExperienceProps) {
+  const [isSecretMode, setIsSecretMode] = useState(false);
+
+  useEffect(() => {
+    const checkSecretMode = () => {
+      if (typeof document !== 'undefined') {
+        setIsSecretMode(document.body.classList.contains('secret-active'));
+      }
+    };
+    // Sincronização rápida para garantir o tema correto
+    const interval = setInterval(checkSecretMode, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'Presente';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+  };
+
+  const startDate = formatDate(experience.start_date);
+  const endDate = experience.end_date ? formatDate(experience.end_date) : 'Atual';
+
+  // Configuração de Tema
+  const theme = isSecretMode ? {
+    border: 'border-pink-500/30',
+    hoverBorder: 'hover:border-pink-500/60',
+    iconBg: 'bg-pink-500/10',
+    iconColor: 'text-pink-400',
+    timelineLine: 'bg-pink-500/30',
+    timelineDot: 'bg-pink-500',
+    glow: 'shadow-[0_0_30px_-10px_rgba(236,72,153,0.15)]',
+    badge: 'bg-pink-500/10 text-pink-300 border-pink-500/20'
+  } : {
+    border: 'border-emerald-500/30',
+    hoverBorder: 'hover:border-emerald-500/60',
+    iconBg: 'bg-emerald-500/10',
+    iconColor: 'text-emerald-400',
+    timelineLine: 'bg-emerald-500/30',
+    timelineDot: 'bg-emerald-500',
+    glow: 'shadow-[0_0_30px_-10px_rgba(16,185,129,0.15)]',
+    badge: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
+  };
+
   return (
     <motion.div 
-      initial={{ opacity: 0, x: -30 }}
+      initial={{ opacity: 0, x: -20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: index * 0.15 }}
-      className="relative pl-8 pb-12 last:pb-0 group"
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      className="relative mb-12 last:mb-0 pl-6 group"
     >
-      {/* Linha vertical (brilha ao passar o mouse) */}
-      <div className="absolute left-0 top-0 h-full w-[2px] bg-slate-800 group-hover:bg-emerald-500/50 transition-colors duration-500 group-last:h-auto group-last:bottom-0"></div>
-      
-      {/* Bolinha Pulsante */}
-      <div className={`absolute -left-[9px] top-1.5 w-5 h-5 rounded-full border-4 border-slate-950 transition-all duration-300 z-10 shadow-xl ${
-        experience.is_current 
-          ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.6)] scale-110' 
-          : 'bg-slate-600 group-hover:bg-emerald-400 group-hover:shadow-[0_0_10px_rgba(52,211,153,0.4)]'
-      }`}></div>
+      {/* Nó da Timeline (O ponto na linha vertical) */}
+      <div className={`absolute -left-[41px] top-0 w-5 h-5 rounded-full border-4 border-slate-900 ${theme.timelineDot} shadow-[0_0_10px_currentColor] z-10 transition-colors duration-500`}></div>
 
-      {/* Card com Efeito Glassmorphism */}
-      <div className="relative p-6 rounded-xl bg-slate-900/40 backdrop-blur-sm border border-slate-800/50 group-hover:border-emerald-500/30 group-hover:bg-slate-900/60 transition-all duration-300 hover:translate-x-2 hover:shadow-lg">
+      {/* Cartão Glassmorphism */}
+      <div className={`
+        relative p-6 rounded-2xl bg-slate-900/40 backdrop-blur-sm border ${theme.border} ${theme.hoverBorder} 
+        transition-all duration-300 group-hover:-translate-y-1 group-hover:bg-slate-900/60 ${theme.glow}
+      `}>
         
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-          <div>
-            <h3 className="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">
-              {experience.role}
-            </h3>
-            <span className="text-emerald-500/90 font-mono text-sm block mt-1">
-              {experience.company}
-            </span>
-          </div>
+        {/* Header do Card */}
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
+            <div>
+                <h3 className="text-xl font-bold text-slate-100 group-hover:text-white transition-colors">
+                    {experience.role}
+                </h3>
+                <div className="flex items-center gap-2 mt-1 text-slate-400 font-medium">
+                    <Building2 size={16} className={theme.iconColor} />
+                    <span>{experience.company}</span>
+                </div>
+            </div>
 
-          {/* Badge de Data */}
-          <div className="self-start sm:self-center px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-mono text-slate-300 whitespace-nowrap">
-            {new Date(experience.start_date).getFullYear()} - {experience.is_current ? 'Atual' : new Date(experience.end_date!).getFullYear()}
-          </div>
+            {/* Badge de Data */}
+            <div className={`
+                flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono font-bold w-fit
+                bg-slate-800/80 border border-slate-700
+            `}>
+                <Calendar size={14} className="text-slate-400" />
+                <span className="text-slate-300 uppercase">{startDate} - {endDate}</span>
+            </div>
         </div>
 
-        <p className="text-slate-400 leading-relaxed text-sm md:text-base group-hover:text-slate-300 transition-colors">
-          {experience.description}
+        {/* Descrição */}
+        <p className="text-slate-400 leading-relaxed text-sm md:text-base border-t border-slate-800/50 pt-4 mt-2">
+            {experience.description}
         </p>
+
+        {/* Localização (Se houver) */}
+        {experience.location && (
+            <div className="mt-4 flex items-center gap-2 text-xs text-slate-500 font-mono">
+                <div className={`w-2 h-2 rounded-full ${theme.timelineDot}`}></div>
+                {experience.location}
+            </div>
+        )}
+
       </div>
     </motion.div>
   );
