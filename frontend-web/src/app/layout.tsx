@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Cauã Freitas | Full Stack Developer",
-  description: "Transformando dados em inteligência e código em solução.",
+  description: "Desenvolvedor Full Stack e Analista de Dados",
 };
 
 export default function RootLayout({
