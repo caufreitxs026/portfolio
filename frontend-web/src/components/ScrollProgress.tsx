@@ -68,25 +68,6 @@ export default function ScrollProgress() {
         className={`fixed top-0 left-0 right-0 h-1 origin-left z-[100] ${theme.bar}`}
         style={{ scaleX }}
       />
-
-      {/* Botão Voltar ao Topo */}
-      <motion.button
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ 
-          opacity: isVisible ? 1 : 0, 
-          scale: isVisible ? 1 : 0.5,
-          pointerEvents: isVisible ? 'auto' : 'none'
-        }}
-        onClick={scrollToTop}
-        className={`
-            fixed bottom-8 right-8 p-3 text-white rounded-full shadow-lg z-40 transition-colors duration-300 border backdrop-blur-sm
-            ${theme.button}
-        `}
-        whileHover={{ y: -5 }}
-        whileTap={{ scale: 0.9 }}
-      >
-        <ArrowUp size={24} />
-      </motion.button>
     </>
   );
 }
