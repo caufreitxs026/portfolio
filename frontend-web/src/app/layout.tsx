@@ -3,6 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import CustomCursor from "@/components/CustomCursor";
+import EffectsWrapper from "@/components/EffectsWrapper";
+import ParticleBackground from "@/components/ParticleBackground";
+import ScrollProgress from "@/components/ScrollProgress";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,11 +21,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt">
-      {/* cursor-none: Esconde o cursor padrão do sistema para usar o nosso */}
+      {/* cursor-none: Esconde o cursor padrão para usar o CustomCursor */}
       <body className={`${inter.className} cursor-none selection:bg-emerald-500/30 selection:text-emerald-200`}>
         <LanguageProvider>
-          {/* Componente do Cursor Global */}
+          
+          {/* Efeitos Globais */}
+          <EffectsWrapper />
           <CustomCursor />
+          <ScrollProgress />
+          <ParticleBackground />
           
           {children}
         </LanguageProvider>
