@@ -15,6 +15,19 @@ import TechWordle from '@/components/TechWordle';
 import CompetenceSection from '@/components/CompetenceSection';
 import { ProjectSkeleton, ExperienceSkeleton } from '@/components/Skeletons';
 import { usePortfolioData } from '@/hooks/usePortfolioData';
+import { LanguageProvider } from '@/contexts/LanguageContext';
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="pt">
+      <body>
+        <LanguageProvider>
+           {children}
+        </LanguageProvider>
+      </body>
+    </html>
+  );
+}
 
 export default function Home() {
   const { projects, experiences, skills, certificates, loading } = usePortfolioData();
