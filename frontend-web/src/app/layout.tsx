@@ -24,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://caufreitxs.vercel.app'), // Seu domínio real
   title: {
-    default: "Cauã Freitas | Full Stack & Data Analyst",
+    default: "Cauã Freitas | Full Stack Developer & Data Analyst",
     template: "%s | Cauã Freitas"
   },
   description: "Desenvolvedor Full Stack e Analista de Dados focado em soluções de alta performance.",
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'pt_BR',
     url: 'https://caufreitxs.vercel.app',
-    title: 'Cauã Freitas | Digital Portfolio',
+    title: 'Cauã Freitas | Full Stack Developer & Data Analyst',
     description: 'Transformando dados em experiências digitais imersivas.',
-    siteName: 'Cauã Freitas Portfolio',
+    siteName: 'Cauã Freitas - Full Stack Developer & Data Analyst',
   },
   robots: {
     index: true,
