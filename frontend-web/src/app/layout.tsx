@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     default: "Cauã Freitas | Full Stack & Data Analyst",
     template: "%s | Cauã Freitas"
   },
-  description: "Portfólio interativo de Cauã Freitas. Desenvolvedor Full Stack e Analista de Dados focado em soluções de alta performance.",
+  description: "Desenvolvedor Full Stack e Analista de Dados focado em soluções de alta performance.",
   keywords: ["Full Stack", "Data Analyst", "Python", "React", "Developer", "Cauã Freitas"],
   authors: [{ name: "Cauã Freitas" }],
   creator: "Cauã Freitas",
