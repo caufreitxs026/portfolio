@@ -192,7 +192,7 @@ export default function Hero() {
                 <div className="flex">
                   <span className="text-slate-700 w-6 select-none text-right mr-4">9</span>
                   <div className="whitespace-nowrap pl-4">
-                    <span className="text-blue-300">role</span> = <span className="text-orange-300">'Full Stack Developer e Analista de Suporte Computacional'</span>
+                    <span className="text-blue-300">role</span> = <span className="text-orange-300">'Full Stack Developer and IT Support Analyst'</span>
                   </div>
                 </div>
 
