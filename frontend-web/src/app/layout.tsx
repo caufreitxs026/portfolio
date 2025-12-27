@@ -24,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://caufreitxs.vercel.app'), // Seu domínio real
   title: {
-    default: "Cauã Freitas | Código & Impacto",
+    default: "Cauã Freitas | Full Stack Developer",
     template: "%s | Cauã Freitas"
   },
   description: "Desenvolvedor Full Stack e Analista de Dados focado em soluções de alta performance.",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Cauã Freitas" }],
   creator: "Cauã Freitas",
   icons: {
-    icon: '/favicon.ico',
+    icon: '/opengraph-image.png',
   },
   openGraph: {
     type: 'website',
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     url: 'https://caufreitxs.vercel.app',
     title: 'Cauã Freitas | Full Stack Developer & Data Analyst',
     description: 'Transformando dados em experiências digitais imersivas.',
-    siteName: 'Cauã Freitas - Código & Impacto',
+    siteName: 'Cauã Freitas | Full Stack Developer',
   },
   robots: {
     index: true,
