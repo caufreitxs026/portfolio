@@ -63,55 +63,135 @@ def send_email_resend(contact: ContactMessage):
     print(">>> [RESEND] Iniciando envio via API...")
     if not RESEND_API_KEY: return False
 
-    # Template HTML Premium
+    # Template HTML Otimizado para Outlook e Responsivo
+    # Usa tabelas aninhadas e estilos inline para garantir renderização perfeita no motor do Word
     html_content = f"""
     <!DOCTYPE html>
-    <html>
+    <html lang="pt-BR" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--[if mso]>
+        <xml>
+        <o:OfficeDocumentSettings>
+            <o:PixelsPerInch>96</o:PixelsPerInch>
+        </o:OfficeDocumentSettings>
+        </xml>
+        <![endif]-->
         <style>
-            body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #e2e8f0; margin: 0; padding: 0; }}
-            .container {{ max-width: 600px; margin: 40px auto; background-color: #1e293b; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.4); border: 1px solid #334155; }}
-            .header {{ background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 30px; text-align: center; }}
-            .header h1 {{ margin: 0; color: #ffffff; font-size: 24px; letter-spacing: 1px; text-transform: uppercase; }}
-            .content {{ padding: 40px 30px; }}
-            .info-item {{ margin-bottom: 20px; }}
-            .label {{ color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; display: block; margin-bottom: 6px; }}
-            .value {{ color: #f1f5f9; font-size: 16px; background-color: #0f172a; padding: 12px 16px; border-radius: 8px; border: 1px solid #334155; display: block; }}
-            .message-box {{ background-color: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 20px; color: #cbd5e1; line-height: 1.6; margin-top: 10px; }}
-            .footer {{ background-color: #0f172a; padding: 20px; text-align: center; border-top: 1px solid #334155; color: #64748b; font-size: 12px; }}
-            .highlight {{ color: #34d399; font-weight: bold; }}
-            a {{ color: #34d399; text-decoration: none; }}
+            body, table, td, a {{ -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }}
+            table, td {{ mso-table-lspace: 0pt; mso-table-rspace: 0pt; }}
+            img {{ -ms-interpolation-mode: bicubic; }}
+            body {{ margin: 0; padding: 0; width: 100% !important; }}
+            
+            /* Responsividade para Mobile */
+            @media screen and (max-width: 600px) {{
+                .container {{ width: 100% !important; }}
+                .mobile-padding {{ padding-left: 20px !important; padding-right: 20px !important; }}
+            }}
         </style>
     </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>Novo Contato Recebido 🚀</h1>
-            </div>
-            <div class="content">
-                <div class="info-item">
-                    <span class="label">Remetente</span>
-                    <span class="value">{contact.name}</span>
-                </div>
-                
-                <div class="info-item">
-                    <span class="label">E-mail de Contato</span>
-                    <span class="value">{contact.email}</span>
-                </div>
-                
-                <div class="info-item" style="margin-top: 30px;">
-                    <span class="label">Mensagem</span>
-                    <div class="message-box">
-                        {contact.content}
-                    </div>
-                </div>
-            </div>
-            <div class="footer">
-                <p>Enviado via <strong>Portfolio Cauã Freitas</strong></p>
-                <p>Este é um canal seguro e criptografado.</p>
-            </div>
-        </div>
+    <body style="margin: 0; padding: 0; background-color: #0f172a;">
+        
+        <!-- Wrapper Principal -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #0f172a;">
+            <tr>
+                <td align="center" style="padding: 40px 0;">
+                    
+                    <!-- Ghost Table para forçar largura no Outlook -->
+                    <!--[if mso]>
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600">
+                    <tr>
+                    <td align="center" valign="top" width="600">
+                    <![endif]-->
+                    
+                    <!-- Container do Cartão -->
+                    <table class="container" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; overflow: hidden;">
+                        
+                        <!-- Header (Gradient simulation via color fallback) -->
+                        <tr>
+                            <td align="center" style="background-color: #10b981; padding: 30px; border-bottom: 4px solid #059669;">
+                                <h1 style="color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 24px; margin: 0; text-transform: uppercase; letter-spacing: 2px;">
+                                    🚀 Novo Contato
+                                </h1>
+                            </td>
+                        </tr>
+
+                        <!-- Corpo do Conteúdo -->
+                        <tr>
+                            <td class="mobile-padding" style="padding: 40px;">
+                                
+                                <!-- Nome -->
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                    <tr>
+                                        <td style="padding-bottom: 5px;">
+                                            <span style="color: #94a3b8; font-family: 'Segoe UI', sans-serif; font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Remetente</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding-bottom: 25px;">
+                                            <span style="color: #f1f5f9; font-family: 'Segoe UI', sans-serif; font-size: 18px; font-weight: 600;">{contact.name}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Email -->
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                    <tr>
+                                        <td style="padding-bottom: 5px;">
+                                            <span style="color: #94a3b8; font-family: 'Segoe UI', sans-serif; font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">E-mail de Contato</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding-bottom: 25px;">
+                                            <a href="mailto:{contact.email}" style="color: #34d399; font-family: 'Segoe UI', sans-serif; font-size: 16px; text-decoration: none;">{contact.email}</a>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Box da Mensagem -->
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                    <tr>
+                                        <td style="padding-bottom: 10px;">
+                                            <span style="color: #94a3b8; font-family: 'Segoe UI', sans-serif; font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Mensagem</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="background-color: #0f172a; border: 1px solid #334155; border-radius: 4px; padding: 20px;">
+                                            <span style="color: #cbd5e1; font-family: 'Segoe UI', sans-serif; font-size: 15px; line-height: 1.6; display: block;">
+                                                {contact.content.replace(chr(10), '<br>')}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                            </td>
+                        </tr>
+
+                        <!-- Footer -->
+                        <tr>
+                            <td align="center" style="background-color: #0f172a; padding: 20px; border-top: 1px solid #334155;">
+                                <p style="color: #64748b; font-family: 'Segoe UI', sans-serif; font-size: 12px; margin: 0;">
+                                    Enviado via <strong style="color: #94a3b8;">Portfolio Cauã Freitas</strong>
+                                </p>
+                                <p style="color: #475569; font-family: 'Segoe UI', sans-serif; font-size: 10px; margin: 5px 0 0 0;">
+                                    Canal Seguro Criptografado • ID da Mensagem: Gerado Automaticamente
+                                </p>
+                            </td>
+                        </tr>
+
+                    </table>
+                    
+                    <!-- Fechamento Ghost Table -->
+                    <!--[if mso]>
+                    </td>
+                    </tr>
+                    </table>
+                    <![endif]-->
+                    
+                </td>
+            </tr>
+        </table>
     </body>
     </html>
     """
