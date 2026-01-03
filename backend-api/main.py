@@ -112,7 +112,7 @@ def send_email_resend(contact: ContactMessage):
                         <tr>
                             <td align="center" style="background-color: #10b981; padding: 30px; border-bottom: 4px solid #059669;">
                                 <h1 style="color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 24px; margin: 0; text-transform: uppercase; letter-spacing: 2px;">
-                                    🚀 Novo Contato
+                                    Novo Contato
                                 </h1>
                             </td>
                         </tr>
@@ -200,7 +200,7 @@ def send_email_resend(contact: ContactMessage):
         params = {
             "from": "Portfolio <onboarding@resend.dev>",
             "to": [EMAIL_TO],
-            "subject": f"🚀 Nova mensagem de {contact.name}",
+            "subject": f"Nova mensagem de {contact.name}",
             "html": html_content,
             "reply_to": contact.email
         }
