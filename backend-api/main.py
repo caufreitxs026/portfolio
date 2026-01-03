@@ -63,8 +63,8 @@ def send_email_resend(contact: ContactMessage):
     print(">>> [RESEND] Iniciando envio via API...")
     if not RESEND_API_KEY: return False
 
-    # Template HTML Otimizado para Outlook e Responsivo
-    # Usa tabelas aninhadas e estilos inline para garantir renderização perfeita no motor do Word
+    # Template HTML Premium Otimizado para Outlook
+    # Simula a textura tátil do portfólio usando cores sólidas e bordas de alto contraste
     html_content = f"""
     <!DOCTYPE html>
     <html lang="pt-BR" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -82,107 +82,136 @@ def send_email_resend(contact: ContactMessage):
             body, table, td, a {{ -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }}
             table, td {{ mso-table-lspace: 0pt; mso-table-rspace: 0pt; }}
             img {{ -ms-interpolation-mode: bicubic; }}
-            body {{ margin: 0; padding: 0; width: 100% !important; }}
+            body {{ margin: 0; padding: 0; width: 100% !important; background-color: #020617; }}
             
-            /* Responsividade para Mobile */
+            /* Tipografia e Cores */
+            .text-muted {{ color: #94a3b8; }}
+            .text-light {{ color: #f8fafc; }}
+            .border-color {{ border-color: #1e293b; }}
+            .bg-card {{ background-color: #0f172a; }}
+            
             @media screen and (max-width: 600px) {{
                 .container {{ width: 100% !important; }}
-                .mobile-padding {{ padding-left: 20px !important; padding-right: 20px !important; }}
+                .mobile-padding {{ padding-left: 24px !important; padding-right: 24px !important; }}
+                .mobile-title {{ font-size: 20px !important; }}
             }}
         </style>
     </head>
-    <body style="margin: 0; padding: 0; background-color: #0f172a;">
+    <body style="margin: 0; padding: 0; background-color: #020617;">
         
-        <!-- Wrapper Principal -->
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #0f172a;">
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #020617;">
             <tr>
-                <td align="center" style="padding: 40px 0;">
+                <td align="center" style="padding: 60px 0;">
                     
-                    <!-- Ghost Table para forçar largura no Outlook -->
                     <!--[if mso]>
                     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600">
                     <tr>
                     <td align="center" valign="top" width="600">
                     <![endif]-->
                     
-                    <!-- Container do Cartão -->
-                    <table class="container" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; overflow: hidden;">
+                    <!-- Container Principal (Efeito Cartão Flutuante) -->
+                    <table class="container" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #0f172a; border: 1px solid #1e293b; border-radius: 12px; border-collapse: separate; mso-border-radius-alt: 12px;">
                         
-                        <!-- Header (Gradient simulation via color fallback) -->
+                        <!-- Barra Superior Emerald -->
                         <tr>
-                            <td align="center" style="background-color: #10b981; padding: 30px; border-bottom: 4px solid #059669;">
-                                <h1 style="color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 24px; margin: 0; text-transform: uppercase; letter-spacing: 2px;">
-                                    Novo Contato
+                            <td height="4" style="background-color: #10b981; font-size: 0; line-height: 0;">&nbsp;</td>
+                        </tr>
+
+                        <!-- Cabeçalho -->
+                        <tr>
+                            <td class="mobile-padding" style="padding: 40px 40px 10px 40px;">
+                                <h1 class="mobile-title" style="color: #f8fafc; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">
+                                    Novo Contato Recebido
                                 </h1>
-                            </td>
-                        </tr>
-
-                        <!-- Corpo do Conteúdo -->
-                        <tr>
-                            <td class="mobile-padding" style="padding: 40px;">
-                                
-                                <!-- Nome -->
-                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                                    <tr>
-                                        <td style="padding-bottom: 5px;">
-                                            <span style="color: #94a3b8; font-family: 'Segoe UI', sans-serif; font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Remetente</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding-bottom: 25px;">
-                                            <span style="color: #f1f5f9; font-family: 'Segoe UI', sans-serif; font-size: 18px; font-weight: 600;">{contact.name}</span>
-                                        </td>
-                                    </tr>
-                                </table>
-
-                                <!-- Email -->
-                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                                    <tr>
-                                        <td style="padding-bottom: 5px;">
-                                            <span style="color: #94a3b8; font-family: 'Segoe UI', sans-serif; font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">E-mail de Contato</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding-bottom: 25px;">
-                                            <a href="mailto:{contact.email}" style="color: #34d399; font-family: 'Segoe UI', sans-serif; font-size: 16px; text-decoration: none;">{contact.email}</a>
-                                        </td>
-                                    </tr>
-                                </table>
-
-                                <!-- Box da Mensagem -->
-                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                                    <tr>
-                                        <td style="padding-bottom: 10px;">
-                                            <span style="color: #94a3b8; font-family: 'Segoe UI', sans-serif; font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Mensagem</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="background-color: #0f172a; border: 1px solid #334155; border-radius: 4px; padding: 20px;">
-                                            <span style="color: #cbd5e1; font-family: 'Segoe UI', sans-serif; font-size: 15px; line-height: 1.6; display: block;">
-                                                {contact.content.replace(chr(10), '<br>')}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </table>
-
-                            </td>
-                        </tr>
-
-                        <!-- Footer -->
-                        <tr>
-                            <td align="center" style="background-color: #0f172a; padding: 20px; border-top: 1px solid #334155;">
-                                <p style="color: #64748b; font-family: 'Segoe UI', sans-serif; font-size: 12px; margin: 0;">
-                                    Enviado via <strong style="color: #94a3b8;">Portfolio Cauã Freitas</strong>
+                                <p style="color: #94a3b8; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 14px; margin: 8px 0 0 0;">
+                                    Uma nova mensagem foi enviada através do seu portfólio.
                                 </p>
-                                <p style="color: #475569; font-family: 'Segoe UI', sans-serif; font-size: 10px; margin: 5px 0 0 0;">
-                                    Canal Seguro Criptografado • ID da Mensagem: Gerado Automaticamente
+                            </td>
+                        </tr>
+
+                        <!-- Divisor Sutil -->
+                        <tr>
+                            <td style="padding: 20px 40px;">
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                    <tr>
+                                        <td height="1" style="background-color: #1e293b; font-size: 0; line-height: 0;">&nbsp;</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <!-- Conteúdo Principal -->
+                        <tr>
+                            <td class="mobile-padding" style="padding: 0 40px 40px 40px;">
+                                
+                                <!-- Detalhes do Remetente -->
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                    <tr>
+                                        <td style="padding-bottom: 24px;">
+                                            
+                                            <!-- Nome -->
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 20px;">
+                                                <tr>
+                                                    <td width="30" valign="middle" style="padding-right: 12px;">
+                                                        <!-- Ícone Simulado (Bullet) -->
+                                                        <span style="height: 8px; width: 8px; background-color: #10b981; border-radius: 50%; display: block;"></span>
+                                                    </td>
+                                                    <td valign="middle">
+                                                        <span style="color: #64748b; font-family: 'Segoe UI', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Nome</span>
+                                                        <div style="color: #f1f5f9; font-family: 'Segoe UI', sans-serif; font-size: 16px; font-weight: 500; margin-top: 4px;">{contact.name}</div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+
+                                            <!-- Email -->
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                <tr>
+                                                    <td width="30" valign="middle" style="padding-right: 12px;">
+                                                        <span style="height: 8px; width: 8px; background-color: #3b82f6; border-radius: 50%; display: block;"></span>
+                                                    </td>
+                                                    <td valign="middle">
+                                                        <span style="color: #64748b; font-family: 'Segoe UI', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Email</span>
+                                                        <div style="margin-top: 4px;">
+                                                            <a href="mailto:{contact.email}" style="color: #f1f5f9; font-family: 'Segoe UI', sans-serif; font-size: 16px; font-weight: 500; text-decoration: none; border-bottom: 1px dotted #94a3b8;">{contact.email}</a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Caixa de Mensagem (Design Tátil) -->
+                                    <tr>
+                                        <td>
+                                            <span style="color: #64748b; font-family: 'Segoe UI', sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; display: block; margin-bottom: 12px;">Mensagem</span>
+                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #1e293b; border: 1px solid #334155; border-radius: 8px;">
+                                                <tr>
+                                                    <td style="padding: 20px;">
+                                                        <span style="color: #cbd5e1; font-family: 'Segoe UI', sans-serif; font-size: 15px; line-height: 1.6; display: block;">
+                                                            {contact.content.replace(chr(10), '<br>')}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                            </td>
+                        </tr>
+
+                        <!-- Rodapé do Cartão -->
+                        <tr>
+                            <td align="center" style="background-color: #020617; padding: 24px; border-top: 1px solid #1e293b;">
+                                <p style="color: #475569; font-family: 'Segoe UI', sans-serif; font-size: 11px; margin: 0; letter-spacing: 0.5px;">
+                                    PORTFOLIO SYSTEM • SECURE CHANNEL
                                 </p>
                             </td>
                         </tr>
 
                     </table>
                     
-                    <!-- Fechamento Ghost Table -->
                     <!--[if mso]>
                     </td>
                     </tr>
