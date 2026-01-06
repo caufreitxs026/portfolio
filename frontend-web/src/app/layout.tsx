@@ -24,35 +24,23 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://caufreitxs.vercel.app'), // Seu domínio real
   title: {
-    default: "Cauã Freitas | Full Stack & Data Analyst",
+    default: "Cauã Freitas | Full Stack Developer",
     template: "%s | Cauã Freitas"
   },
-  description: "Portfólio interativo de Cauã Freitas. Desenvolvedor Full Stack e Analista de Dados focado em soluções de alta performance.",
+  description: "Desenvolvedor Full Stack e Analista de Dados focado em soluções de alta performance.",
   keywords: ["Full Stack", "Data Analyst", "Python", "React", "Developer", "Cauã Freitas"],
   authors: [{ name: "Cauã Freitas" }],
   creator: "Cauã Freitas",
   icons: {
-    // Favicon 3D Cartoon (Estilo Developer)
-    // Se você tiver a imagem .png final, basta colocar em /public e mudar para '/favicon.png'
-    icon: 'https://avatar.iran.liara.run/public/boy?username=CauaFreitas', 
-    shortcut: 'https://avatar.iran.liara.run/public/boy?username=CauaFreitas',
-    apple: 'https://avatar.iran.liara.run/public/boy?username=CauaFreitas',
+    icon: '/opengraph-image.png',
   },
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
     url: 'https://caufreitxs.vercel.app',
-    title: 'Cauã Freitas | Digital Portfolio',
+    title: 'Cauã Freitas | Full Stack Developer & Data Analyst',
     description: 'Transformando dados em experiências digitais imersivas.',
-    siteName: 'Cauã Freitas Portfolio',
-    images: [
-      {
-        url: 'https://avatar.iran.liara.run/public/boy?username=CauaFreitas', // Imagem de compartilhamento
-        width: 800,
-        height: 600,
-        alt: 'Cauã Freitas Avatar',
-      },
-    ],
+    siteName: 'Cauã Freitas | Full Stack Developer',
   },
   robots: {
     index: true,
