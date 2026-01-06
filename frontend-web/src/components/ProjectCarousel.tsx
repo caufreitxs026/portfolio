@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, Github, ChevronLeft, ChevronRight, X, Cpu, Activity, Zap, Code2, Database, Layout } from 'lucide-react';
+import { ExternalLink, Github, ChevronLeft, ChevronRight, X, Cpu, Activity, Database, Layout, Code2 } from 'lucide-react';
 import Image from 'next/image';
 
 interface Project {
@@ -42,19 +42,33 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
     }
   }, [selectedId]);
 
-  if (!mounted || !projects || projects.length === 0) return null;
-
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     if (selectedId !== null) return;
     setDirection(1);
     setCurrentIndex((prev) => (prev + 1 === projects.length ? 0 : prev + 1));
-  };
+  }, [selectedId, projects.length]);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     if (selectedId !== null) return;
     setDirection(-1);
     setCurrentIndex((prev) => (prev - 1 < 0 ? projects.length - 1 : prev - 1));
-  };
+  }, [selectedId, projects.length]);
+
+  // Navegação por Teclado
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedId !== null) {
+        if (e.key === 'Escape') setSelectedId(null);
+      } else {
+        if (e.key === 'ArrowLeft') prevSlide();
+        if (e.key === 'ArrowRight') nextSlide();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId, nextSlide, prevSlide]);
+
+  if (!mounted || !projects || projects.length === 0) return null;
 
   const project = projects[currentIndex];
 
@@ -78,6 +92,12 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
     modalBg: 'bg-slate-950/95',
     statValue: 'text-emerald-400',
     closeBtn: 'hover:bg-emerald-500/20 text-emerald-400'
+  };
+
+  // Configuração do Swipe (Arrastar)
+  const swipeConfidenceThreshold = 10000;
+  const swipePower = (offset: number, velocity: number) => {
+    return Math.abs(offset) * velocity;
   };
 
   // Variantes do Carrossel
@@ -110,7 +130,7 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
       {/* Background Decorativo */}
       <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} blur-3xl opacity-30 -z-10 rounded-full scale-90`}></div>
 
-      {/* --- CARROSSEL PRINCIPAL (LAYOUT ID PARA TRANSIÇÃO MÁGICA) --- */}
+      {/* --- CARROSSEL PRINCIPAL --- */}
       <div className="relative h-[500px] md:h-[450px]">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           {selectedId === null && (
@@ -123,7 +143,19 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
               animate="center"
               exit="exit"
               transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
-              className={`absolute inset-0 flex flex-col md:flex-row overflow-hidden rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800 shadow-2xl ring-1 ring-white/5 cursor-pointer group`}
+              // Propriedades de Drag (Swipe)
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={1}
+              onDragEnd={(e, { offset, velocity }) => {
+                const swipe = swipePower(offset.x, velocity.x);
+                if (swipe < -swipeConfidenceThreshold) {
+                  nextSlide();
+                } else if (swipe > swipeConfidenceThreshold) {
+                  prevSlide();
+                }
+              }}
+              className={`absolute inset-0 flex flex-col md:flex-row overflow-hidden rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800 shadow-2xl ring-1 ring-white/5 cursor-grab active:cursor-grabbing group`}
               onClick={() => setSelectedId(project.id)}
             >
               {/* Lado Esquerdo: Imagem */}
@@ -133,7 +165,7 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                     src={project.image_url}
                     alt={project.title}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-slate-900 relative">
@@ -148,13 +180,13 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                 {/* Overlay de Clique */}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <span className="bg-black/50 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-md border border-white/10">
-                        Clique para Expandir
+                        Clique ou Arraste
                     </span>
                 </div>
               </motion.div>
 
               {/* Lado Direito: Conteúdo Resumido */}
-              <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center relative">
+              <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center relative pointer-events-none">
                 <motion.h3 layoutId={`title-${project.id}`} className={`text-3xl font-bold mb-4 text-white`}>
                   {project.title}
                 </motion.h3>
@@ -173,7 +205,7 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                 </div>
                 <div className="mt-auto flex items-center gap-2 text-xs font-mono text-slate-500">
                     <Cpu size={14} />
-                    <span>SYSTEM READY // CLICK TO ACCESS</span>
+                    <span>SYSTEM READY // SWIPE NAV ENABLED</span>
                 </div>
               </div>
             </motion.div>
@@ -183,17 +215,17 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
         {/* Controles de Navegação (Só aparecem se não houver modal aberto) */}
         {selectedId === null && (
             <>
-                <button onClick={prevSlide} className={`absolute left-0 top-1/2 -translate-y-1/2 p-3 -ml-5 md:-ml-8 rounded-full bg-slate-900/50 border border-slate-700 text-slate-400 hover:text-white transition-all hover:scale-110 z-10 ${theme.border}`}>
+                <button onClick={(e) => { e.stopPropagation(); prevSlide(); }} className={`absolute left-0 top-1/2 -translate-y-1/2 p-3 -ml-5 md:-ml-8 rounded-full bg-slate-900/50 border border-slate-700 text-slate-400 hover:text-white transition-all hover:scale-110 z-10 ${theme.border}`}>
                     <ChevronLeft size={24} />
                 </button>
-                <button onClick={nextSlide} className={`absolute right-0 top-1/2 -translate-y-1/2 p-3 -mr-5 md:-mr-8 rounded-full bg-slate-900/50 border border-slate-700 text-slate-400 hover:text-white transition-all hover:scale-110 z-10 ${theme.border}`}>
+                <button onClick={(e) => { e.stopPropagation(); nextSlide(); }} className={`absolute right-0 top-1/2 -translate-y-1/2 p-3 -mr-5 md:-mr-8 rounded-full bg-slate-900/50 border border-slate-700 text-slate-400 hover:text-white transition-all hover:scale-110 z-10 ${theme.border}`}>
                     <ChevronRight size={24} />
                 </button>
             </>
         )}
       </div>
 
-      {/* --- MODAL EXPANDIDO (PORTAL HOLOGRÁFICO) --- */}
+      {/* --- MODAL EXPANDIDO --- */}
       <AnimatePresence>
         {selectedId !== null && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
@@ -220,7 +252,7 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
               </button>
 
               {/* Coluna Esquerda: Visual & Stats */}
-              <div className="w-full md:w-5/12 bg-slate-900/50 border-r border-slate-800 flex flex-col">
+              <div className="w-full md:w-5/12 bg-slate-900/50 border-r border-slate-800 flex flex-col relative overflow-hidden">
                  <motion.div layoutId={`image-${selectedId}`} className="relative h-64 md:h-1/2 w-full overflow-hidden">
                     {projects.find(p => p.id === selectedId)?.image_url ? (
                         <Image
@@ -236,9 +268,14 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                     )}
                     {/* Efeito CRT no Modo Secreto */}
                     {isSecretMode && <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-20 bg-[length:100%_2px,3px_100%] pointer-events-none opacity-50"></div>}
+                    
+                    {/* Shimmer Effect (Brilho que passa) */}
+                    <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden">
+                        <div className="absolute top-0 -left-[100%] w-[50%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 animate-[shimmer_2s_infinite]"></div>
+                    </div>
                  </motion.div>
 
-                 {/* Painel de Métricas (Fictício para UX) */}
+                 {/* Painel de Métricas */}
                  <div className="p-6 flex-1 flex flex-col justify-center space-y-6">
                     <h4 className="text-xs font-mono uppercase text-slate-500 tracking-widest border-b border-slate-800 pb-2">Project Metrics</h4>
                     
@@ -292,7 +329,6 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                     </div>
                  </div>
 
-                 {/* Botões de Ação */}
                  <div className="flex flex-col sm:flex-row gap-4 mt-8 pt-8 border-t border-slate-800">
                     {projects.find(p => p.id === selectedId)?.deploy_url && (
                         <a
