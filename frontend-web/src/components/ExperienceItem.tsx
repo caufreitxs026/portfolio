@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 import { Calendar, Building2, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import SpotlightCard from './ui/SpotlightCard';
+// CORREÇÃO: Importando do mesmo diretório, já que o arquivo está em components/SpotlightCard.tsx
+import SpotlightCard from './SpotlightCard';
 
 interface ExperienceProps {
   experience: {
@@ -32,7 +33,7 @@ export default function ExperienceItem({ experience, index }: ExperienceProps) {
   }, []);
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'Momento Atual'; // Texto mais fluido que "Presente"
+    if (!dateString) return 'Momento Atual';
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
   };
