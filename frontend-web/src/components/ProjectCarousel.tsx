@@ -10,7 +10,7 @@ interface Project {
   title: string;
   description: string;
   image_url?: string;
-  github_url?: string;
+  repo_link?: string; // Atualizado para corresponder ao banco de dados
   deploy_url?: string;
   tech_stack: string[];
 }
@@ -341,9 +341,9 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                             Ver Projeto Online
                         </a>
                     )}
-                    {projects.find(p => p.id === selectedId)?.github_url && (
+                    {projects.find(p => p.id === selectedId)?.repo_link && (
                         <a
-                            href={projects.find(p => p.id === selectedId)?.github_url}
+                            href={projects.find(p => p.id === selectedId)?.repo_link}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-slate-300 border border-slate-700 hover:border-slate-500 hover:text-white transition-colors bg-slate-800/50"
