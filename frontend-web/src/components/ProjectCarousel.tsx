@@ -124,7 +124,7 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
     })
   };
 
-  // Componente de Fallback Visual (Digital Blueprint)
+  // Componente de Fallback Visual (Digital Blueprint) - Adaptado para Mobile
   const TechFallback = () => (
     <div className="w-full h-full relative bg-slate-950 overflow-hidden flex items-center justify-center group/tech">
         {/* Grid Animado */}
@@ -138,16 +138,17 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
         />
 
         {/* Núcleo Central */}
-        <div className={`relative z-10 p-8 rounded-2xl bg-slate-900/80 border ${theme.border} backdrop-blur-xl shadow-2xl flex flex-col items-center gap-6 transform transition-transform duration-500 group-hover/tech:scale-105`}>
+        <div className={`relative z-10 p-4 sm:p-8 rounded-2xl bg-slate-900/80 border ${theme.border} backdrop-blur-xl shadow-2xl flex flex-col items-center gap-4 sm:gap-6 transform transition-transform duration-500 group-hover/tech:scale-105`}>
             {/* Ícone Brilhante */}
-            <div className={`relative p-5 rounded-full bg-slate-800/80 border border-slate-700 shadow-[0_0_30px_-5px_currentColor] ${theme.primary}`}>
+            <div className={`relative p-3 sm:p-5 rounded-full bg-slate-800/80 border border-slate-700 shadow-[0_0_30px_-5px_currentColor] ${theme.primary}`}>
                 <div className={`absolute inset-0 rounded-full ${theme.bgPrimary} opacity-20 blur-md animate-pulse`}></div>
-                <Terminal size={32} />
+                {/* Ícone menor no mobile */}
+                <Terminal className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
 
             {/* Dados Simulados */}
-            <div className="space-y-3 w-40">
-                <div className="flex justify-between items-center text-[10px] text-slate-500 font-mono uppercase tracking-wider">
+            <div className="space-y-2 sm:space-y-3 w-32 sm:w-40">
+                <div className="flex justify-between items-center text-[9px] sm:text-[10px] text-slate-500 font-mono uppercase tracking-wider">
                     <span>Compiling</span>
                     <span>98%</span>
                 </div>
@@ -165,10 +166,10 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                 </div>
             </div>
 
-            <div className={`absolute top-2 left-2 w-2 h-2 ${theme.bgPrimary} rounded-full`}></div>
-            <div className={`absolute top-2 right-2 w-2 h-2 ${theme.bgPrimary} rounded-full`}></div>
-            <div className={`absolute bottom-2 left-2 w-2 h-2 ${theme.bgPrimary} rounded-full`}></div>
-            <div className={`absolute bottom-2 right-2 w-2 h-2 ${theme.bgPrimary} rounded-full`}></div>
+            <div className={`absolute top-2 left-2 w-1.5 h-1.5 sm:w-2 sm:h-2 ${theme.bgPrimary} rounded-full`}></div>
+            <div className={`absolute top-2 right-2 w-1.5 h-1.5 sm:w-2 sm:h-2 ${theme.bgPrimary} rounded-full`}></div>
+            <div className={`absolute bottom-2 left-2 w-1.5 h-1.5 sm:w-2 sm:h-2 ${theme.bgPrimary} rounded-full`}></div>
+            <div className={`absolute bottom-2 right-2 w-1.5 h-1.5 sm:w-2 sm:h-2 ${theme.bgPrimary} rounded-full`}></div>
         </div>
 
         {/* Partículas de Fundo */}
@@ -232,7 +233,7 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                   <TechFallback />
                 )}
                 
-                {/* Overlay de Clique (Apenas se tiver imagem para não tapar o fallback animado) */}
+                {/* Overlay de Clique - Ajustado para touch */}
                 {project.image_url && (
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                         <span className="bg-black/50 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-md border border-white/10">
@@ -244,10 +245,10 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
 
               {/* Lado Direito: Conteúdo Resumido */}
               <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center relative pointer-events-none">
-                <motion.h3 layoutId={`title-${project.id}`} className={`text-3xl font-bold mb-4 text-white`}>
+                <motion.h3 layoutId={`title-${project.id}`} className={`text-2xl sm:text-3xl font-bold mb-4 text-white`}>
                   {project.title}
                 </motion.h3>
-                <motion.p layoutId={`desc-${project.id}`} className="text-slate-400 leading-relaxed mb-6 line-clamp-3">
+                <motion.p layoutId={`desc-${project.id}`} className="text-slate-400 leading-relaxed mb-6 line-clamp-3 text-sm sm:text-base">
                   {project.description}
                 </motion.p>
                 <div className="flex flex-wrap gap-2 mb-8">
@@ -260,7 +261,7 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                       <span className="text-xs text-slate-500 self-center">+{project.tech_stack.length - 3}</span>
                   )}
                 </div>
-                <div className="mt-auto flex items-center gap-2 text-xs font-mono text-slate-500">
+                <div className="mt-auto flex items-center gap-2 text-[10px] sm:text-xs font-mono text-slate-500">
                     <Cpu size={14} />
                     <span>SYSTEM READY // SWIPE NAV ENABLED</span>
                 </div>
@@ -272,11 +273,11 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
         {/* Controles de Navegação */}
         {selectedId === null && (
             <>
-                <button onClick={(e) => { e.stopPropagation(); prevSlide(); }} className={`absolute left-0 top-1/2 -translate-y-1/2 p-3 -ml-5 md:-ml-8 rounded-full bg-slate-900/50 border border-slate-700 text-slate-400 hover:text-white transition-all hover:scale-110 z-10 ${theme.border}`}>
-                    <ChevronLeft size={24} />
+                <button onClick={(e) => { e.stopPropagation(); prevSlide(); }} className={`absolute left-0 top-1/2 -translate-y-1/2 p-2 sm:p-3 -ml-3 sm:-ml-8 rounded-full bg-slate-900/50 border border-slate-700 text-slate-400 hover:text-white transition-all hover:scale-110 z-10 ${theme.border}`}>
+                    <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); nextSlide(); }} className={`absolute right-0 top-1/2 -translate-y-1/2 p-3 -mr-5 md:-mr-8 rounded-full bg-slate-900/50 border border-slate-700 text-slate-400 hover:text-white transition-all hover:scale-110 z-10 ${theme.border}`}>
-                    <ChevronRight size={24} />
+                <button onClick={(e) => { e.stopPropagation(); nextSlide(); }} className={`absolute right-0 top-1/2 -translate-y-1/2 p-2 sm:p-3 -mr-3 sm:-mr-8 rounded-full bg-slate-900/50 border border-slate-700 text-slate-400 hover:text-white transition-all hover:scale-110 z-10 ${theme.border}`}>
+                    <ChevronRight size={20} className="sm:w-6 sm:h-6" />
                 </button>
             </>
         )}
@@ -306,8 +307,8 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                 <X size={20} />
               </button>
 
-              <div className="w-full md:w-5/12 bg-slate-900/50 border-r border-slate-800 flex flex-col relative overflow-hidden">
-                 <motion.div layoutId={`image-${selectedId}`} className="relative h-64 md:h-1/2 w-full overflow-hidden">
+              <div className="w-full md:w-5/12 bg-slate-900/50 border-r border-slate-800 flex flex-col relative overflow-hidden shrink-0">
+                 <motion.div layoutId={`image-${selectedId}`} className="relative h-48 sm:h-64 md:h-1/2 w-full overflow-hidden">
                     {projects.find(p => p.id === selectedId)?.image_url ? (
                         <Image
                             src={projects.find(p => p.id === selectedId)!.image_url!}
@@ -327,66 +328,66 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                  </motion.div>
 
                  {/* Painel de Métricas */}
-                 <div className="p-6 flex-1 flex flex-col justify-center space-y-6">
+                 <div className="p-4 sm:p-6 flex-1 flex flex-col justify-center space-y-4 sm:space-y-6 bg-slate-900/30">
                     <h4 className="text-xs font-mono uppercase text-slate-500 tracking-widest border-b border-slate-800 pb-2">Project Metrics</h4>
                     
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-slate-800"><Activity size={18} className="text-blue-400" /></div>
-                            <span className="text-sm font-medium text-slate-300">Performance</span>
+                            <div className="p-2 rounded-lg bg-slate-800"><Activity size={16} className="text-blue-400" /></div>
+                            <span className="text-xs sm:text-sm font-medium text-slate-300">Performance</span>
                         </div>
-                        <span className={`text-lg font-bold font-mono ${theme.statValue}`}>98%</span>
+                        <span className={`text-sm sm:text-lg font-bold font-mono ${theme.statValue}`}>98%</span>
                     </div>
 
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-slate-800"><Database size={18} className="text-purple-400" /></div>
-                            <span className="text-sm font-medium text-slate-300">Database</span>
+                            <div className="p-2 rounded-lg bg-slate-800"><Database size={16} className="text-purple-400" /></div>
+                            <span className="text-xs sm:text-sm font-medium text-slate-300">Database</span>
                         </div>
-                        <span className={`text-lg font-bold font-mono ${theme.statValue}`}>Optimized</span>
+                        <span className={`text-sm sm:text-lg font-bold font-mono ${theme.statValue}`}>Optimized</span>
                     </div>
 
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-slate-800"><Layout size={18} className="text-orange-400" /></div>
-                            <span className="text-sm font-medium text-slate-300">Responsive</span>
+                            <div className="p-2 rounded-lg bg-slate-800"><Layout size={16} className="text-orange-400" /></div>
+                            <span className="text-xs sm:text-sm font-medium text-slate-300">Responsive</span>
                         </div>
-                        <span className={`text-lg font-bold font-mono ${theme.statValue}`}>Mobile-1st</span>
+                        <span className={`text-sm sm:text-lg font-bold font-mono ${theme.statValue}`}>Mobile-1st</span>
                     </div>
                  </div>
               </div>
 
               {/* Coluna Direita: Detalhes */}
-              <div className="w-full md:w-7/12 p-8 overflow-y-auto custom-scrollbar">
-                 <motion.h2 layoutId={`title-${selectedId}`} className={`text-3xl md:text-4xl font-bold mb-6 text-white`}>
+              <div className="w-full md:w-7/12 p-5 sm:p-8 overflow-y-auto custom-scrollbar">
+                 <motion.h2 layoutId={`title-${selectedId}`} className={`text-2xl md:text-4xl font-bold mb-4 sm:mb-6 text-white`}>
                     {projects.find(p => p.id === selectedId)?.title}
                  </motion.h2>
 
-                 <div className="mb-8">
-                    <h4 className={`text-sm font-bold uppercase tracking-wider mb-3 ${theme.primary}`}>Visão Geral</h4>
-                    <motion.p layoutId={`desc-${selectedId}`} className="text-slate-300 leading-relaxed text-lg">
+                 <div className="mb-6 sm:mb-8">
+                    <h4 className={`text-xs sm:text-sm font-bold uppercase tracking-wider mb-2 sm:mb-3 ${theme.primary}`}>Visão Geral</h4>
+                    <motion.p layoutId={`desc-${selectedId}`} className="text-slate-300 leading-relaxed text-sm sm:text-lg">
                         {projects.find(p => p.id === selectedId)?.description}
                     </motion.p>
                  </div>
 
-                 <div className="mb-8">
-                    <h4 className={`text-sm font-bold uppercase tracking-wider mb-3 ${theme.primary}`}>Tech Stack</h4>
+                 <div className="mb-6 sm:mb-8">
+                    <h4 className={`text-xs sm:text-sm font-bold uppercase tracking-wider mb-2 sm:mb-3 ${theme.primary}`}>Tech Stack</h4>
                     <div className="flex flex-wrap gap-2">
                         {projects.find(p => p.id === selectedId)?.tech_stack.map((tech) => (
-                            <span key={tech} className={`px-4 py-2 rounded-lg text-sm font-medium border font-mono ${theme.badge}`}>
+                            <span key={tech} className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium border font-mono ${theme.badge}`}>
                                 {tech}
                             </span>
                         ))}
                     </div>
                  </div>
 
-                 <div className="flex flex-col sm:flex-row gap-4 mt-8 pt-8 border-t border-slate-800">
+                 <div className="flex flex-col gap-3 mt-6 pt-6 border-t border-slate-800">
                     {projects.find(p => p.id === selectedId)?.deploy_url && (
                         <a
                             href={projects.find(p => p.id === selectedId)?.deploy_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-white font-bold shadow-lg transition-transform hover:-translate-y-1 ${theme.button}`}
+                            className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-white font-bold shadow-lg transition-transform hover:-translate-y-1 text-sm sm:text-base ${theme.button}`}
                         >
                             <ExternalLink size={18} />
                             Ver Projeto Online
@@ -397,7 +398,7 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                             href={projects.find(p => p.id === selectedId)?.repo_link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-slate-300 border border-slate-700 hover:border-slate-500 hover:text-white transition-colors bg-slate-800/50"
+                            className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-slate-300 border border-slate-700 hover:border-slate-500 hover:text-white transition-colors bg-slate-800/50 text-sm sm:text-base"
                         >
                             <Github size={18} />
                             Código Fonte
