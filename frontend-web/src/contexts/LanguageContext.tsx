@@ -28,7 +28,9 @@ const translations = {
       loading: 'Carregando dados do servidor...',
       experienceTitle: 'Experiência Profissional',
       contactTitle: 'Vamos Conversar?',
-      contactSubtitle: 'Estou disponível para novos desafios. Envie uma mensagem.'
+      contactSubtitle: 'Estou disponível para novos desafios. Envie uma mensagem.',
+      loadTimeline: 'Carregar Linha do Tempo Completa',
+      collapseTimeline: 'Recolher Histórico'
     },
     contact: {
       nameLabel: 'Identificação // Nome',
@@ -71,7 +73,9 @@ const translations = {
       loading: 'Loading server data...',
       experienceTitle: 'Professional Experience',
       contactTitle: 'Let\'s Talk?',
-      contactSubtitle: 'I am available for new challenges. Send me a message.'
+      contactSubtitle: 'I am available for new challenges. Send me a message.',
+      loadTimeline: 'Load Full Timeline',
+      collapseTimeline: 'Collapse History'
     },
     contact: {
       nameLabel: 'Identification // Name',
