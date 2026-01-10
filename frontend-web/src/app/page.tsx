@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Code, Server, Gamepad2 } from 'lucide-react';
+import { Code, Server, Gamepad2, ChevronDown, ChevronUp, History } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 // Componentes
@@ -23,6 +23,10 @@ export default function Home() {
   const [isSecretMode, setIsSecretMode] = useState(false);
   const [mounted, setMounted] = useState(false);
   
+  // Estado para controlar a expansão da experiência
+  const [showAllExperiences, setShowAllExperiences] = useState(false);
+  const INITIAL_EXP_COUNT = 3;
+  
   // Hook de Tradução
   const { t } = useLanguage();
 
@@ -38,6 +42,19 @@ export default function Home() {
   }, []);
 
   if (!mounted) return null;
+
+  // Definição de Tema para o Botão "Ver Mais"
+  const theme = isSecretMode ? {
+    buttonExp: 'bg-pink-900/20 text-pink-400 border-pink-500/30 hover:bg-pink-500/10 hover:border-pink-500/60',
+    iconExp: 'text-pink-500'
+  } : {
+    buttonExp: 'bg-emerald-900/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 hover:border-emerald-500/60',
+    iconExp: 'text-emerald-500'
+  };
+
+  const displayedExperiences = showAllExperiences 
+    ? experiences 
+    : experiences.slice(0, INITIAL_EXP_COUNT);
 
   return (
     <main className="min-h-screen text-slate-300 selection:bg-emerald-500 selection:text-white overflow-x-hidden">
@@ -113,6 +130,7 @@ export default function Home() {
           </div>
           
           <div className="ml-3 pl-8 relative">
+             {/* Linha Vertical Contínua */}
              <div className="absolute left-0 top-2 bottom-0 w-[2px] bg-slate-800/50"></div>
             
             {loading ? (
@@ -121,9 +139,40 @@ export default function Home() {
                 <ExperienceSkeleton />
               </div>
             ) : (
-              experiences.map((exp: any, index: number) => (
-                <ExperienceItem key={exp.id} experience={exp} index={index} />
-              ))
+              <>
+                {displayedExperiences.map((exp: any, index: number) => (
+                  <ExperienceItem key={exp.id} experience={exp} index={index} />
+                ))}
+
+                {/* Botão de Expandir/Recolher (Só aparece se houver mais itens que o limite) */}
+                {experiences.length > INITIAL_EXP_COUNT && (
+                  <div className="mt-8 relative z-20 flex justify-center md:justify-start pl-6">
+                    <motion.button
+                      onClick={() => setShowAllExperiences(!showAllExperiences)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`
+                        group flex items-center gap-3 px-6 py-3 rounded-xl border backdrop-blur-sm transition-all duration-300 font-mono text-sm font-bold uppercase tracking-wider
+                        ${theme.buttonExp}
+                      `}
+                    >
+                      <div className={`p-1 rounded-full border bg-slate-950 ${isSecretMode ? 'border-pink-500/50' : 'border-emerald-500/50'}`}>
+                        {showAllExperiences ? <ChevronUp size={16} /> : <History size={16} />}
+                      </div>
+                      
+                      <span>
+                        {showAllExperiences ? 'Recolher Histórico' : 'Carregar Linha do Tempo Completa'}
+                      </span>
+                      
+                      {!showAllExperiences && (
+                        <span className={`text-xs opacity-60 ml-1 ${theme.iconExp}`}>
+                          (+{experiences.length - INITIAL_EXP_COUNT})
+                        </span>
+                      )}
+                    </motion.button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
