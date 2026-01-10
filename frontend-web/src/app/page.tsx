@@ -161,7 +161,7 @@ export default function Home() {
                       </div>
                       
                       <span>
-                        {showAllExperiences ? 'Recolher Histórico' : 'Carregar Linha do Tempo Completa'}
+                        {showAllExperiences ? t.home.collapseTimeline : t.home.loadTimeline}
                       </span>
                       
                       {!showAllExperiences && (
