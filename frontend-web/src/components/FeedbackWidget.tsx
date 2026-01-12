@@ -17,19 +17,20 @@ export default function FeedbackWidget() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [showCallout, setShowCallout] = useState(false);
 
-  // --- LÓGICA DA NAVE (Spaceship) ---
+  // --- LÓGICA DA NAVE (Física Robusta) ---
   const shipRef = useRef<HTMLButtonElement>(null);
-  const position = useRef({ x: 100, y: 100 });
-  const velocity = useRef({ x: 2, y: 1.5 });
+  // Inicia fora da tela para evitar flicker antes do cálculo
+  const position = useRef({ x: -100, y: -100 });
+  const velocity = useRef({ x: 1.5, y: 1.2 }); // Velocidade inicial suave
   const requestRef = useRef<number>();
   const isHovering = useRef(false);
+  const isInitialized = useRef(false);
 
   const [ratings, setRatings] = useState<Record<Category, number>>({
     usability: 3, design: 3, projects: 3, structure: 3, experience: 3, mechanics: 3
   });
   const [suggestion, setSuggestion] = useState('');
 
-  // Labels
   const categoryLabels: Record<Category, string> = {
     usability: t.feedback.categories.usability,
     design: t.feedback.categories.design,
@@ -39,7 +40,6 @@ export default function FeedbackWidget() {
     mechanics: t.feedback.categories.mechanics
   };
 
-  // Mensagens do Callout da Nave
   const calloutMessages = [
     "Report Status?", 
     "System Feedback", 
@@ -48,59 +48,87 @@ export default function FeedbackWidget() {
   ];
   const [calloutIndex, setCalloutIndex] = useState(0);
 
-  // Animação da Nave
-  const animateShip = useCallback(() => {
-    if (!shipRef.current || isOpen || hasSubmitted) return;
-
-    if (!isHovering.current) {
-        position.current.x += velocity.current.x;
-        position.current.y += velocity.current.y;
-
-        const { innerWidth, innerHeight } = window;
-        const size = 50;
-
-        if (position.current.x + size > innerWidth || position.current.x < 0) {
-            velocity.current.x = -velocity.current.x;
-        }
-        if (position.current.y + size > innerHeight || position.current.y < 0) {
-            velocity.current.y = -velocity.current.y;
-        }
-    }
-
-    const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
-    shipRef.current.style.transform = `translate(${position.current.x}px, ${position.current.y}px) rotate(${rotation}deg)`;
-
-    requestRef.current = requestAnimationFrame(animateShip);
-  }, [isOpen, hasSubmitted]);
-
+  // Inicialização Segura da Posição
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isInitialized.current) {
         position.current = {
             x: Math.random() * (window.innerWidth - 100),
             y: Math.random() * (window.innerHeight - 100)
         };
+        // Garante velocidade aleatória para não ficar monótono
+        velocity.current = {
+            x: (Math.random() - 0.5) * 4, 
+            y: (Math.random() - 0.5) * 4
+        };
+        isInitialized.current = true;
     }
-    requestRef.current = requestAnimationFrame(animateShip);
-    return () => { if (requestRef.current) cancelAnimationFrame(requestRef.current); };
-  }, [animateShip]);
+  }, []);
 
-  // Ciclo de Mensagens da Nave (Callout)
+  // Loop de Animação com Física Corrigida
+  useEffect(() => {
+    const loop = () => {
+        if (!shipRef.current || isOpen || hasSubmitted) return;
+
+        if (!isHovering.current) {
+            // Atualiza posição
+            position.current.x += velocity.current.x;
+            position.current.y += velocity.current.y;
+
+            const { innerWidth, innerHeight } = window;
+            const size = 60; // Margem de segurança (tamanho da nave + padding)
+
+            // Colisão Eixo X (Com Clamp para evitar prender na parede)
+            if (position.current.x + size > innerWidth) {
+                position.current.x = innerWidth - size; // Empurra de volta
+                velocity.current.x *= -1; // Inverte
+            } else if (position.current.x < 0) {
+                position.current.x = 0; // Empurra de volta
+                velocity.current.x *= -1;
+            }
+
+            // Colisão Eixo Y
+            if (position.current.y + size > innerHeight) {
+                position.current.y = innerHeight - size;
+                velocity.current.y *= -1;
+            } else if (position.current.y < 0) {
+                position.current.y = 0;
+                velocity.current.y *= -1;
+            }
+        }
+
+        // Rotação Suave
+        const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
+        
+        // Aplica transformações
+        shipRef.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0) rotate(${rotation}deg)`;
+
+        requestRef.current = requestAnimationFrame(loop);
+    };
+
+    requestRef.current = requestAnimationFrame(loop);
+
+    return () => {
+        if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    };
+  }, [isOpen, hasSubmitted]); // Removemos dependências instáveis para evitar resets
+
+  // Ciclo de Mensagens (Callout)
   useEffect(() => {
     if (isOpen || hasSubmitted) return;
-    
     const interval = setInterval(() => {
         setCalloutIndex(prev => (prev + 1) % calloutMessages.length);
         setShowCallout(true);
-        setTimeout(() => setShowCallout(false), 3000); // Mostra por 3s
-    }, 10000); // A cada 10s
-
+        setTimeout(() => setShowCallout(false), 3000);
+    }, 10000);
     return () => clearInterval(interval);
   }, [isOpen, hasSubmitted]);
 
   // Detector de Tema
   useEffect(() => {
-    // REMOVIDO: localStorage para testes
-    
+    // REMOVIDO: localStorage para testes (Manter comentado para produção real se quiser persistência)
+    // const localSubmitted = localStorage.getItem('portfolio_feedback_sent');
+    // if (localSubmitted) setHasSubmitted(true);
+
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
         setIsSecretMode(document.body.classList.contains('secret-active'));
@@ -112,9 +140,7 @@ export default function FeedbackWidget() {
           if (mutation.attributeName === 'class') checkSecretMode();
         });
     });
-    if (typeof document !== 'undefined') {
-        observer.observe(document.body, { attributes: true });
-    }
+    if (typeof document !== 'undefined') observer.observe(document.body, { attributes: true });
     return () => observer.disconnect();
   }, []);
 
@@ -140,7 +166,6 @@ export default function FeedbackWidget() {
 
       if (!res.ok) throw new Error('Erro ao enviar feedback');
 
-      // Simula um delay visual para o efeito "Upload"
       setTimeout(() => {
           setStatus('success');
           setHasSubmitted(true);
@@ -148,9 +173,7 @@ export default function FeedbackWidget() {
           
           setTimeout(() => {
             setIsOpen(false);
-            // Reset opcional para testes
-            // setStatus('idle'); setHasSubmitted(false);
-          }, 5000); // 5 segundos admirando a tela de sucesso
+          }, 5000);
       }, 1500);
 
     } catch (error) {
@@ -192,11 +215,11 @@ export default function FeedbackWidget() {
         <div 
             className="fixed top-0 left-0 z-[9990] pointer-events-none"
             style={{ 
-                transform: `translate(${position.current.x}px, ${position.current.y}px)`,
-                // Rotação aplicada no elemento interno para não bugar o callout
+                // Usando translate3d para forçar aceleração de hardware (GPU)
+                transform: `translate3d(${position.current.x}px, ${position.current.y}px, 0)`,
             }}
         >
-            {/* Callout (Balão de Fala Tech) */}
+            {/* Callout (Balão de Fala) */}
             <AnimatePresence>
                 {showCallout && !isHovering.current && (
                     <motion.div
@@ -218,8 +241,6 @@ export default function FeedbackWidget() {
                 onMouseLeave={() => { isHovering.current = false; setShowCallout(false); }}
                 className="w-14 h-14 flex items-center justify-center cursor-pointer transition-transform filter drop-shadow-lg active:scale-95 group pointer-events-auto"
                 title="System Report"
-                // A rotação é aplicada aqui via JS no animateShip, mas para o clique funcionar bem, removemos o translate do JS e aplicamos no pai
-                // Nota: O animateShip atualiza o style deste botão diretamente.
             >
                 <svg viewBox="0 0 32 32" className={`w-full h-full ${theme.shipStroke} stroke-[1.5] fill-slate-950/80`}>
                     <path d="M16 2 L20 10 L28 14 L20 18 L16 28 L12 18 L4 14 L12 10 Z" strokeLinejoin="round" />
@@ -327,7 +348,6 @@ export default function FeedbackWidget() {
                         <div className="space-y-5 mb-8">
                             {CATEGORIES.map((cat) => (
                                 <div key={cat} className="flex items-center justify-between group">
-                                    {/* Label corrigida: flex-1 para ocupar espaço e sem truncate excessivo */}
                                     <span className="text-xs font-mono font-medium text-slate-300 uppercase flex-1 pr-4">
                                         {categoryLabels[cat]}
                                     </span>
