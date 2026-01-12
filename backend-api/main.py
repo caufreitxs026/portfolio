@@ -59,12 +59,21 @@ class ContactMessage(BaseModel):
     email: str
     content: str
 
+# Novo Modelo para Feedback
+class FeedbackLog(BaseModel):
+    usability: int
+    design: int
+    projects: int
+    structure: int
+    experience: int
+    mechanics: int
+    suggestion: str | None = None
+
 def send_email_resend(contact: ContactMessage):
     print(">>> [RESEND] Iniciando envio via API...")
     if not RESEND_API_KEY: return False
 
     # Template HTML Premium Otimizado para Outlook
-    # Simula a textura tátil do portfólio usando cores sólidas e bordas de alto contraste
     html_content = f"""
     <!DOCTYPE html>
     <html lang="pt-BR" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -295,3 +304,26 @@ def send_contact(request: Request, message: ContactMessage):
         return {"status": "success", "message": "Mensagem enviada!"}
     else:
         return {"status": "success", "message": "Mensagem salva (Email falhou)!"}
+
+# --- ROTA DE FEEDBACK ---
+@app.post("/feedback")
+@limiter.limit("3/hour") # Limite mais restrito para evitar spam de feedback
+def send_feedback(request: Request, feedback: FeedbackLog):
+    try:
+        if supabase:
+            supabase.table("feedback_logs").insert({
+                "usability": feedback.usability,
+                "design": feedback.design,
+                "projects": feedback.projects,
+                "structure": feedback.structure,
+                "experience": feedback.experience,
+                "mechanics": feedback.mechanics,
+                "suggestion": feedback.suggestion
+            }).execute()
+            return {"status": "success", "message": "Feedback logged"}
+        else:
+             raise HTTPException(status_code=503, detail="Database unavailable")
+    except Exception as e:
+        print(f"--- Erro Feedback: {str(e)}")
+        sentry_sdk.capture_exception(e)
+        raise HTTPException(status_code=500, detail="Error processing feedback")
