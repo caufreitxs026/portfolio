@@ -15,13 +15,12 @@ export default function FeedbackWidget() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isSecretMode, setIsSecretMode] = useState(false);
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
-  const [showCallout, setShowCallout] = useState(false);
 
   // --- LÓGICA DA NAVE (Física Robusta) ---
   const shipRef = useRef<HTMLButtonElement>(null);
-  // Inicia fora da tela para evitar flicker antes do cálculo
+  // Inicia fora da tela para evitar flicker
   const position = useRef({ x: -100, y: -100 });
-  const velocity = useRef({ x: 1.5, y: 1.2 }); // Velocidade inicial suave
+  const velocity = useRef({ x: 1.5, y: 1.2 });
   const requestRef = useRef<number>();
   const isHovering = useRef(false);
   const isInitialized = useRef(false);
@@ -39,14 +38,6 @@ export default function FeedbackWidget() {
     experience: t.feedback.categories.experience,
     mechanics: t.feedback.categories.mechanics
   };
-
-  const calloutMessages = [
-    "Report Status?", 
-    "System Feedback", 
-    "Click to Log", 
-    "Data Required"
-  ];
-  const [calloutIndex, setCalloutIndex] = useState(0);
 
   // Inicialização Segura da Posição
   useEffect(() => {
@@ -75,14 +66,14 @@ export default function FeedbackWidget() {
             position.current.y += velocity.current.y;
 
             const { innerWidth, innerHeight } = window;
-            const size = 60; // Margem de segurança (tamanho da nave + padding)
+            const size = 60; // Margem de segurança
 
-            // Colisão Eixo X (Com Clamp para evitar prender na parede)
+            // Colisão Eixo X (Com Clamp)
             if (position.current.x + size > innerWidth) {
-                position.current.x = innerWidth - size; // Empurra de volta
-                velocity.current.x *= -1; // Inverte
+                position.current.x = innerWidth - size;
+                velocity.current.x *= -1;
             } else if (position.current.x < 0) {
-                position.current.x = 0; // Empurra de volta
+                position.current.x = 0;
                 velocity.current.x *= -1;
             }
 
@@ -110,25 +101,10 @@ export default function FeedbackWidget() {
     return () => {
         if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [isOpen, hasSubmitted]); // Removemos dependências instáveis para evitar resets
-
-  // Ciclo de Mensagens (Callout)
-  useEffect(() => {
-    if (isOpen || hasSubmitted) return;
-    const interval = setInterval(() => {
-        setCalloutIndex(prev => (prev + 1) % calloutMessages.length);
-        setShowCallout(true);
-        setTimeout(() => setShowCallout(false), 3000);
-    }, 10000);
-    return () => clearInterval(interval);
   }, [isOpen, hasSubmitted]);
 
   // Detector de Tema
   useEffect(() => {
-    // REMOVIDO: localStorage para testes (Manter comentado para produção real se quiser persistência)
-    // const localSubmitted = localStorage.getItem('portfolio_feedback_sent');
-    // if (localSubmitted) setHasSubmitted(true);
-
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
         setIsSecretMode(document.body.classList.contains('secret-active'));
@@ -169,7 +145,8 @@ export default function FeedbackWidget() {
       setTimeout(() => {
           setStatus('success');
           setHasSubmitted(true);
-          // REMOVIDO: localStorage.setItem('portfolio_feedback_sent', 'true');
+          // Persistência desativada para testes visuais
+          // localStorage.setItem('portfolio_feedback_sent', 'true');
           
           setTimeout(() => {
             setIsOpen(false);
@@ -207,6 +184,9 @@ export default function FeedbackWidget() {
     successBg: 'bg-emerald-500/10'
   };
 
+  // Array de partículas para o rastro intenso
+  const particles = Array.from({ length: 8 });
+
   return (
     <AnimatePresence>
       
@@ -215,34 +195,19 @@ export default function FeedbackWidget() {
         <div 
             className="fixed top-0 left-0 z-[9990] pointer-events-none"
             style={{ 
-                // Usando translate3d para forçar aceleração de hardware (GPU)
                 transform: `translate3d(${position.current.x}px, ${position.current.y}px, 0)`,
             }}
         >
-            {/* Callout (Balão de Fala) */}
-            <AnimatePresence>
-                {showCallout && !isHovering.current && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.8 }}
-                        animate={{ opacity: 1, y: -40, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        className={`absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap px-3 py-1 rounded bg-slate-900 border ${theme.border} text-[10px] font-mono font-bold text-white shadow-lg pointer-events-none z-20`}
-                    >
-                        {calloutMessages[calloutIndex]}
-                        <div className={`absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-r border-b ${theme.border} rotate-45`}></div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
             <button
                 ref={shipRef}
                 onClick={() => setIsOpen(true)}
-                onMouseEnter={() => { isHovering.current = true; setShowCallout(true); }}
-                onMouseLeave={() => { isHovering.current = false; setShowCallout(false); }}
-                className="w-14 h-14 flex items-center justify-center cursor-pointer transition-transform filter drop-shadow-lg active:scale-95 group pointer-events-auto"
+                onMouseEnter={() => { isHovering.current = true; }}
+                onMouseLeave={() => { isHovering.current = false; }}
+                className="w-14 h-14 flex items-center justify-center cursor-pointer transition-transform filter drop-shadow-lg active:scale-95 group pointer-events-auto relative"
                 title="System Report"
             >
-                <svg viewBox="0 0 32 32" className={`w-full h-full ${theme.shipStroke} stroke-[1.5] fill-slate-950/80`}>
+                {/* SVG Nave Tech */}
+                <svg viewBox="0 0 32 32" className={`w-full h-full ${theme.shipStroke} stroke-[1.5] fill-slate-950/80 relative z-10`}>
                     <path d="M16 2 L20 10 L28 14 L20 18 L16 28 L12 18 L4 14 L12 10 Z" strokeLinejoin="round" />
                     <path d="M16 8 L16 14" className="stroke-current opacity-50" />
                     <circle cx="28" cy="14" r="1.5" className={`${theme.shipFill} animate-pulse`} />
@@ -250,7 +215,34 @@ export default function FeedbackWidget() {
                     <circle cx="16" cy="16" r="2" className={`${theme.shipFill} opacity-80`} />
                 </svg>
                 
-                <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-6 rounded-full blur-[3px] ${theme.pulse} opacity-50 group-hover:h-8 group-hover:opacity-80 transition-all duration-300`}></div>
+                {/* RASTRO DE PARTÍCULAS INTENSO (Engine Exhaust) */}
+                <div className="absolute top-[75%] left-1/2 -translate-x-1/2 w-4 h-12 pointer-events-none flex flex-col items-center justify-start">
+                    {/* Núcleo de Plasma (Estático e Brilhante) */}
+                    <div className={`w-1.5 h-6 rounded-full blur-[2px] ${theme.pulse} opacity-80 animate-pulse`}></div>
+                    
+                    {/* Partículas Dinâmicas (Ejeção) */}
+                    {particles.map((_, i) => (
+                        <motion.div
+                            key={i}
+                            className={`absolute top-0 w-1 h-1 rounded-full ${theme.shipFill}`}
+                            initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                            animate={{ 
+                                opacity: [0, 0.8, 0], 
+                                y: [0, 20 + Math.random() * 20], // Distância aleatória
+                                x: [(Math.random() - 0.5) * 15, (Math.random() - 0.5) * 30], // Dispersão lateral
+                                scale: [1, 0] 
+                            }}
+                            transition={{ 
+                                duration: 0.4 + Math.random() * 0.3, 
+                                repeat: Infinity, 
+                                ease: "easeOut",
+                                delay: Math.random() * 0.2
+                            }}
+                        />
+                    ))}
+                </div>
+
+                {/* Ping de Radar */}
                 <div className={`absolute inset-0 rounded-full border ${theme.border} opacity-0 group-hover:animate-ping duration-1500`}></div>
             </button>
         </div>
