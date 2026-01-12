@@ -15,12 +15,12 @@ export default function FeedbackWidget() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isSecretMode, setIsSecretMode] = useState(false);
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
-  const [isReady, setIsReady] = useState(false); // Novo estado para evitar "flicker" inicial
+  const [isReady, setIsReady] = useState(false);
 
-  // --- LÓGICA DA NAVE (Física Robusta) ---
+  // --- LÓGICA DA NAVE (Physics Engine) ---
   const shipRef = useRef<HTMLButtonElement>(null);
   const position = useRef({ x: 0, y: 0 });
-  const velocity = useRef({ x: 1.5, y: 1.2 });
+  const velocity = useRef({ x: 1.5, y: 1.5 });
   const requestRef = useRef<number>();
   const isHovering = useRef(false);
   const isInitialized = useRef(false);
@@ -39,29 +39,30 @@ export default function FeedbackWidget() {
     mechanics: t.feedback.categories.mechanics
   };
 
-  // Inicialização Segura da Posição (Executa apenas uma vez)
+  // Inicialização Segura da Posição
   useEffect(() => {
     if (typeof window !== 'undefined' && !isInitialized.current) {
+        // Começa no centro-topo para evitar bugs de colisão inicial
         position.current = {
-            x: Math.random() * (window.innerWidth - 100),
-            y: Math.random() * (window.innerHeight - 100)
+            x: Math.random() * (window.innerWidth / 2),
+            y: Math.random() * (window.innerHeight / 3)
         };
         
-        // Garante velocidade aleatória e constante
+        // Define velocidade constante e direção aleatória
         const angle = Math.random() * Math.PI * 2;
-        const speed = 2; // Velocidade constante
+        const speed = 1.5; // Velocidade suave e constante
         velocity.current = {
             x: Math.cos(angle) * speed,
             y: Math.sin(angle) * speed
         };
         
         isInitialized.current = true;
-        // Só mostra a nave depois de posicionada corretamente
-        setTimeout(() => setIsReady(true), 100);
+        // Fade-in suave da nave
+        setTimeout(() => setIsReady(true), 500);
     }
   }, []);
 
-  // Loop de Animação Otimizado
+  // Loop de Animação Otimizado (60FPS)
   const animateShip = useCallback(() => {
     if (!shipRef.current || isOpen || hasSubmitted) return;
 
@@ -73,7 +74,9 @@ export default function FeedbackWidget() {
         const { innerWidth, innerHeight } = window;
         const size = 60; // Tamanho da nave + margem segura
 
-        // Colisão Eixo X (Com empurrão para evitar travar na parede)
+        // --- COLISÃO COM BORDAS DA TELA ---
+        
+        // Eixo X
         if (position.current.x + size > innerWidth) {
             position.current.x = innerWidth - size;
             velocity.current.x *= -1;
@@ -82,7 +85,7 @@ export default function FeedbackWidget() {
             velocity.current.x *= -1;
         }
 
-        // Colisão Eixo Y
+        // Eixo Y
         if (position.current.y + size > innerHeight) {
             position.current.y = innerHeight - size;
             velocity.current.y *= -1;
@@ -90,12 +93,27 @@ export default function FeedbackWidget() {
             position.current.y = 0;
             velocity.current.y *= -1;
         }
+
+        // --- COLISÃO COM "ÍCONES" (Zona Proibida no Canto Inferior Direito) ---
+        // Evita que a nave passe por cima dos botões de Game e ScrollToTop
+        const forbiddenZoneX = innerWidth - 120; // Largura da zona
+        const forbiddenZoneY = innerHeight - 180; // Altura da zona
+
+        if (position.current.x > forbiddenZoneX && position.current.y > forbiddenZoneY) {
+            // Se entrar na zona, inverte para sair imediatamente
+            if (Math.abs(velocity.current.x) > Math.abs(velocity.current.y)) {
+                velocity.current.x *= -1;
+            } else {
+                velocity.current.y *= -1;
+            }
+        }
     }
 
-    // Calcula rotação (Adiciona 90deg para ajustar o SVG)
+    // Calcula rotação suave baseada na direção
+    // Adiciona 90deg para compensar o desenho original do SVG que aponta para cima
     const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
     
-    // Aplica transformações via GPU
+    // Aplica via Transform (Alta Performance)
     shipRef.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0) rotate(${rotation}deg)`;
 
     requestRef.current = requestAnimationFrame(animateShip);
@@ -108,9 +126,9 @@ export default function FeedbackWidget() {
     };
   }, [animateShip]);
 
-  // Detector de Tema e LocalStorage
+  // Detector de Tema
   useEffect(() => {
-    // REMOVIDO: localStorage para testes (descomentar para produção)
+    // REMOVIDO: localStorage para testes (descomentar em produção)
     // const localSubmitted = localStorage.getItem('portfolio_feedback_sent');
     // if (localSubmitted) setHasSubmitted(true);
 
@@ -156,10 +174,9 @@ export default function FeedbackWidget() {
           setHasSubmitted(true);
           // Persistência: localStorage.setItem('portfolio_feedback_sent', 'true');
           
-          // Fecha o modal após exibir sucesso por 4.5 segundos
           setTimeout(() => {
             setIsOpen(false);
-          }, 4500);
+          }, 4000);
       }, 1500);
 
     } catch (error) {
@@ -169,7 +186,7 @@ export default function FeedbackWidget() {
     }
   };
 
-  // Se já enviou e o menu fechou, o componente não renderiza nada (Nave some)
+  // Renderização Condicional
   if (hasSubmitted && !isOpen) return null;
 
   const theme = isSecretMode ? {
@@ -202,10 +219,11 @@ export default function FeedbackWidget() {
       {/* --- NAVE ESPACIAL (Gatilho) --- */}
       {!isOpen && !hasSubmitted && (
         <div 
-            className={`fixed top-0 left-0 z-[9990] pointer-events-none transition-opacity duration-700 ${isReady ? 'opacity-100' : 'opacity-0'}`}
+            className={`fixed top-0 left-0 z-[9990] pointer-events-none transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'}`}
             style={{ 
+                // A posição é controlada via JS, mas o elemento começa "invisível" para evitar pulos
                 transform: `translate3d(${position.current.x}px, ${position.current.y}px, 0)`,
-                willChange: 'transform' // Dica para o navegador otimizar renderização
+                willChange: 'transform'
             }}
         >
             <button
@@ -214,10 +232,10 @@ export default function FeedbackWidget() {
                 onMouseEnter={() => { isHovering.current = true; }}
                 onMouseLeave={() => { isHovering.current = false; }}
                 className="w-14 h-14 flex items-center justify-center cursor-pointer transition-transform filter drop-shadow-lg active:scale-95 group pointer-events-auto relative"
-                title="System Report"
+                title="Enviar Feedback"
             >
-                {/* SVG Nave Tech */}
-                <svg viewBox="0 0 32 32" className={`w-full h-full ${theme.shipStroke} stroke-[1.5] fill-slate-950/80 relative z-10`}>
+                {/* SVG Nave Tech (Drone) */}
+                <svg viewBox="0 0 32 32" className={`w-full h-full ${theme.shipStroke} stroke-[1.5] fill-slate-950/90 relative z-10`}>
                     <path d="M16 2 L20 10 L28 14 L20 18 L16 28 L12 18 L4 14 L12 10 Z" strokeLinejoin="round" />
                     <path d="M16 8 L16 14" className="stroke-current opacity-50" />
                     <circle cx="28" cy="14" r="1.5" className={`${theme.shipFill} animate-pulse`} />
@@ -225,7 +243,7 @@ export default function FeedbackWidget() {
                     <circle cx="16" cy="16" r="2" className={`${theme.shipFill} opacity-80`} />
                 </svg>
                 
-                {/* Rastro de Partículas (Exaustão) */}
+                {/* Rastro de Partículas */}
                 <div className="absolute top-[75%] left-1/2 -translate-x-1/2 w-4 h-12 pointer-events-none flex flex-col items-center justify-start">
                     <div className={`w-1.5 h-6 rounded-full blur-[2px] ${theme.pulse} opacity-80 animate-pulse`}></div>
                     
@@ -256,7 +274,7 @@ export default function FeedbackWidget() {
         </div>
       )}
 
-      {/* --- CARD EXPANDIDO --- */}
+      {/* --- MODAL DE FEEDBACK --- */}
       {isOpen && (
         <>
           <motion.div 
