@@ -15,7 +15,7 @@ export default function FeedbackWidget() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isSecretMode, setIsSecretMode] = useState(false);
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
-  const [isReady, setIsReady] = useState(false); // Evita flicker inicial
+  const [isReady, setIsReady] = useState(false);
 
   // --- LÓGICA DA NAVE (Physics Engine) ---
   const shipRef = useRef<HTMLButtonElement>(null);
@@ -42,22 +42,21 @@ export default function FeedbackWidget() {
   // Inicialização Segura da Posição
   useEffect(() => {
     if (typeof window !== 'undefined' && !isInitialized.current) {
-        // Posição inicial segura (centro-topo)
+        // Começa no centro para garantir que está visível
         position.current = {
-            x: Math.random() * (window.innerWidth / 2),
-            y: Math.random() * (window.innerHeight / 3)
+            x: (window.innerWidth / 2) - 30,
+            y: (window.innerHeight / 2) - 30
         };
         
         // Define velocidade constante e direção aleatória
         const angle = Math.random() * Math.PI * 2;
-        const speed = 1.5; // Velocidade suave e constante
+        const speed = 2; // Velocidade um pouco maior para fluidez
         velocity.current = {
             x: Math.cos(angle) * speed,
             y: Math.sin(angle) * speed
         };
         
         isInitialized.current = true;
-        // Fade-in suave da nave
         setTimeout(() => setIsReady(true), 500);
     }
   }, []);
@@ -66,54 +65,70 @@ export default function FeedbackWidget() {
   const animateShip = useCallback(() => {
     if (!shipRef.current || isOpen || hasSubmitted) return;
 
-    // Se o mouse NÃO estiver em cima, atualiza a física
     if (!isHovering.current) {
         // Atualiza posição
         position.current.x += velocity.current.x;
         position.current.y += velocity.current.y;
 
         const { innerWidth, innerHeight } = window;
-        const size = 60; // Tamanho da nave + margem segura
+        
+        // MARGENS DE SEGURANÇA (Para evitar sumir nas bordas)
+        const MARGIN = 15; // Distância mínima da borda
+        const SHIP_SIZE = 70; // Tamanho da área de colisão da nave
 
-        // --- COLISÃO COM BORDAS DA TELA (Ricochete) ---
+        // --- COLISÃO COM BORDAS DA TELA (Ricochete com Margem) ---
         
         // Eixo X
-        if (position.current.x + size > innerWidth) {
-            position.current.x = innerWidth - size;
+        if (position.current.x + SHIP_SIZE + MARGIN > innerWidth) {
+            position.current.x = innerWidth - SHIP_SIZE - MARGIN;
             velocity.current.x *= -1;
-        } else if (position.current.x < 0) {
-            position.current.x = 0;
+        } else if (position.current.x < MARGIN) {
+            position.current.x = MARGIN;
             velocity.current.x *= -1;
         }
 
         // Eixo Y
-        if (position.current.y + size > innerHeight) {
-            position.current.y = innerHeight - size;
+        if (position.current.y + SHIP_SIZE + MARGIN > innerHeight) {
+            position.current.y = innerHeight - SHIP_SIZE - MARGIN;
             velocity.current.y *= -1;
-        } else if (position.current.y < 0) {
-            position.current.y = 0;
+        } else if (position.current.y < MARGIN) {
+            position.current.y = MARGIN;
             velocity.current.y *= -1;
         }
 
         // --- COLISÃO COM "ÍCONES" (Zona Proibida no Canto Inferior Direito) ---
-        const forbiddenZoneX = innerWidth - 120; // Largura da zona
-        const forbiddenZoneY = innerHeight - 180; // Altura da zona
+        // Aumentei a área da zona proibida para garantir que não sobreponha os botões
+        const forbiddenZoneX = innerWidth - 140; 
+        const forbiddenZoneY = innerHeight - 200; 
 
         if (position.current.x > forbiddenZoneX && position.current.y > forbiddenZoneY) {
-            // Se entrar na zona, inverte para sair imediatamente
+            // Empurra a nave para fora da zona suavemente
             if (Math.abs(velocity.current.x) > Math.abs(velocity.current.y)) {
-                velocity.current.x *= -1;
+                // Se veio mais na horizontal, inverte X
+                velocity.current.x = -Math.abs(velocity.current.x); 
             } else {
-                velocity.current.y *= -1;
+                // Se veio mais na vertical, inverte Y
+                velocity.current.y = -Math.abs(velocity.current.y);
             }
         }
     }
 
-    // Rotação Dinâmica: Aponta na direção do movimento
-    // Adiciona 90deg para compensar o desenho original do SVG que aponta para cima
+    // Sanity Check: Se a nave se perder (ex: resize brusco), reseta para o centro
+    if (
+        position.current.x > window.innerWidth + 100 || 
+        position.current.x < -100 || 
+        position.current.y > window.innerHeight + 100 || 
+        position.current.y < -100
+    ) {
+        position.current = {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2
+        };
+    }
+
     const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
     
-    // Aplica via Transform (Alta Performance na GPU)
+    // Aplica via Transform (GPU)
     shipRef.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0) rotate(${rotation}deg)`;
 
     requestRef.current = requestAnimationFrame(animateShip);
