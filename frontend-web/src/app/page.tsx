@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Code, Server, Gamepad2, ChevronDown, ChevronUp, History } from 'lucide-react';
+import { Code, Server, Gamepad2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 // Componentes
@@ -13,6 +13,7 @@ import Footer from '@/components/Footer';
 import ProjectCarousel from '@/components/ProjectCarousel';
 import TechWordle from '@/components/TechWordle';
 import CompetenceSection from '@/components/CompetenceSection';
+import FeedbackWidget from '@/components/FeedbackWidget'; // <--- Importado aqui
 import { ProjectSkeleton, ExperienceSkeleton } from '@/components/Skeletons';
 import { usePortfolioData } from '@/hooks/usePortfolioData';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -62,7 +63,12 @@ export default function Home() {
       <Navbar />
       <Hero />
 
-      {/* --- BOTÃO FLUTUANTE DO JOGO --- */}
+      {/* --- WIDGETS FLUTUANTES --- */}
+      
+      {/* 1. Nave de Feedback (Drone de Patrulha) */}
+      <FeedbackWidget />
+
+      {/* 2. Botão do Jogo (GameHub) */}
       <AnimatePresence>
         {!isGameOpen && (
           <motion.button
@@ -144,7 +150,7 @@ export default function Home() {
                   <ExperienceItem key={exp.id} experience={exp} index={index} />
                 ))}
 
-                {/* Botão de Expandir/Recolher (Só aparece se houver mais itens que o limite) */}
+                {/* Botão de Expandir/Recolher */}
                 {experiences.length > INITIAL_EXP_COUNT && (
                   <div className="mt-8 relative z-20 flex justify-center md:justify-start pl-6">
                     <motion.button
@@ -156,19 +162,9 @@ export default function Home() {
                         ${theme.buttonExp}
                       `}
                     >
-                      <div className={`p-1 rounded-full border bg-slate-950 ${isSecretMode ? 'border-pink-500/50' : 'border-emerald-500/50'}`}>
-                        {showAllExperiences ? <ChevronUp size={16} /> : <History size={16} />}
-                      </div>
-                      
                       <span>
-                        {showAllExperiences ? t.home.collapseTimeline : t.home.loadTimeline}
+                        {showAllExperiences ? 'Recolher Histórico' : 'Carregar Linha do Tempo Completa'}
                       </span>
-                      
-                      {!showAllExperiences && (
-                        <span className={`text-xs opacity-60 ml-1 ${theme.iconExp}`}>
-                          (+{experiences.length - INITIAL_EXP_COUNT})
-                        </span>
-                      )}
                     </motion.button>
                   </div>
                 )}
