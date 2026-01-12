@@ -42,8 +42,12 @@ export default function FeedbackWidget() {
 
   // 1. Lógica de Gatilho e Tema
   useEffect(() => {
+    // Verifica localStorage para não mostrar novamente se já enviou
     const localSubmitted = localStorage.getItem('portfolio_feedback_sent');
-    if (localSubmitted) return;
+    if (localSubmitted) {
+        setHasSubmitted(true);
+        return;
+    }
 
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
@@ -61,10 +65,12 @@ export default function FeedbackWidget() {
         observer.observe(document.body, { attributes: true });
     }
 
+    // Timer de 45 segundos
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, 45000);
 
+    // Gatilho de Scroll (50%)
     const handleScroll = () => {
       const scrollPercent = (window.scrollY + window.innerHeight) / document.body.scrollHeight;
       if (scrollPercent > 0.5) {
@@ -127,7 +133,7 @@ export default function FeedbackWidget() {
     }
   };
 
-  if (!isVisible || hasSubmitted && !isOpen) return null;
+  if (!isVisible || (hasSubmitted && !isOpen)) return null;
 
   const theme = isSecretMode ? {
     border: 'border-pink-500/30',
@@ -145,15 +151,15 @@ export default function FeedbackWidget() {
 
   return (
     <AnimatePresence>
-      {/* Botão Flutuante (Minimizado) */}
+      {/* Botão Flutuante (Centralizado no Mobile, Direita no Desktop) */}
       {!isOpen && isVisible && !hasSubmitted && (
         <motion.button
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0, opacity: 0 }}
+          initial={{ scale: 0, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0, opacity: 0, y: 20 }}
           onClick={() => setIsOpen(true)}
           className={`
-            fixed bottom-4 right-4 md:bottom-8 md:right-24 z-[90] 
+            fixed bottom-6 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:bottom-8 md:right-24 z-[100] 
             flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-md shadow-2xl group
             ${theme.bg} ${theme.border} ${theme.glow}
           `}
@@ -161,21 +167,24 @@ export default function FeedbackWidget() {
           whileTap={{ scale: 0.95 }}
         >
           <Activity size={18} className={theme.text} />
-          <span className="text-xs font-mono font-bold text-slate-300 uppercase">System Report</span>
+          <span className="text-xs font-mono font-bold text-slate-300 uppercase whitespace-nowrap">System Report</span>
           <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full animate-pulse ${isSecretMode ? 'bg-pink-500' : 'bg-emerald-500'}`}></span>
         </motion.button>
       )}
 
-      {/* Card Expandido (Formulário) */}
+      {/* Card Expandido (Centralizado no Mobile, Direita no Desktop) */}
       {isOpen && (
         <motion.div
-          initial={{ y: 50, opacity: 0, scale: 0.9 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: 50, opacity: 0, scale: 0.9 }}
+          initial={{ y: 50, opacity: 0, scale: 0.9, x: "-50%" }} // Inicial mobile (centralizado)
+          animate={{ y: 0, opacity: 1, scale: 1, x: "-50%" }}
+          exit={{ y: 50, opacity: 0, scale: 0.9, x: "-50%" }}
+          // Ajustes de variantes para desktop (sobrescrevendo o x centralizado do mobile)
+          style={{ x: "-50%" }} // Default mobile center transform
           className={`
-            fixed bottom-4 right-4 md:bottom-8 md:right-24 z-[100]
-            w-[calc(100vw-2rem)] md:w-[380px] rounded-2xl border backdrop-blur-xl shadow-2xl overflow-hidden
+            fixed bottom-6 left-1/2 md:translate-x-0 md:left-auto md:right-24 md:bottom-8 z-[100]
+            w-[calc(100vw-2rem)] max-w-[380px] rounded-2xl border backdrop-blur-xl shadow-2xl overflow-hidden
             ${theme.bg} ${theme.border}
+            md:!transform-none
           `}
         >
           {/* Header */}
