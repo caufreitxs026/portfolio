@@ -48,6 +48,25 @@ const translations = {
     footer: {
       rights: 'Todos os direitos reservados.',
       developed: 'Desenvolvido com'
+    },
+    feedback: {
+      title: 'Diagnostic Log',
+      successTitle: 'Log Registrado!',
+      successMsg: 'Obrigado por contribuir com a evolução do sistema.',
+      intro: 'Avalie os parâmetros do sistema. Clique nas barras para definir o nível de estabilidade.',
+      categories: {
+        usability: 'Usabilidade',
+        design: 'Design & UI',
+        projects: 'Qualidade Projetos',
+        structure: 'Estrutura Info.',
+        experience: 'UX Geral',
+        mechanics: 'Mecânicas/Efeitos'
+      },
+      suggestionLabel: 'Patch Notes (Sugestões)',
+      suggestionPlaceholder: 'Opcional: Algum bug ou melhoria?',
+      btnSend: 'Upload Log',
+      btnSending: 'Enviando Dados...',
+      error: 'Falha na conexão. Tente novamente.'
     }
   },
   en: {
@@ -93,6 +112,25 @@ const translations = {
     footer: {
       rights: 'All rights reserved.',
       developed: 'Developed with'
+    },
+    feedback: {
+      title: 'Diagnostic Log',
+      successTitle: 'Log Registered!',
+      successMsg: 'Thank you for contributing to system evolution.',
+      intro: 'Evaluate system parameters. Click bars to define stability level.',
+      categories: {
+        usability: 'Usability',
+        design: 'Design & UI',
+        projects: 'Project Quality',
+        structure: 'Info Structure',
+        experience: 'General UX',
+        mechanics: 'Mechanics/FX'
+      },
+      suggestionLabel: 'Patch Notes (Suggestions)',
+      suggestionPlaceholder: 'Optional: Any bug or improvement?',
+      btnSend: 'Upload Log',
+      btnSending: 'Sending Data...',
+      error: 'Connection failed. Try again.'
     }
   }
 };
