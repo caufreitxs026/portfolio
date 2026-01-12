@@ -42,37 +42,28 @@ export default function FeedbackWidget() {
   const animateShip = useCallback(() => {
     if (!shipRef.current || isOpen || hasSubmitted) return;
 
-    // Se o mouse estiver em cima, não move (para facilitar o clique)
     if (!isHovering.current) {
-        // Atualiza posição
         position.current.x += velocity.current.x;
         position.current.y += velocity.current.y;
 
         const { innerWidth, innerHeight } = window;
-        const size = 50; // Tamanho aproximado da nave
+        const size = 50;
 
-        // Ricochete X
         if (position.current.x + size > innerWidth || position.current.x < 0) {
             velocity.current.x = -velocity.current.x;
         }
-        // Ricochete Y
         if (position.current.y + size > innerHeight || position.current.y < 0) {
             velocity.current.y = -velocity.current.y;
         }
     }
 
-    // Calcula rotação baseada na velocidade (Math.atan2)
-    // Adiciona 90deg porque o SVG aponta para cima por padrão
     const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
-
-    // Aplica transformações diretamente no DOM para performance (sem re-render do React)
     shipRef.current.style.transform = `translate(${position.current.x}px, ${position.current.y}px) rotate(${rotation}deg)`;
 
     requestRef.current = requestAnimationFrame(animateShip);
   }, [isOpen, hasSubmitted]);
 
   useEffect(() => {
-    // Inicializa posição aleatória
     if (typeof window !== 'undefined') {
         position.current = {
             x: Math.random() * (window.innerWidth - 100),
@@ -80,7 +71,6 @@ export default function FeedbackWidget() {
         };
     }
 
-    // Inicia loop
     requestRef.current = requestAnimationFrame(animateShip);
 
     return () => {
@@ -88,10 +78,11 @@ export default function FeedbackWidget() {
     };
   }, [animateShip]);
 
-  // Detector de Tema e LocalStorage
+  // Detector de Tema (LocalStorage removido para testes)
   useEffect(() => {
-    const localSubmitted = localStorage.getItem('portfolio_feedback_sent');
-    if (localSubmitted) setHasSubmitted(true);
+    // REMOVIDO: Verificação de localStorage para permitir testes contínuos
+    // const localSubmitted = localStorage.getItem('portfolio_feedback_sent');
+    // if (localSubmitted) setHasSubmitted(true);
 
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
@@ -136,11 +127,13 @@ export default function FeedbackWidget() {
 
       setStatus('success');
       setHasSubmitted(true);
-      localStorage.setItem('portfolio_feedback_sent', 'true');
+      // REMOVIDO: localStorage.setItem('portfolio_feedback_sent', 'true');
       
-      // Fecha o modal e remove a nave após 4 segundos exibindo a mensagem de sucesso
       setTimeout(() => {
         setIsOpen(false);
+        // Reset opcional para testes: descomente abaixo se quiser que a nave volte na mesma sessão após enviar
+        // setHasSubmitted(false); 
+        // setStatus('idle');
       }, 4000);
 
     } catch (error) {
@@ -175,8 +168,7 @@ export default function FeedbackWidget() {
   return (
     <AnimatePresence>
       
-      {/* --- NAVE ESPACIAL (Gatilho Permanente) --- */}
-      {/* Só aparece se não estiver aberto e ainda não tiver submetido */}
+      {/* --- NAVE ESPACIAL --- */}
       {!isOpen && !hasSubmitted && (
         <button
           ref={shipRef}
@@ -187,23 +179,14 @@ export default function FeedbackWidget() {
           style={{ willChange: 'transform' }} 
           title="Status Report Drone"
         >
-            {/* SVG Nave Tech (Stealth Drone Design) */}
             <svg viewBox="0 0 32 32" className={`w-full h-full ${theme.shipStroke} stroke-[1.5] fill-slate-950/80`}>
-                {/* Corpo Principal estilo Stealth */}
                 <path d="M16 2 L20 10 L28 14 L20 18 L16 28 L12 18 L4 14 L12 10 Z" strokeLinejoin="round" />
-                {/* Detalhe do Cockpit */}
                 <path d="M16 8 L16 14" className="stroke-current opacity-50" />
-                {/* Propulsores Laterais */}
                 <circle cx="28" cy="14" r="1.5" className={`${theme.shipFill} animate-pulse`} />
                 <circle cx="4" cy="14" r="1.5" className={`${theme.shipFill} animate-pulse`} />
-                {/* Núcleo de Energia */}
                 <circle cx="16" cy="16" r="2" className={`${theme.shipFill} opacity-80`} />
             </svg>
-            
-            {/* Rastro de Motor (Engine Trail) */}
             <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-6 rounded-full blur-[3px] ${theme.pulse} opacity-50 group-hover:h-8 group-hover:opacity-80 transition-all duration-300`}></div>
-            
-            {/* Ping de Radar */}
             <div className={`absolute inset-0 rounded-full border ${theme.border} opacity-0 group-hover:animate-ping duration-1500`}></div>
         </button>
       )}
