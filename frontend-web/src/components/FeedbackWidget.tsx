@@ -15,7 +15,7 @@ export default function FeedbackWidget() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isSecretMode, setIsSecretMode] = useState(false);
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
-  const [isReady, setIsReady] = useState(false);
+  const [isReady, setIsReady] = useState(false); // Evita flicker inicial
 
   // --- LÓGICA DA NAVE (Physics Engine) ---
   const shipRef = useRef<HTMLButtonElement>(null);
@@ -42,7 +42,7 @@ export default function FeedbackWidget() {
   // Inicialização Segura da Posição
   useEffect(() => {
     if (typeof window !== 'undefined' && !isInitialized.current) {
-        // Começa no centro-topo para evitar bugs de colisão inicial
+        // Posição inicial segura (centro-topo)
         position.current = {
             x: Math.random() * (window.innerWidth / 2),
             y: Math.random() * (window.innerHeight / 3)
@@ -66,6 +66,7 @@ export default function FeedbackWidget() {
   const animateShip = useCallback(() => {
     if (!shipRef.current || isOpen || hasSubmitted) return;
 
+    // Se o mouse NÃO estiver em cima, atualiza a física
     if (!isHovering.current) {
         // Atualiza posição
         position.current.x += velocity.current.x;
@@ -74,7 +75,7 @@ export default function FeedbackWidget() {
         const { innerWidth, innerHeight } = window;
         const size = 60; // Tamanho da nave + margem segura
 
-        // --- COLISÃO COM BORDAS DA TELA ---
+        // --- COLISÃO COM BORDAS DA TELA (Ricochete) ---
         
         // Eixo X
         if (position.current.x + size > innerWidth) {
@@ -95,7 +96,6 @@ export default function FeedbackWidget() {
         }
 
         // --- COLISÃO COM "ÍCONES" (Zona Proibida no Canto Inferior Direito) ---
-        // Evita que a nave passe por cima dos botões de Game e ScrollToTop
         const forbiddenZoneX = innerWidth - 120; // Largura da zona
         const forbiddenZoneY = innerHeight - 180; // Altura da zona
 
@@ -109,11 +109,11 @@ export default function FeedbackWidget() {
         }
     }
 
-    // Calcula rotação suave baseada na direção
+    // Rotação Dinâmica: Aponta na direção do movimento
     // Adiciona 90deg para compensar o desenho original do SVG que aponta para cima
     const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
     
-    // Aplica via Transform (Alta Performance)
+    // Aplica via Transform (Alta Performance na GPU)
     shipRef.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0) rotate(${rotation}deg)`;
 
     requestRef.current = requestAnimationFrame(animateShip);
@@ -128,10 +128,6 @@ export default function FeedbackWidget() {
 
   // Detector de Tema
   useEffect(() => {
-    // REMOVIDO: localStorage para testes (descomentar em produção)
-    // const localSubmitted = localStorage.getItem('portfolio_feedback_sent');
-    // if (localSubmitted) setHasSubmitted(true);
-
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
         setIsSecretMode(document.body.classList.contains('secret-active'));
@@ -186,7 +182,6 @@ export default function FeedbackWidget() {
     }
   };
 
-  // Renderização Condicional
   if (hasSubmitted && !isOpen) return null;
 
   const theme = isSecretMode ? {
@@ -216,12 +211,11 @@ export default function FeedbackWidget() {
   return (
     <AnimatePresence>
       
-      {/* --- NAVE ESPACIAL (Gatilho) --- */}
+      {/* --- NAVE ESPACIAL (Visual SVG Drone) --- */}
       {!isOpen && !hasSubmitted && (
         <div 
             className={`fixed top-0 left-0 z-[9990] pointer-events-none transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'}`}
             style={{ 
-                // A posição é controlada via JS, mas o elemento começa "invisível" para evitar pulos
                 transform: `translate3d(${position.current.x}px, ${position.current.y}px, 0)`,
                 willChange: 'transform'
             }}
@@ -234,7 +228,7 @@ export default function FeedbackWidget() {
                 className="w-14 h-14 flex items-center justify-center cursor-pointer transition-transform filter drop-shadow-lg active:scale-95 group pointer-events-auto relative"
                 title="Enviar Feedback"
             >
-                {/* SVG Nave Tech (Drone) */}
+                {/* SVG Nave Tech Customizada */}
                 <svg viewBox="0 0 32 32" className={`w-full h-full ${theme.shipStroke} stroke-[1.5] fill-slate-950/90 relative z-10`}>
                     <path d="M16 2 L20 10 L28 14 L20 18 L16 28 L12 18 L4 14 L12 10 Z" strokeLinejoin="round" />
                     <path d="M16 8 L16 14" className="stroke-current opacity-50" />
@@ -243,7 +237,7 @@ export default function FeedbackWidget() {
                     <circle cx="16" cy="16" r="2" className={`${theme.shipFill} opacity-80`} />
                 </svg>
                 
-                {/* Rastro de Partículas */}
+                {/* Rastro de Partículas (Efeito Visual Intenso) */}
                 <div className="absolute top-[75%] left-1/2 -translate-x-1/2 w-4 h-12 pointer-events-none flex flex-col items-center justify-start">
                     <div className={`w-1.5 h-6 rounded-full blur-[2px] ${theme.pulse} opacity-80 animate-pulse`}></div>
                     
