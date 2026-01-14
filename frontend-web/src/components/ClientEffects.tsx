@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
-// Importação dinâmica com SSR desativado para componentes pesados
+// Importação dinâmica de todos os efeitos
+// Se algum componente estiver quebrando o build, comente a importação dele aqui também se necessário.
 const SystemBoot = dynamic(() => import('./SystemBoot'), { ssr: false });
 const CustomCursor = dynamic(() => import('./CustomCursor'), { ssr: false });
 const EffectsWrapper = dynamic(() => import('./EffectsWrapper'), { ssr: false });
@@ -14,24 +15,25 @@ export default function ClientEffects() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    // Garante que o código só rode no navegador após o carregamento inicial
     setIsMounted(true);
   }, []);
 
-  // Se não estiver montado no cliente, retorna null (não renderiza nada)
-  // Isso evita qualquer erro de "window is not defined" ou conflito de HTML
   if (!isMounted) return null;
 
   return (
     <>
-      {/* Componentes Lógicos e Visuais */}
-      <SystemBoot />
+      {/* 1. Componentes Leves (Provavelmente seguros) - Ativados */}
       <EffectsWrapper />
       <CustomCursor />
       <ScrollProgress />
-      <ParticleBackground />
 
-      {/* Camada de Textura (Noise) - Movida para cá para segurança */}
+      {/* 2. Componentes Pesados (Possíveis causadores de erro) - DESATIVADOS TEMPORARIAMENTE 
+          Descomente um por vez e teste o deploy.
+      */}
+      {/* <SystemBoot /> */}
+      {/* <ParticleBackground /> */}
+
+      {/* Camada de Textura (Noise) */}
       <div 
         className="fixed inset-0 z-[9998] pointer-events-none opacity-[0.04] mix-blend-overlay"
         style={{ 
@@ -39,7 +41,7 @@ export default function ClientEffects() {
         }}
       />
 
-      {/* Camada de Vinheta - Movida para cá para segurança */}
+      {/* Camada de Vinheta */}
       <div className="fixed inset-0 z-[9997] pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
     </>
   );
