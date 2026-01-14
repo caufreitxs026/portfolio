@@ -6,7 +6,12 @@ import CustomCursor from "@/components/CustomCursor";
 import EffectsWrapper from "@/components/EffectsWrapper";
 import ParticleBackground from "@/components/ParticleBackground";
 import ScrollProgress from "@/components/ScrollProgress";
-import SystemBoot from "@/components/SystemBoot"; // 1. Importacao aqui
+import dynamic from "next/dynamic"; // Importação do dynamic
+
+// Carregamento dinâmico com SSR desativado para evitar erros de hidratação/window no mobile
+const SystemBoot = dynamic(() => import("@/components/SystemBoot"), {
+  ssr: false,
+});
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -66,7 +71,7 @@ export default function RootLayout({
       >
         <LanguageProvider>
           
-          {/* 2. Insercao do Componente aqui (Logo no inicio) */}
+          {/* SystemBoot carregado apenas no cliente para evitar crash mobile */}
           <SystemBoot />
 
           {/* Textura de Ruido (Noise) */}
