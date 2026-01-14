@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import dynamic from "next/dynamic"; 
+import dynamic from "next/dynamic";
 
-// Reativando ClientEffects com carregamento dinâmico
+// Carrega o isolador de efeitos APENAS no cliente
 const ClientEffects = dynamic(() => import("@/components/ClientEffects"), { 
   ssr: false 
 });
@@ -27,8 +27,8 @@ export const metadata: Metadata = {
     default: "Cauã Freitas | Full Stack & Data Analyst",
     template: "%s | Cauã Freitas"
   },
-  description: "Portfólio interativo de Cauã Freitas. Desenvolvedor Full Stack e Analista de Dados focado em soluções de alta performance.",
-  keywords: ["Full Stack", "Data Analyst", "Python", "React", "Developer", "Cauã Freitas"],
+  description: "Desenvolvedor Full Stack e Analista de Dados focado em soluções de alta performance.",
+  keywords: ["Full Stack", "Data Analyst", "Python", "React", "Developer", "SQL", "Cauã Freitas"],
   authors: [{ name: "Cauã Freitas" }],
   creator: "Cauã Freitas",
   icons: {
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'pt_BR',
     url: 'https://caufreitxs.vercel.app',
-    title: 'Cauã Freitas | Digital Portfolio',
+    title: 'Cauã Freitas | Full Stack & Data Analyst',
     description: 'Transformando dados em experiências digitais imersivas.',
     siteName: 'Cauã Freitas Portfolio',
   },
@@ -59,7 +59,8 @@ export default function RootLayout({
         className={`
           ${inter.variable} ${jetbrainsMono.variable} 
           font-sans antialiased 
-          bg-slate-950 text-slate-200 
+          /* MUDANÇA: bg-slate-900 é mais claro que 950. Texto base mais claro (slate-100) */
+          bg-slate-900 text-slate-100 
           cursor-default 
           selection:bg-emerald-500/30 selection:text-emerald-200
           overflow-x-hidden
@@ -67,23 +68,19 @@ export default function RootLayout({
       >
         <LanguageProvider>
           
-          {/* ClientEffects reativado. 
-              Se houver erro, edite o arquivo components/ClientEffects.tsx e comente os componentes internos.
-          */}
           <ClientEffects />
 
-          {/* Textura de Ruido (CSS Puro - Seguro) */}
+          {/* Textura de Ruido (Reduzida opacidade de 0.04 para 0.02 para limpar a visão) */}
           <div 
-            className="fixed inset-0 z-[9998] pointer-events-none opacity-[0.04] mix-blend-overlay"
+            className="fixed inset-0 z-[9998] pointer-events-none opacity-[0.02] mix-blend-overlay"
             style={{ 
               backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` 
             }}
           />
 
-          {/* Vinheta (CSS Puro - Seguro) */}
-          <div className="fixed inset-0 z-[9997] pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
+          {/* Vinheta (Reduzida intensidade para clarear os cantos) */}
+          <div className="fixed inset-0 z-[9997] pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.2)_100%)]" />
           
-          {/* Conteúdo Principal do Site */}
           <div className="relative z-10 animate-in fade-in duration-700 ease-out">
             {children}
           </div>
