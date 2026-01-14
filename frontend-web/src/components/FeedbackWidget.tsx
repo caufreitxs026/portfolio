@@ -63,7 +63,8 @@ export default function FeedbackWidget() {
 
   // Loop de Animação Otimizado
   const animateShip = useCallback(() => {
-    if (!shipRef.current || isOpen || hasSubmitted) return;
+    // Se o modal estiver aberto, para o loop imediatamente para economizar recursos
+    if (isOpen || hasSubmitted) return;
 
     if (!isHovering.current) {
         // Atualiza posição
@@ -104,19 +105,30 @@ export default function FeedbackWidget() {
             }
         }
 
-        const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
-        shipRef.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0) rotate(${rotation}deg)`;
+        // Aplica rotação e movimento
+        if (shipRef.current) {
+            const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
+            shipRef.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0) rotate(${rotation}deg)`;
+        }
     }
 
     requestRef.current = requestAnimationFrame(animateShip);
   }, [isOpen, hasSubmitted]);
 
+  // Efeito para reiniciar a animação quando o modal fecha
   useEffect(() => {
-    requestRef.current = requestAnimationFrame(animateShip);
+    if (!isOpen && !hasSubmitted) {
+        // CORREÇÃO CRÍTICA: Reseta o estado de hover.
+        // Se o modal fechou, o mouse não está necessariamente em cima da nave, 
+        // então liberamos o freio para ela voltar a voar.
+        isHovering.current = false;
+        requestRef.current = requestAnimationFrame(animateShip);
+    }
+
     return () => {
         if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [animateShip]);
+  }, [animateShip, isOpen, hasSubmitted]);
 
   // Detector de Tema
   useEffect(() => {
@@ -156,6 +168,12 @@ export default function FeedbackWidget() {
   const handleHoverShip = () => {
     isHovering.current = true;
     playSound('hover'); 
+  };
+
+  const handleClose = () => {
+      setIsOpen(false);
+      // Garantia extra: remove o hover via estado do React se necessário, 
+      // mas o ref isHovering.current = false no useEffect já cuida disso.
   };
 
   const handleSubmit = async () => {
@@ -266,20 +284,19 @@ export default function FeedbackWidget() {
                     ))}
                 </div>
                 
-                {/* Ping de Radar (Padrão) */}
                 <div className={`absolute inset-0 rounded-full border ${theme.border} opacity-0 group-hover:opacity-0 animate-ping duration-1500 pointer-events-none`}></div>
             </button>
         </div>
       )}
 
-      {/* --- MODAL DE FEEDBACK --- */}
+      {/* --- MODAL DE FEEDBACK (CENTRALIZADO) --- */}
       {isOpen && (
         <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
-            onClick={() => setIsOpen(false)}
+            onClick={handleClose}
         >
             <motion.div
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -309,7 +326,7 @@ export default function FeedbackWidget() {
                         </div>
                     </div>
                     {!hasSubmitted && (
-                        <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full">
+                        <button onClick={handleClose} className="text-slate-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full">
                             <X size={20} />
                         </button>
                     )}
