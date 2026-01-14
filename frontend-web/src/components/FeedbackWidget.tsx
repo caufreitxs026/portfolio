@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, X, Send, MessageSquare, CheckCircle2, AlertCircle, Zap, Radio, BarChart3 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 
 type Category = 'usability' | 'design' | 'projects' | 'structure' | 'experience' | 'mechanics';
 
@@ -11,6 +12,7 @@ const CATEGORIES: Category[] = ['usability', 'design', 'projects', 'structure', 
 
 export default function FeedbackWidget() {
   const { t } = useLanguage();
+  const { playSound } = useSoundEffects();
   const [isOpen, setIsOpen] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isSecretMode, setIsSecretMode] = useState(false);
@@ -48,14 +50,13 @@ export default function FeedbackWidget() {
         };
         
         const angle = Math.random() * Math.PI * 2;
-        const speed = 1.5; // Velocidade constante e suave
+        const speed = 1.5;
         velocity.current = {
             x: Math.cos(angle) * speed,
             y: Math.sin(angle) * speed
         };
         
         isInitialized.current = true;
-        // Pequeno delay para garantir que o DOM esteja pronto antes de mostrar
         setTimeout(() => setIsReady(true), 200);
     }
   }, []);
@@ -64,8 +65,6 @@ export default function FeedbackWidget() {
   const animateShip = useCallback(() => {
     if (!shipRef.current || isOpen || hasSubmitted) return;
 
-    // Se o mouse estiver em cima, NÃO atualiza a posição (Freio Absoluto)
-    // Isso impede que a nave "fuja"
     if (!isHovering.current) {
         // Atualiza posição
         position.current.x += velocity.current.x;
@@ -93,7 +92,7 @@ export default function FeedbackWidget() {
             velocity.current.y *= -1;
         }
 
-        // Zona Proibida (Canto Inferior Direito - Botões Flutuantes)
+        // Zona Proibida (Canto Inferior Direito)
         const forbiddenZoneX = innerWidth - 140; 
         const forbiddenZoneY = innerHeight - 200; 
 
@@ -105,13 +104,8 @@ export default function FeedbackWidget() {
             }
         }
 
-        // Rotação dinâmica apenas quando em movimento
         const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
         shipRef.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0) rotate(${rotation}deg)`;
-    } else {
-        // Se estiver no hover, mantemos a posição atual mas podemos resetar a rotação ou mantê-la
-        // Aqui mantemos o translate mas forçamos a rotação para 0 ou mantemos a última para não "pular"
-        // Optamos por manter a última posição visual sem atualizar via JS para evitar conflito
     }
 
     requestRef.current = requestAnimationFrame(animateShip);
@@ -124,9 +118,8 @@ export default function FeedbackWidget() {
     };
   }, [animateShip]);
 
-  // Detector de Tema e Persistência
+  // Detector de Tema
   useEffect(() => {
-    // Verifica se já enviou
     const localSubmitted = localStorage.getItem('portfolio_feedback_sent');
     if (localSubmitted) {
        setHasSubmitted(true);
@@ -155,7 +148,18 @@ export default function FeedbackWidget() {
     return 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] border-emerald-400';
   };
 
+  const handleOpen = () => {
+    playSound('click');
+    setIsOpen(true);
+  };
+
+  const handleHoverShip = () => {
+    isHovering.current = true;
+    playSound('hover'); 
+  };
+
   const handleSubmit = async () => {
+    playSound('click');
     setStatus('sending');
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-acxt.onrender.com';
@@ -171,6 +175,7 @@ export default function FeedbackWidget() {
 
       setTimeout(() => {
           setStatus('success');
+          playSound('success'); 
           setHasSubmitted(true);
           localStorage.setItem('portfolio_feedback_sent', 'true');
           
@@ -222,21 +227,17 @@ export default function FeedbackWidget() {
         <div 
             className={`fixed top-0 left-0 z-[9990] pointer-events-none transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'}`}
             style={{ 
-                // Usando translate3d no container pai para alta performance
                 transform: `translate3d(${position.current.x}px, ${position.current.y}px, 0)`,
                 willChange: 'transform'
             }}
         >
             <button
                 ref={shipRef}
-                onClick={() => setIsOpen(true)}
-                onMouseEnter={() => { isHovering.current = true; }}
+                onClick={handleOpen}
+                onMouseEnter={handleHoverShip}
                 onMouseLeave={() => { isHovering.current = false; }}
-                // REMOVIDO 'transition-all' e 'transition-transform' para evitar conflito com JS
-                // Mantido apenas transitions de filtro e cor
                 className="w-14 h-14 flex items-center justify-center cursor-pointer transition-[filter,opacity,scale] duration-200 filter drop-shadow-lg hover:scale-110 active:scale-95 group pointer-events-auto relative"
                 title="Enviar Feedback"
-                // A rotação é aplicada aqui via inline style pelo JS, não conflita mais com CSS
             >
                 {/* SVG Nave Tech Customizada */}
                 <svg viewBox="0 0 32 32" className={`w-full h-full ${theme.shipStroke} stroke-[1.5] fill-slate-950/90 relative z-10`}>
@@ -247,8 +248,12 @@ export default function FeedbackWidget() {
                     <circle cx="16" cy="16" r="2" className={`${theme.shipFill} opacity-80`} />
                 </svg>
                 
+                {/* Radar Rotativo (Ativo no Hover) */}
+                <div className={`absolute -inset-4 rounded-full border-2 ${theme.border} border-t-transparent border-l-transparent opacity-0 group-hover:opacity-100 group-hover:animate-spin transition-opacity duration-300 pointer-events-none`} style={{ animationDuration: '2s' }}></div>
+                <div className={`absolute -inset-2 rounded-full border ${theme.border} border-dashed opacity-0 group-hover:opacity-40 group-hover:animate-[spin_4s_linear_infinite_reverse] transition-opacity duration-300 pointer-events-none`}></div>
+
                 {/* Rastro de Partículas */}
-                <div className="absolute top-[75%] left-1/2 -translate-x-1/2 w-4 h-12 pointer-events-none flex flex-col items-center justify-start">
+                <div className="absolute top-[75%] left-1/2 -translate-x-1/2 w-4 h-12 pointer-events-none flex flex-col items-center justify-start group-hover:opacity-0 transition-opacity duration-300">
                     <div className={`w-1.5 h-6 rounded-full blur-[2px] ${theme.pulse} opacity-80 animate-pulse`}></div>
                     {particles.map((_, i) => (
                         <motion.div
@@ -260,12 +265,14 @@ export default function FeedbackWidget() {
                         />
                     ))}
                 </div>
-                <div className={`absolute inset-0 rounded-full border ${theme.border} opacity-0 group-hover:animate-ping duration-1500`}></div>
+                
+                {/* Ping de Radar (Padrão) */}
+                <div className={`absolute inset-0 rounded-full border ${theme.border} opacity-0 group-hover:opacity-0 animate-ping duration-1500 pointer-events-none`}></div>
             </button>
         </div>
       )}
 
-      {/* --- MODAL DE FEEDBACK (CENTRALIZADO) --- */}
+      {/* --- MODAL DE FEEDBACK --- */}
       {isOpen && (
         <motion.div 
             initial={{ opacity: 0 }}
@@ -365,7 +372,10 @@ export default function FeedbackWidget() {
                                                 {[0, 1, 2, 3, 4].map((level) => (
                                                     <button
                                                         key={level}
-                                                        onClick={() => setRatings(prev => ({ ...prev, [cat]: level }))}
+                                                        onClick={() => {
+                                                            playSound('click');
+                                                            setRatings(prev => ({ ...prev, [cat]: level }));
+                                                        }}
                                                         className={`
                                                             w-8 h-8 sm:w-8 sm:h-8 rounded transition-all duration-300 transform border
                                                             ${getBarColor(level, ratings[cat])}
