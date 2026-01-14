@@ -46,28 +46,34 @@ export default function FeedbackWidget() {
             x: Math.random() * (window.innerWidth - 100),
             y: Math.random() * (window.innerHeight - 100)
         };
+        
         const angle = Math.random() * Math.PI * 2;
-        const speed = 2;
+        const speed = 1.5; // Velocidade constante e suave
         velocity.current = {
             x: Math.cos(angle) * speed,
             y: Math.sin(angle) * speed
         };
+        
         isInitialized.current = true;
-        setTimeout(() => setIsReady(true), 500);
+        // Pequeno delay para garantir que o DOM esteja pronto antes de mostrar
+        setTimeout(() => setIsReady(true), 200);
     }
   }, []);
 
-  // Loop de Animação
+  // Loop de Animação Otimizado
   const animateShip = useCallback(() => {
     if (!shipRef.current || isOpen || hasSubmitted) return;
 
+    // Se o mouse estiver em cima, NÃO atualiza a posição (Freio Absoluto)
+    // Isso impede que a nave "fuja"
     if (!isHovering.current) {
+        // Atualiza posição
         position.current.x += velocity.current.x;
         position.current.y += velocity.current.y;
 
         const { innerWidth, innerHeight } = window;
         const size = 60;
-        const MARGIN = 15;
+        const MARGIN = 10;
 
         // Colisão X
         if (position.current.x + size + MARGIN > innerWidth) {
@@ -87,7 +93,7 @@ export default function FeedbackWidget() {
             velocity.current.y *= -1;
         }
 
-        // Zona Proibida (Canto Inferior Direito)
+        // Zona Proibida (Canto Inferior Direito - Botões Flutuantes)
         const forbiddenZoneX = innerWidth - 140; 
         const forbiddenZoneY = innerHeight - 200; 
 
@@ -98,10 +104,15 @@ export default function FeedbackWidget() {
                 velocity.current.y = -Math.abs(velocity.current.y);
             }
         }
-    }
 
-    const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
-    shipRef.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0) rotate(${rotation}deg)`;
+        // Rotação dinâmica apenas quando em movimento
+        const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
+        shipRef.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0) rotate(${rotation}deg)`;
+    } else {
+        // Se estiver no hover, mantemos a posição atual mas podemos resetar a rotação ou mantê-la
+        // Aqui mantemos o translate mas forçamos a rotação para 0 ou mantemos a última para não "pular"
+        // Optamos por manter a última posição visual sem atualizar via JS para evitar conflito
+    }
 
     requestRef.current = requestAnimationFrame(animateShip);
   }, [isOpen, hasSubmitted]);
@@ -113,9 +124,9 @@ export default function FeedbackWidget() {
     };
   }, [animateShip]);
 
-  // Detector de Tema
+  // Detector de Tema e Persistência
   useEffect(() => {
-    // Persistência: Verifica se já enviou
+    // Verifica se já enviou
     const localSubmitted = localStorage.getItem('portfolio_feedback_sent');
     if (localSubmitted) {
        setHasSubmitted(true);
@@ -158,13 +169,11 @@ export default function FeedbackWidget() {
 
       if (!res.ok) throw new Error('Erro ao enviar feedback');
 
-      // Delay para apreciar a animação de envio
       setTimeout(() => {
           setStatus('success');
           setHasSubmitted(true);
           localStorage.setItem('portfolio_feedback_sent', 'true');
           
-          // Fecha o modal após 3.5 segundos exibindo o sucesso
           setTimeout(() => {
             setIsOpen(false);
           }, 3500);
@@ -213,6 +222,7 @@ export default function FeedbackWidget() {
         <div 
             className={`fixed top-0 left-0 z-[9990] pointer-events-none transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'}`}
             style={{ 
+                // Usando translate3d no container pai para alta performance
                 transform: `translate3d(${position.current.x}px, ${position.current.y}px, 0)`,
                 willChange: 'transform'
             }}
@@ -222,9 +232,13 @@ export default function FeedbackWidget() {
                 onClick={() => setIsOpen(true)}
                 onMouseEnter={() => { isHovering.current = true; }}
                 onMouseLeave={() => { isHovering.current = false; }}
-                className="w-14 h-14 flex items-center justify-center cursor-pointer transition-transform filter drop-shadow-lg active:scale-95 group pointer-events-auto relative"
+                // REMOVIDO 'transition-all' e 'transition-transform' para evitar conflito com JS
+                // Mantido apenas transitions de filtro e cor
+                className="w-14 h-14 flex items-center justify-center cursor-pointer transition-[filter,opacity,scale] duration-200 filter drop-shadow-lg hover:scale-110 active:scale-95 group pointer-events-auto relative"
                 title="Enviar Feedback"
+                // A rotação é aplicada aqui via inline style pelo JS, não conflita mais com CSS
             >
+                {/* SVG Nave Tech Customizada */}
                 <svg viewBox="0 0 32 32" className={`w-full h-full ${theme.shipStroke} stroke-[1.5] fill-slate-950/90 relative z-10`}>
                     <path d="M16 2 L20 10 L28 14 L20 18 L16 28 L12 18 L4 14 L12 10 Z" strokeLinejoin="round" />
                     <path d="M16 8 L16 14" className="stroke-current opacity-50" />
@@ -233,6 +247,7 @@ export default function FeedbackWidget() {
                     <circle cx="16" cy="16" r="2" className={`${theme.shipFill} opacity-80`} />
                 </svg>
                 
+                {/* Rastro de Partículas */}
                 <div className="absolute top-[75%] left-1/2 -translate-x-1/2 w-4 h-12 pointer-events-none flex flex-col items-center justify-start">
                     <div className={`w-1.5 h-6 rounded-full blur-[2px] ${theme.pulse} opacity-80 animate-pulse`}></div>
                     {particles.map((_, i) => (
@@ -250,27 +265,26 @@ export default function FeedbackWidget() {
         </div>
       )}
 
-      {/* --- OVERLAY & CARD CENTRALIZADO --- */}
+      {/* --- MODAL DE FEEDBACK (CENTRALIZADO) --- */}
       {isOpen && (
         <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
-            onClick={() => setIsOpen(false)} // Fecha ao clicar fora
+            onClick={() => setIsOpen(false)}
         >
             <motion.div
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.95, opacity: 0, filter: 'blur(10px)' }} // Saída estilo "desmaterialização"
+                exit={{ scale: 0.95, opacity: 0, filter: 'blur(10px)' }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 className={`
                     relative w-full max-w-[450px] rounded-2xl overflow-hidden shadow-2xl
                     ${theme.bg} border ${theme.modalBorder}
                 `}
-                onClick={(e) => e.stopPropagation()} // Impede fechar ao clicar no card
+                onClick={(e) => e.stopPropagation()}
             >
-                {/* Efeito de Scanline no Background */}
                 <div className="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 bg-[length:100%_4px,6px_100%]"></div>
 
                 {/* Header */}
@@ -294,7 +308,7 @@ export default function FeedbackWidget() {
                     )}
                 </div>
 
-                {/* Corpo do Modal */}
+                {/* Corpo */}
                 <div className="relative z-10 p-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
                     <AnimatePresence mode="wait">
                         {status === 'success' ? (
@@ -304,7 +318,6 @@ export default function FeedbackWidget() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="flex flex-col items-center justify-center py-8 text-center space-y-6"
                             >
-                                {/* Animação de Sucesso "UAU" */}
                                 <div className="relative">
                                     <div className={`absolute inset-0 rounded-full blur-xl opacity-40 ${theme.pulse}`}></div>
                                     <div className={`relative p-6 rounded-full bg-black/40 border-2 ${theme.border}`}>
@@ -323,7 +336,6 @@ export default function FeedbackWidget() {
                                     <p className="text-slate-400 text-sm max-w-[280px] mx-auto leading-relaxed">{t.feedback.successMsg}</p>
                                 </div>
 
-                                {/* Barra de Progresso Final */}
                                 <div className="w-full max-w-[200px] bg-slate-800/50 h-1.5 rounded-full overflow-hidden mt-2 border border-slate-700">
                                     <motion.div 
                                         initial={{ width: 0 }} 
@@ -349,7 +361,6 @@ export default function FeedbackWidget() {
                                             <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider group-hover:text-white transition-colors">
                                                 {categoryLabels[cat]}
                                             </span>
-                                            
                                             <div className="flex gap-2 self-end sm:self-auto">
                                                 {[0, 1, 2, 3, 4].map((level) => (
                                                     <button
