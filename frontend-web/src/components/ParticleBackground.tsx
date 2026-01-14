@@ -8,12 +8,10 @@ import type { Engine } from "tsparticles-engine";
 export default function ParticleBackground() {
   const [isSecretMode, setIsSecretMode] = useState(false);
 
-  // Inicialização da Engine
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadSlim(engine);
   }, []);
 
-  // Detecta mudança de tema para atualizar cor das partículas
   useEffect(() => {
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
@@ -37,8 +35,7 @@ export default function ParticleBackground() {
     return () => observer.disconnect();
   }, []);
 
-  // Cores dinâmicas
-  const color = isSecretMode ? "#ec4899" : "#10b981"; // Pink-500 vs Emerald-500
+  const color = isSecretMode ? "#ec4899" : "#10b981";
 
   return (
     <Particles
@@ -46,68 +43,58 @@ export default function ParticleBackground() {
       init={particlesInit}
       className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none"
       options={{
-        fullScreen: { enable: true, zIndex: -1 }, // Garante que fique atrás de tudo
-        background: {
-          color: {
-            value: "transparent",
-          },
-        },
-        fpsLimit: 60,
+        fullScreen: { enable: true, zIndex: -1 },
+        background: { color: { value: "transparent" } },
+        fpsLimit: 60, // Limita FPS para economizar bateria
         interactivity: {
           events: {
             onHover: {
               enable: true,
-              mode: "grab", // Efeito de teia ao passar o mouse
+              mode: "bubble", // 'bubble' é mais leve que 'grab'
             },
             resize: true,
           },
           modes: {
-            grab: {
-              distance: 140,
-              links: {
-                opacity: 0.5,
-                color: color // Link reativo
-              },
+            bubble: {
+              distance: 200,
+              size: 4,
+              duration: 2,
+              opacity: 0.8,
             },
           },
         },
         particles: {
-          color: {
-            value: color, // Partícula reativa
-          },
+          color: { value: color },
+          // DESATIVADO LINKS (LINHAS) PARA PERFORMANCE MÁXIMA E VISUAL MAIS LIMPO
           links: {
-            color: color, // Linha reativa
-            distance: 150,
-            enable: true,
-            opacity: 0.15,
-            width: 1,
+            enable: false, 
           },
           move: {
             direction: "none",
             enable: true,
-            outModes: {
-              default: "bounce",
-            },
-            random: false,
-            speed: 0.8, // Movimento lento e elegante
+            outModes: { default: "bounce" },
+            random: true,
+            speed: 0.5, // Movimento bem lento e calmo
             straight: false,
           },
           number: {
             density: {
               enable: true,
-              area: 1000, // Menos denso para visual clean
+              area: 800,
             },
-            value: 40,
+            value: 20, // Reduzido de 40 para 20 (menos é mais)
           },
           opacity: {
             value: 0.3,
+            animation: {
+              enable: true,
+              speed: 0.5,
+              minimumValue: 0.1,
+              sync: false
+            }
           },
-          shape: {
-            type: "circle",
-          },
-          size: {
-            value: { min: 1, max: 2 },
-          },
+          shape: { type: "circle" },
+          size: { value: { min: 1, max: 3 } },
         },
         detectRetina: true,
       }}
