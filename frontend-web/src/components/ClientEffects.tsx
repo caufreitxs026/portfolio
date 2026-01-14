@@ -27,9 +27,7 @@ export default function ClientEffects() {
       <CustomCursor />
       <ScrollProgress />
 
-      {/* 2. Componentes Pesados (Possíveis causadores de erro) - DESATIVADOS TEMPORARIAMENTE 
-          Descomente um por vez e teste o deploy.
-      */}
+      {/* 2. Componentes Pesados - Agora seguros para ativação */}
       <SystemBoot />
       <ParticleBackground />
 
