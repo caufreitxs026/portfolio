@@ -19,7 +19,7 @@ export default function FeedbackWidget() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [isReady, setIsReady] = useState(false);
 
-  // --- LÓGICA DA NAVE (Physics Engine) ---
+  // --- LÓGICA DA NAVE ---
   const shipRef = useRef<HTMLButtonElement>(null);
   const position = useRef({ x: 0, y: 0 });
   const velocity = useRef({ x: 1.5, y: 1.5 });
@@ -41,7 +41,6 @@ export default function FeedbackWidget() {
     mechanics: t.feedback.categories.mechanics
   };
 
-  // Inicialização Segura da Posição
   useEffect(() => {
     if (typeof window !== 'undefined' && !isInitialized.current) {
         position.current = {
@@ -50,7 +49,7 @@ export default function FeedbackWidget() {
         };
         
         const angle = Math.random() * Math.PI * 2;
-        const speed = 1.5;
+        const speed = 1.2; // Velocidade levemente reduzida para suavidade
         velocity.current = {
             x: Math.cos(angle) * speed,
             y: Math.sin(angle) * speed
@@ -61,13 +60,10 @@ export default function FeedbackWidget() {
     }
   }, []);
 
-  // Loop de Animação Otimizado
   const animateShip = useCallback(() => {
-    // Se o modal estiver aberto, para o loop imediatamente para economizar recursos
-    if (isOpen || hasSubmitted) return;
+    if (!shipRef.current || isOpen || hasSubmitted) return;
 
     if (!isHovering.current) {
-        // Atualiza posição
         position.current.x += velocity.current.x;
         position.current.y += velocity.current.y;
 
@@ -75,7 +71,6 @@ export default function FeedbackWidget() {
         const size = 60;
         const MARGIN = 10;
 
-        // Colisão X
         if (position.current.x + size + MARGIN > innerWidth) {
             position.current.x = innerWidth - size - MARGIN;
             velocity.current.x *= -1;
@@ -84,7 +79,6 @@ export default function FeedbackWidget() {
             velocity.current.x *= -1;
         }
 
-        // Colisão Y
         if (position.current.y + size + MARGIN > innerHeight) {
             position.current.y = innerHeight - size - MARGIN;
             velocity.current.y *= -1;
@@ -93,7 +87,6 @@ export default function FeedbackWidget() {
             velocity.current.y *= -1;
         }
 
-        // Zona Proibida (Canto Inferior Direito)
         const forbiddenZoneX = innerWidth - 140; 
         const forbiddenZoneY = innerHeight - 200; 
 
@@ -105,32 +98,20 @@ export default function FeedbackWidget() {
             }
         }
 
-        // Aplica rotação e movimento
-        if (shipRef.current) {
-            const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
-            shipRef.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0) rotate(${rotation}deg)`;
-        }
+        const rotation = (Math.atan2(velocity.current.y, velocity.current.x) * 180 / Math.PI) + 90;
+        shipRef.current.style.transform = `translate3d(${position.current.x}px, ${position.current.y}px, 0) rotate(${rotation}deg)`;
     }
 
     requestRef.current = requestAnimationFrame(animateShip);
   }, [isOpen, hasSubmitted]);
 
-  // Efeito para reiniciar a animação quando o modal fecha
   useEffect(() => {
-    if (!isOpen && !hasSubmitted) {
-        // CORREÇÃO CRÍTICA: Reseta o estado de hover.
-        // Se o modal fechou, o mouse não está necessariamente em cima da nave, 
-        // então liberamos o freio para ela voltar a voar.
-        isHovering.current = false;
-        requestRef.current = requestAnimationFrame(animateShip);
-    }
-
+    requestRef.current = requestAnimationFrame(animateShip);
     return () => {
         if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [animateShip, isOpen, hasSubmitted]);
+  }, [animateShip]);
 
-  // Detector de Tema
   useEffect(() => {
     const localSubmitted = localStorage.getItem('portfolio_feedback_sent');
     if (localSubmitted) {
@@ -168,12 +149,6 @@ export default function FeedbackWidget() {
   const handleHoverShip = () => {
     isHovering.current = true;
     playSound('hover'); 
-  };
-
-  const handleClose = () => {
-      setIsOpen(false);
-      // Garantia extra: remove o hover via estado do React se necessário, 
-      // mas o ref isHovering.current = false no useEffect já cuida disso.
   };
 
   const handleSubmit = async () => {
@@ -235,12 +210,10 @@ export default function FeedbackWidget() {
     modalBorder: 'border-emerald-500/40 shadow-emerald-900/20'
   };
 
-  const particles = Array.from({ length: 8 });
-
   return (
     <AnimatePresence>
       
-      {/* --- NAVE ESPACIAL (Gatilho) --- */}
+      {/* --- NAVE ESPACIAL --- */}
       {!isOpen && !hasSubmitted && (
         <div 
             className={`fixed top-0 left-0 z-[9990] pointer-events-none transition-opacity duration-1000 ${isReady ? 'opacity-100' : 'opacity-0'}`}
@@ -257,7 +230,6 @@ export default function FeedbackWidget() {
                 className="w-14 h-14 flex items-center justify-center cursor-pointer transition-[filter,opacity,scale] duration-200 filter drop-shadow-lg hover:scale-110 active:scale-95 group pointer-events-auto relative"
                 title="Enviar Feedback"
             >
-                {/* SVG Nave Tech Customizada */}
                 <svg viewBox="0 0 32 32" className={`w-full h-full ${theme.shipStroke} stroke-[1.5] fill-slate-950/90 relative z-10`}>
                     <path d="M16 2 L20 10 L28 14 L20 18 L16 28 L12 18 L4 14 L12 10 Z" strokeLinejoin="round" />
                     <path d="M16 8 L16 14" className="stroke-current opacity-50" />
@@ -266,37 +238,25 @@ export default function FeedbackWidget() {
                     <circle cx="16" cy="16" r="2" className={`${theme.shipFill} opacity-80`} />
                 </svg>
                 
-                {/* Radar Rotativo (Ativo no Hover) */}
+                {/* Radar Rotativo (Leve) */}
                 <div className={`absolute -inset-4 rounded-full border-2 ${theme.border} border-t-transparent border-l-transparent opacity-0 group-hover:opacity-100 group-hover:animate-spin transition-opacity duration-300 pointer-events-none`} style={{ animationDuration: '2s' }}></div>
-                <div className={`absolute -inset-2 rounded-full border ${theme.border} border-dashed opacity-0 group-hover:opacity-40 group-hover:animate-[spin_4s_linear_infinite_reverse] transition-opacity duration-300 pointer-events-none`}></div>
 
-                {/* Rastro de Partículas */}
-                <div className="absolute top-[75%] left-1/2 -translate-x-1/2 w-4 h-12 pointer-events-none flex flex-col items-center justify-start group-hover:opacity-0 transition-opacity duration-300">
-                    <div className={`w-1.5 h-6 rounded-full blur-[2px] ${theme.pulse} opacity-80 animate-pulse`}></div>
-                    {particles.map((_, i) => (
-                        <motion.div
-                            key={i}
-                            className={`absolute top-0 w-1 h-1 rounded-full ${theme.shipFill}`}
-                            initial={{ opacity: 0, y: 0, scale: 0.5 }}
-                            animate={{ opacity: [0, 0.8, 0], y: [0, 20 + Math.random() * 20], x: [(Math.random() - 0.5) * 15, (Math.random() - 0.5) * 30], scale: [1, 0] }}
-                            transition={{ duration: 0.4 + Math.random() * 0.3, repeat: Infinity, ease: "easeOut", delay: Math.random() * 0.2 }}
-                        />
-                    ))}
-                </div>
+                {/* Rastro de Motor (Simplificado - CSS Puro - Performance) */}
+                <div className={`absolute top-[75%] left-1/2 -translate-x-1/2 w-1.5 h-8 rounded-full blur-[2px] ${theme.pulse} opacity-60 group-hover:h-10 transition-all duration-300 pointer-events-none`}></div>
                 
                 <div className={`absolute inset-0 rounded-full border ${theme.border} opacity-0 group-hover:opacity-0 animate-ping duration-1500 pointer-events-none`}></div>
             </button>
         </div>
       )}
 
-      {/* --- MODAL DE FEEDBACK (CENTRALIZADO) --- */}
+      {/* --- MODAL DE FEEDBACK --- */}
       {isOpen && (
         <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
-            onClick={handleClose}
+            onClick={() => setIsOpen(false)}
         >
             <motion.div
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -311,7 +271,6 @@ export default function FeedbackWidget() {
             >
                 <div className="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 bg-[length:100%_4px,6px_100%]"></div>
 
-                {/* Header */}
                 <div className="relative z-10 flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/5">
                     <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-lg bg-black/40 border ${theme.border}`}>
@@ -326,13 +285,12 @@ export default function FeedbackWidget() {
                         </div>
                     </div>
                     {!hasSubmitted && (
-                        <button onClick={handleClose} className="text-slate-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full">
+                        <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full">
                             <X size={20} />
                         </button>
                     )}
                 </div>
 
-                {/* Corpo */}
                 <div className="relative z-10 p-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
                     <AnimatePresence mode="wait">
                         {status === 'success' ? (
@@ -385,6 +343,7 @@ export default function FeedbackWidget() {
                                             <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider group-hover:text-white transition-colors">
                                                 {categoryLabels[cat]}
                                             </span>
+                                            
                                             <div className="flex gap-2 self-end sm:self-auto">
                                                 {[0, 1, 2, 3, 4].map((level) => (
                                                     <button
