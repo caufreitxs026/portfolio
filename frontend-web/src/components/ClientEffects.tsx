@@ -30,8 +30,8 @@ export default function ClientEffects() {
       {/* 2. Componentes Pesados (Possíveis causadores de erro) - DESATIVADOS TEMPORARIAMENTE 
           Descomente um por vez e teste o deploy.
       */}
-      {/* <SystemBoot /> */}
-      {/* <ParticleBackground /> */}
+      <SystemBoot />
+      <ParticleBackground />
 
       {/* Camada de Textura (Noise) */}
       <div 
