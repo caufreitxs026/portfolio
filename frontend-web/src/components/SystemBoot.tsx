@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Terminal, CheckCircle2, Lock, Cpu, Wifi, ShieldCheck, HardDrive, Zap } from 'lucide-react';
+import { Terminal, CheckCircle2, Lock, Cpu, Wifi, HardDrive, Zap } from 'lucide-react';
 
 export default function SystemBoot() {
   const [isVisible, setIsVisible] = useState(true);
@@ -10,25 +10,43 @@ export default function SystemBoot() {
   const [logs, setLogs] = useState<string[]>([]);
   const [rightPanelLogs, setRightPanelLogs] = useState<string[]>([]);
   const [isSecretMode, setIsSecretMode] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  const logsEndRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Safe Storage Access Helper
+  const getStorage = (key: string) => {
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        return window.sessionStorage.getItem(key);
+      }
+    } catch (e) {
+      console.warn('Storage not available', e);
+    }
+    return null;
+  };
+
+  const setStorage = (key: string, value: string) => {
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        window.sessionStorage.setItem(key, value);
+      }
+    } catch (e) {
+      console.warn('Storage write failed', e);
+    }
+  };
 
   // Inicialização Segura
   useEffect(() => {
-    setIsClient(true);
-    try {
-      const hasBooted = sessionStorage.getItem('portfolio_booted');
-      if (hasBooted) {
-        setIsVisible(false);
-      }
-    } catch (e) {
-      console.warn("Storage access limited", e);
+    setIsMounted(true);
+    const hasBooted = getStorage('portfolio_booted');
+    if (hasBooted) {
+      setIsVisible(false);
     }
   }, []);
 
   // Sequência de Boot e Tema
   useEffect(() => {
-    if (!isVisible || !isClient) return;
+    if (!isVisible || !isMounted) return;
 
     const checkSecretMode = () => {
       if (typeof document !== 'undefined') {
@@ -37,7 +55,6 @@ export default function SystemBoot() {
     };
     checkSecretMode();
 
-    // Mensagens Técnicas Profissionais
     const bootSequence = [
         "BIOS DATE 01/14/26 19:37:00 VER 1.0.2",
         "CPU: Neural Quantum Core i9 @ 5.4GHz",
@@ -57,7 +74,6 @@ export default function SystemBoot() {
         "System Ready."
     ];
 
-    // Logs secundários para o painel lateral (Hex Dump simulado)
     const sysLogs = [
         "0x0040f: A4 F2 90 12",
         "0x00410: B2 C3 D4 E5",
@@ -72,12 +88,10 @@ export default function SystemBoot() {
         if (logIndex < bootSequence.length) {
             setLogs(prev => {
                 const newLogs = [...prev, bootSequence[logIndex]];
-                // Mantém o scroll automático suave, limitando logs antigos se necessário
                 if (newLogs.length > 14) newLogs.shift(); 
                 return newLogs;
             });
             
-            // Adiciona logs laterais aleatoriamente para dar vida
             if (Math.random() > 0.6) {
                  setRightPanelLogs(prev => {
                     const newRight = [...prev, sysLogs[Math.floor(Math.random() * sysLogs.length)]];
@@ -90,11 +104,11 @@ export default function SystemBoot() {
         } else {
             clearInterval(logInterval);
         }
-    }, 200); // Velocidade de leitura rápida
+    }, 200);
 
     const progressInterval = setInterval(() => {
         setProgress(prev => {
-            const next = prev + (Math.random() * 8); // Avanço variável
+            const next = prev + (Math.random() * 8); 
             if (next >= 100) {
                 clearInterval(progressInterval);
                 return 100;
@@ -107,11 +121,13 @@ export default function SystemBoot() {
         clearInterval(logInterval);
         clearInterval(progressInterval);
     };
-  }, [isVisible, isClient]);
+  }, [isVisible, isMounted]);
 
-  // Auto-scroll para o último log
+  // Auto-scroll manual (mais seguro que scrollIntoView)
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
   }, [logs]);
 
   // Finalização e saída
@@ -119,15 +135,13 @@ export default function SystemBoot() {
     if (progress >= 100) {
         const timer = setTimeout(() => {
             setIsVisible(false);
-            try {
-                sessionStorage.setItem('portfolio_booted', 'true');
-            } catch (e) {}
-        }, 1200); // Tempo para ler "System Ready"
+            setStorage('portfolio_booted', 'true');
+        }, 1200);
         return () => clearTimeout(timer);
     }
   }, [progress]);
 
-  if (!isVisible || !isClient) return null;
+  if (!isVisible || !isMounted) return null;
 
   const theme = isSecretMode ? {
     bg: 'bg-black',
@@ -150,7 +164,7 @@ export default function SystemBoot() {
         {isVisible && (
             <motion.div
                 initial={{ opacity: 1 }}
-                exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }} // Saída cinematográfica
+                exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
                 transition={{ duration: 0.8, ease: "easeInOut" }}
                 className={`fixed inset-0 z-[10000] flex flex-col items-center justify-center ${theme.bg} font-mono cursor-wait overflow-hidden`}
             >
@@ -184,11 +198,14 @@ export default function SystemBoot() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         
                         {/* Painel Principal de Logs */}
-                        <div className={`md:col-span-2 h-64 md:h-80 relative bg-black/40 rounded-lg border ${theme.border} p-4 overflow-hidden shadow-inner`}>
+                        <div 
+                            ref={scrollContainerRef}
+                            className={`md:col-span-2 h-64 md:h-80 relative bg-black/40 rounded-lg border ${theme.border} p-4 overflow-hidden shadow-inner flex flex-col`}
+                        >
                             {/* Overlay de Scanline suave */}
-                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20 pointer-events-none"></div>
+                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20 pointer-events-none z-10"></div>
                             
-                            <div className="h-full flex flex-col justify-end space-y-1.5">
+                            <div className="flex-1 flex flex-col justify-end space-y-1.5 z-0">
                                 {logs.map((log, i) => (
                                     <motion.div 
                                         key={i}
@@ -202,7 +219,6 @@ export default function SystemBoot() {
                                         <span>{log}</span>
                                     </motion.div>
                                 ))}
-                                <div ref={logsEndRef} />
                                 {/* Cursor Piscante */}
                                 <motion.div 
                                     animate={{ opacity: [0, 1, 0] }}
@@ -254,7 +270,7 @@ export default function SystemBoot() {
                         
                         {/* Barra */}
                         <div className="h-2 w-full bg-slate-900 rounded-sm overflow-hidden border border-white/10 relative">
-                            {/* Background Striped Animado (CSS puro seria ideal, aqui estático para segurança) */}
+                            {/* Background Striped Animado */}
                             <div className={`absolute inset-0 opacity-20 ${theme.bar}`} style={{ backgroundImage: 'linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent)', backgroundSize: '1rem 1rem' }}></div>
                             
                             <motion.div 
