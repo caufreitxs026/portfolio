@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Terminal, CheckCircle2, Lock, Cpu, Wifi, HardDrive, Zap } from 'lucide-react';
+// Adicionado ShieldCheck na importação
+import { Terminal, CheckCircle2, Lock, Cpu, Wifi, HardDrive, Zap, ShieldCheck } from 'lucide-react';
 
 export default function SystemBoot() {
   const [isVisible, setIsVisible] = useState(true);
@@ -87,7 +88,6 @@ export default function SystemBoot() {
     const logInterval = setInterval(() => {
         if (logIndex < bootSequence.length) {
             // FIX: Captura o valor ATUAL antes de entrar no callback do setLogs
-            // Isso evita referências indefinidas dentro da closure assíncrona
             const currentLog = bootSequence[logIndex];
 
             if (currentLog) {
