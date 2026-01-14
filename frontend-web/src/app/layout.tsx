@@ -4,15 +4,10 @@ import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import dynamic from "next/dynamic";
 
-// OTIMIZAÇÃO CRÍTICA: Carregamento dinâmico de TODOS os componentes visuais/interativos
-// Isso evita erros de "window not found" e problemas de hidratação no Next.js
-// pois garante que eles só rodem quando o navegador estiver 100% pronto.
-
-const SystemBoot = dynamic(() => import("@/components/SystemBoot"), { ssr: false });
-const CustomCursor = dynamic(() => import("@/components/CustomCursor"), { ssr: false });
-const EffectsWrapper = dynamic(() => import("@/components/EffectsWrapper"), { ssr: false });
-const ParticleBackground = dynamic(() => import("@/components/ParticleBackground"), { ssr: false });
-const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), { ssr: false });
+// Carrega o isolador de efeitos apenas no cliente
+const ClientEffects = dynamic(() => import("@/components/ClientEffects"), { 
+  ssr: false 
+});
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -72,14 +67,10 @@ export default function RootLayout({
       >
         <LanguageProvider>
           
-          {/* Componentes carregados SOMENTE no cliente (Segurança contra erros de build) */}
-          <SystemBoot />
-          <EffectsWrapper />
-          <CustomCursor />
-          <ScrollProgress />
-          <ParticleBackground />
+          {/* Efeitos Visuais Isolados (Segurança contra erros de Hidratação) */}
+          <ClientEffects />
 
-          {/* Textura de Ruido (Noise) */}
+          {/* Textura de Ruido (CSS Puro - Seguro) */}
           <div 
             className="fixed inset-0 z-[9998] pointer-events-none opacity-[0.04] mix-blend-overlay"
             style={{ 
@@ -87,10 +78,10 @@ export default function RootLayout({
             }}
           />
 
-          {/* Vinheta (Bordas Escuras) */}
+          {/* Vinheta (CSS Puro - Seguro) */}
           <div className="fixed inset-0 z-[9997] pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
           
-          {/* Conteudo Principal */}
+          {/* Conteúdo Principal */}
           <div className="relative z-10 animate-in fade-in duration-700 ease-out">
             {children}
           </div>
