@@ -6,8 +6,8 @@ import CustomCursor from "@/components/CustomCursor";
 import EffectsWrapper from "@/components/EffectsWrapper";
 import ParticleBackground from "@/components/ParticleBackground";
 import ScrollProgress from "@/components/ScrollProgress";
+import SystemBoot from "@/components/SystemBoot"; // 1. Importacao aqui
 
-// Configuração de Fontes Premium com Swap para performance
 const inter = Inter({ 
   subsets: ["latin"],
   variable: '--font-inter',
@@ -20,27 +20,26 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
-// Metadados Otimizados para SEO e Compartilhamento (Open Graph)
 export const metadata: Metadata = {
-  metadataBase: new URL('https://caufreitxs.vercel.app'), // Seu domínio real
+  metadataBase: new URL('https://caufreitxs.vercel.app'), 
   title: {
-    default: "Cauã Freitas | Full Stack Developer",
+    default: "Cauã Freitas | Full Stack & Data Analyst",
     template: "%s | Cauã Freitas"
   },
-  description: "Desenvolvedor Full Stack e Analista de Dados focado em soluções de alta performance.",
+  description: "Portfólio interativo de Cauã Freitas. Desenvolvedor Full Stack e Analista de Dados focado em soluções de alta performance.",
   keywords: ["Full Stack", "Data Analyst", "Python", "React", "Developer", "Cauã Freitas"],
   authors: [{ name: "Cauã Freitas" }],
   creator: "Cauã Freitas",
   icons: {
-    icon: '/opengraph-image.png',
+    icon: '/favicon.ico',
   },
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
     url: 'https://caufreitxs.vercel.app',
-    title: 'Cauã Freitas | Full Stack Developer & Data Analyst',
+    title: 'Cauã Freitas | Digital Portfolio',
     description: 'Transformando dados em experiências digitais imersivas.',
-    siteName: 'Cauã Freitas | Full Stack Developer',
+    siteName: 'Cauã Freitas Portfolio',
   },
   robots: {
     index: true,
@@ -67,8 +66,10 @@ export default function RootLayout({
       >
         <LanguageProvider>
           
-          {/* --- CAMADA DE TEXTURA (NOISE) --- */}
-          {/* Adiciona textura granulada para remover o aspecto "plástico" digital */}
+          {/* 2. Insercao do Componente aqui (Logo no inicio) */}
+          <SystemBoot />
+
+          {/* Textura de Ruido (Noise) */}
           <div 
             className="fixed inset-0 z-[9998] pointer-events-none opacity-[0.04] mix-blend-overlay"
             style={{ 
@@ -76,17 +77,16 @@ export default function RootLayout({
             }}
           />
 
-          {/* --- CAMADA DE VINHETA (VIGNETTE) --- */}
-          {/* Escurece as bordas da tela para focar a atenção no centro (Efeito Cinema) */}
+          {/* Vinheta (Bordas Escuras) */}
           <div className="fixed inset-0 z-[9997] pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
 
-          {/* --- EFEITOS GLOBAIS --- */}
+          {/* Efeitos Globais */}
           <EffectsWrapper />
           <CustomCursor />
           <ScrollProgress />
           <ParticleBackground />
           
-          {/* Conteúdo Principal com Fade-in Suave */}
+          {/* Conteudo Principal */}
           <div className="relative z-10 animate-in fade-in duration-700 ease-out">
             {children}
           </div>
