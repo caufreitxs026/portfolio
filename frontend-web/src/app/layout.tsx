@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-// import dynamic from "next/dynamic"; // Comentado temporariamente
+import dynamic from "next/dynamic"; 
 
-// HOTFIX: Desativando ClientEffects para restaurar o acesso ao site.
-// O erro está dentro de um dos componentes visuais. Vamos reativar após o site subir.
-// const ClientEffects = dynamic(() => import("@/components/ClientEffects"), { 
-//   ssr: false 
-// });
+// Reativando ClientEffects com carregamento dinâmico
+const ClientEffects = dynamic(() => import("@/components/ClientEffects"), { 
+  ssr: false 
+});
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -68,8 +67,10 @@ export default function RootLayout({
       >
         <LanguageProvider>
           
-          {/* Efeitos desativados para debug de emergência */}
-          {/* <ClientEffects /> */}
+          {/* ClientEffects reativado. 
+              Se houver erro, edite o arquivo components/ClientEffects.tsx e comente os componentes internos.
+          */}
+          <ClientEffects />
 
           {/* Textura de Ruido (CSS Puro - Seguro) */}
           <div 
