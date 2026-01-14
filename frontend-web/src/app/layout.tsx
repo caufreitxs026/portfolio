@@ -4,7 +4,8 @@ import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import dynamic from "next/dynamic";
 
-// Carrega o isolador de efeitos apenas no cliente
+// Carrega o isolador de efeitos APENAS no cliente
+// Isso impede que qualquer lógica visual quebre o build do servidor
 const ClientEffects = dynamic(() => import("@/components/ClientEffects"), { 
   ssr: false 
 });
@@ -67,21 +68,12 @@ export default function RootLayout({
       >
         <LanguageProvider>
           
-          {/* Efeitos Visuais Isolados (Segurança contra erros de Hidratação) */}
+          {/* O ClientEffects contém todos os visuais pesados (Cursor, Partículas, Boot, Noise).
+            Ele só será montado quando o navegador estiver pronto, evitando erros de hidratação.
+          */}
           <ClientEffects />
-
-          {/* Textura de Ruido (CSS Puro - Seguro) */}
-          <div 
-            className="fixed inset-0 z-[9998] pointer-events-none opacity-[0.04] mix-blend-overlay"
-            style={{ 
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` 
-            }}
-          />
-
-          {/* Vinheta (CSS Puro - Seguro) */}
-          <div className="fixed inset-0 z-[9997] pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
           
-          {/* Conteúdo Principal */}
+          {/* Conteúdo Principal do Site */}
           <div className="relative z-10 animate-in fade-in duration-700 ease-out">
             {children}
           </div>
