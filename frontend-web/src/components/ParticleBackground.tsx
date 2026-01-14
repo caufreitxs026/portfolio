@@ -45,44 +45,48 @@ export default function ParticleBackground() {
       options={{
         fullScreen: { enable: true, zIndex: -1 },
         background: { color: { value: "transparent" } },
-        fpsLimit: 60, // Limita FPS para economizar bateria
+        fpsLimit: 60, // Trava em 60 FPS para economia de bateria
         interactivity: {
           events: {
             onHover: {
               enable: true,
-              mode: "bubble", // 'bubble' é mais leve que 'grab'
+              mode: "grab", // Efeito de conectar ao cursor
             },
             resize: true,
           },
           modes: {
-            bubble: {
-              distance: 200,
-              size: 4,
-              duration: 2,
-              opacity: 0.8,
+            grab: {
+              distance: 180, // Distância que o cursor "pega" as partículas
+              links: {
+                opacity: 0.5, // Linhas do cursor são mais visíveis
+                color: color
+              },
             },
           },
         },
         particles: {
           color: { value: color },
-          // DESATIVADO LINKS (LINHAS) PARA PERFORMANCE MÁXIMA E VISUAL MAIS LIMPO
           links: {
-            enable: false, 
+            enable: true, // Ativa conexões entre partículas para o visual "constelação"
+            distance: 150,
+            color: color,
+            opacity: 0.15, // Bem sutil para não poluir (Claro)
+            width: 1,
           },
           move: {
             direction: "none",
             enable: true,
             outModes: { default: "bounce" },
             random: true,
-            speed: 0.5, // Movimento bem lento e calmo
+            speed: 0.8, // Movimento lento e suave (Calm Tech)
             straight: false,
           },
           number: {
             density: {
               enable: true,
-              area: 800,
+              area: 1000, // Área grande para espalhar bem
             },
-            value: 20, // Reduzido de 40 para 20 (menos é mais)
+            value: 30, // Quantidade baixa para performance (Otimizado)
           },
           opacity: {
             value: 0.3,
@@ -94,7 +98,7 @@ export default function ParticleBackground() {
             }
           },
           shape: { type: "circle" },
-          size: { value: { min: 1, max: 3 } },
+          size: { value: { min: 1, max: 2 } },
         },
         detectRetina: true,
       }}
