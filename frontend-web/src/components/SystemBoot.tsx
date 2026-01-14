@@ -86,18 +86,27 @@ export default function SystemBoot() {
     let logIndex = 0;
     const logInterval = setInterval(() => {
         if (logIndex < bootSequence.length) {
-            setLogs(prev => {
-                const newLogs = [...prev, bootSequence[logIndex]];
-                if (newLogs.length > 14) newLogs.shift(); 
-                return newLogs;
-            });
+            // FIX: Captura o valor ATUAL antes de entrar no callback do setLogs
+            // Isso evita referências indefinidas dentro da closure assíncrona
+            const currentLog = bootSequence[logIndex];
+
+            if (currentLog) {
+                setLogs(prev => {
+                    const newLogs = [...prev, currentLog];
+                    if (newLogs.length > 14) newLogs.shift(); 
+                    return newLogs;
+                });
+            }
             
             if (Math.random() > 0.6) {
-                 setRightPanelLogs(prev => {
-                    const newRight = [...prev, sysLogs[Math.floor(Math.random() * sysLogs.length)]];
-                    if (newRight.length > 8) newRight.shift();
-                    return newRight;
-                 });
+                 const randomSysLog = sysLogs[Math.floor(Math.random() * sysLogs.length)];
+                 if (randomSysLog) {
+                    setRightPanelLogs(prev => {
+                        const newRight = [...prev, randomSysLog];
+                        if (newRight.length > 8) newRight.shift();
+                        return newRight;
+                    });
+                 }
             }
 
             logIndex++;
@@ -211,7 +220,8 @@ export default function SystemBoot() {
                                         key={i}
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        className={`flex items-start gap-2 text-xs sm:text-sm font-medium leading-tight ${log.includes("OK") ? theme.accent : "text-slate-400"}`}
+                                        // FIX: Uso de optional chaining (log?) para evitar crash se log for undefined
+                                        className={`flex items-start gap-2 text-xs sm:text-sm font-medium leading-tight ${log?.includes("OK") ? theme.accent : "text-slate-400"}`}
                                     >
                                         <span className="opacity-40 text-[10px] min-w-[50px]">
                                             [{new Date().toLocaleTimeString('pt-BR', { hour12: false })}]
