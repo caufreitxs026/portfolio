@@ -2,16 +2,17 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import CustomCursor from "@/components/CustomCursor";
-import EffectsWrapper from "@/components/EffectsWrapper";
-import ParticleBackground from "@/components/ParticleBackground";
-import ScrollProgress from "@/components/ScrollProgress";
-import dynamic from "next/dynamic"; // Importação do dynamic
+import dynamic from "next/dynamic";
 
-// Carregamento dinâmico com SSR desativado para evitar erros de hidratação/window no mobile
-const SystemBoot = dynamic(() => import("@/components/SystemBoot"), {
-  ssr: false,
-});
+// OTIMIZAÇÃO CRÍTICA: Carregamento dinâmico de TODOS os componentes visuais/interativos
+// Isso evita erros de "window not found" e problemas de hidratação no Next.js
+// pois garante que eles só rodem quando o navegador estiver 100% pronto.
+
+const SystemBoot = dynamic(() => import("@/components/SystemBoot"), { ssr: false });
+const CustomCursor = dynamic(() => import("@/components/CustomCursor"), { ssr: false });
+const EffectsWrapper = dynamic(() => import("@/components/EffectsWrapper"), { ssr: false });
+const ParticleBackground = dynamic(() => import("@/components/ParticleBackground"), { ssr: false });
+const ScrollProgress = dynamic(() => import("@/components/ScrollProgress"), { ssr: false });
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -71,8 +72,12 @@ export default function RootLayout({
       >
         <LanguageProvider>
           
-          {/* SystemBoot carregado apenas no cliente para evitar crash mobile */}
+          {/* Componentes carregados SOMENTE no cliente (Segurança contra erros de build) */}
           <SystemBoot />
+          <EffectsWrapper />
+          <CustomCursor />
+          <ScrollProgress />
+          <ParticleBackground />
 
           {/* Textura de Ruido (Noise) */}
           <div 
@@ -84,12 +89,6 @@ export default function RootLayout({
 
           {/* Vinheta (Bordas Escuras) */}
           <div className="fixed inset-0 z-[9997] pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
-
-          {/* Efeitos Globais */}
-          <EffectsWrapper />
-          <CustomCursor />
-          <ScrollProgress />
-          <ParticleBackground />
           
           {/* Conteudo Principal */}
           <div className="relative z-10 animate-in fade-in duration-700 ease-out">
