@@ -35,7 +35,7 @@ export default function ParticleBackground() {
     return () => observer.disconnect();
   }, []);
 
-  const color = isSecretMode ? "#ec4899" : "#10b981"; // Pink vs Emerald
+  const color = isSecretMode ? "#ec4899" : "#10b981";
 
   return (
     <Particles
@@ -45,35 +45,24 @@ export default function ParticleBackground() {
       options={{
         fullScreen: { enable: true, zIndex: -1 },
         background: { color: { value: "transparent" } },
-        fpsLimit: 60, // Trava em 60 FPS para consistência
+        fpsLimit: 60,
         interactivity: {
           detectsOn: "window",
           events: {
             onHover: {
               enable: true,
-              mode: "grab", // Conecta partículas ao mouse
-            },
-            onClick: {
-              enable: true,
-              mode: "push", // Adiciona partículas ao clicar (Explosão criativa)
+              mode: "grab", // Atração sutil
             },
             resize: true,
           },
           modes: {
             grab: {
-              distance: 180,
+              distance: 200,
               links: {
-                opacity: 0.4,
+                opacity: 0.3, // Link mais forte perto do mouse
                 color: color
               },
             },
-            push: {
-              quantity: 3, // Adiciona poucas por vez para não pesar
-            },
-            repulse: {
-              distance: 200,
-              duration: 0.4,
-            }
           },
         },
         particles: {
@@ -82,55 +71,38 @@ export default function ParticleBackground() {
             enable: true,
             distance: 150,
             color: color,
-            opacity: 0.12, // Transparência sutil para elegância
+            opacity: 0.08, // Muito sutil no fundo
             width: 1,
-            triangles: {
-              enable: false, // Mantém limpo, sem preenchimento triangular
-            }
-          },
-          collisions: {
-            enable: false, // Desativa colisão entre partículas para performance
           },
           move: {
             direction: "none",
             enable: true,
-            outModes: { default: "out" }, // Partículas saem e reaparecem (fluxo contínuo)
+            outModes: { default: "out" },
             random: true,
-            speed: 0.6, // Movimento lento e "premium"
+            speed: 0.4, // Movimento "flutuante" lento
             straight: false,
-            attract: {
-              enable: false,
-              rotateX: 600,
-              rotateY: 1200
-            }
           },
           number: {
             density: {
               enable: true,
-              area: 1200, // Espalhamento amplo
+              area: 1200,
             },
-            value: 40, // Quantidade ideal para telas modernas
+            value: 50, // Quantidade equilibrada
           },
           opacity: {
-            value: 0.3,
-            random: true, // Variedade visual
+            value: 0.4,
+            random: true, // Cintilação
             animation: {
               enable: true,
-              speed: 0.8,
+              speed: 0.5,
               minimumValue: 0.1,
               sync: false
             }
           },
           shape: { type: "circle" },
           size: {
-            value: { min: 1, max: 3 }, // Tamanhos variados para profundidade
+            value: { min: 1, max: 2.5 }, // Tamanhos variados para profundidade 3D
             random: true,
-            animation: {
-              enable: true,
-              speed: 2,
-              minimumValue: 0.5,
-              sync: false
-            }
           },
         },
         detectRetina: true,
