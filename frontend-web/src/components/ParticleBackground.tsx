@@ -35,7 +35,8 @@ export default function ParticleBackground() {
     return () => observer.disconnect();
   }, []);
 
-  const color = isSecretMode ? "#ec4899" : "#ffffff"; // Branco/Cinza no modo normal é mais pro
+  // Cores: Emerald para Normal, Pink para Hacker
+  const color = isSecretMode ? "#ec4899" : "#10b981";
 
   return (
     <Particles
@@ -45,33 +46,40 @@ export default function ParticleBackground() {
       options={{
         fullScreen: { enable: true, zIndex: -1 },
         background: { color: { value: "transparent" } },
-        fpsLimit: 60,
+        fpsLimit: 60, // Otimização de bateria
         interactivity: {
           detectsOn: "window",
           events: {
             onHover: {
               enable: true,
-              mode: "grab", // Conexão sutil
+              mode: "grab", // Conecta partículas ao mouse suavemente
+            },
+            onClick: {
+              enable: true,
+              mode: "push", // Cria novas partículas ao clicar
             },
             resize: true,
           },
           modes: {
             grab: {
-              distance: 150,
+              distance: 180,
               links: {
-                opacity: 0.2, // Muito sutil
-                color: isSecretMode ? "#ec4899" : "#94a3b8" // Slate-400 no modo normal
+                opacity: 0.5, // Linhas mais fortes perto do mouse
+                color: color
               },
+            },
+            push: {
+              quantity: 3,
             },
           },
         },
         particles: {
-          color: { value: isSecretMode ? "#ec4899" : "#cbd5e1" }, // Slate-300
+          color: { value: color },
           links: {
             enable: true,
-            distance: 120,
-            color: isSecretMode ? "#ec4899" : "#64748b", // Slate-500
-            opacity: 0.05, // Quase invisível, apenas textura
+            distance: 150,
+            color: color,
+            opacity: 0.1, // Linhas de fundo quase invisíveis para limpeza visual
             width: 1,
           },
           move: {
@@ -79,29 +87,38 @@ export default function ParticleBackground() {
             enable: true,
             outModes: { default: "out" },
             random: true,
-            speed: 0.3, // Movimento extremamente lento e elegante
+            speed: 0.3, // Movimento ultra-lento para elegância ("Drift")
             straight: false,
           },
           number: {
             density: {
               enable: true,
-              area: 1500, // Muito espaçado
+              area: 1000,
             },
-            value: 40,
+            value: 35, // Quantidade equilibrada
           },
+          // Efeito de Cintilação (Twinkle)
           opacity: {
-            value: 0.3,
+            value: 0.5,
             random: true,
             animation: {
               enable: true,
-              speed: 0.5,
+              speed: 0.8, // Velocidade da cintilação
               minimumValue: 0.1,
               sync: false
             }
           },
           shape: { type: "circle" },
+          // Efeito de Pulsação (Breathing)
           size: {
-            value: { min: 1, max: 2 }, // Partículas pequenas e delicadas
+            value: { min: 1, max: 3 },
+            random: true,
+            animation: {
+              enable: true,
+              speed: 1.5, // Velocidade da pulsação de tamanho
+              minimumValue: 0.5,
+              sync: false
+            }
           },
         },
         detectRetina: true,
