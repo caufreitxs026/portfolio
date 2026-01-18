@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion';
 import { Calendar, Building2, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
-// CORREÇÃO: Importando do mesmo diretório, já que o arquivo está em components/SpotlightCard.tsx
-import SpotlightCard from './SpotlightCard';
+import SpotlightCard from './ui/SpotlightCard';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface ExperienceProps {
   experience: {
@@ -21,6 +21,7 @@ interface ExperienceProps {
 
 export default function ExperienceItem({ experience, index }: ExperienceProps) {
   const [isSecretMode, setIsSecretMode] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const checkSecretMode = () => {
@@ -42,21 +43,30 @@ export default function ExperienceItem({ experience, index }: ExperienceProps) {
   const endDate = experience.end_date ? formatDate(experience.end_date) : 'Momento Atual';
   const isCurrentRole = !experience.end_date;
 
-  // Tema Dinâmico
-  const theme = isSecretMode ? {
-    iconColor: 'text-pink-400',
-    iconBg: 'bg-pink-500/10 border-pink-500/20',
-    timelineDot: 'bg-pink-500',
-    timelineGlow: 'shadow-[0_0_15px_rgba(236,72,153,0.6)]',
-    dateBadge: 'bg-pink-500/10 text-pink-300 border-pink-500/20',
-    accentText: 'text-pink-300'
+  // Tema Dinâmico (Dark / Light / Secret)
+  const styles = theme === 'dark' ? {
+    iconColor: isSecretMode ? 'text-pink-400' : 'text-emerald-400',
+    iconBg: isSecretMode ? 'bg-pink-500/10 border-pink-500/20' : 'bg-emerald-500/10 border-emerald-500/20',
+    timelineDot: isSecretMode ? 'bg-pink-500' : 'bg-emerald-500',
+    timelineGlow: isSecretMode ? 'shadow-[0_0_15px_rgba(236,72,153,0.6)]' : 'shadow-[0_0_15px_rgba(16,185,129,0.6)]',
+    dateBadge: isSecretMode ? 'bg-pink-500/10 text-pink-300 border-pink-500/20' : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+    textMain: 'text-white',
+    textSub: 'text-slate-300',
+    textDesc: 'text-slate-400',
+    border: 'border-slate-950',
+    inactiveBadge: 'bg-slate-800/50 border-slate-700 text-slate-400'
   } : {
-    iconColor: 'text-emerald-400',
-    iconBg: 'bg-emerald-500/10 border-emerald-500/20',
-    timelineDot: 'bg-emerald-500',
-    timelineGlow: 'shadow-[0_0_15px_rgba(16,185,129,0.6)]',
-    dateBadge: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
-    accentText: 'text-emerald-300'
+    // TEMA CLARO
+    iconColor: 'text-indigo-600',
+    iconBg: 'bg-indigo-50 border-indigo-100',
+    timelineDot: 'bg-indigo-500',
+    timelineGlow: 'shadow-[0_0_15px_rgba(99,102,241,0.4)]',
+    dateBadge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    textMain: 'text-slate-900',
+    textSub: 'text-slate-600',
+    textDesc: 'text-slate-600',
+    border: 'border-slate-100', // Borda do dot para se misturar ao fundo
+    inactiveBadge: 'bg-slate-100 border-slate-200 text-slate-500'
   };
 
   return (
@@ -67,59 +77,50 @@ export default function ExperienceItem({ experience, index }: ExperienceProps) {
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className="relative mb-10 sm:mb-12 last:mb-0 pl-4 sm:pl-6 group"
     >
-      {/* Nó da Timeline (Com efeito de pulso se for atual) */}
+      {/* Nó da Timeline */}
       <div className={`
-        absolute -left-[39px] sm:-left-[41px] top-1 sm:top-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-[3px] sm:border-4 border-slate-950 
-        ${theme.timelineDot} ${isCurrentRole ? `animate-pulse ${theme.timelineGlow}` : 'shadow-[0_0_10px_rgba(0,0,0,0.5)]'} 
+        absolute -left-[39px] sm:-left-[41px] top-1 sm:top-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-[3px] sm:border-4 ${styles.border} 
+        ${styles.timelineDot} ${isCurrentRole ? `animate-pulse ${styles.timelineGlow}` : 'shadow-sm'} 
         z-10 transition-colors duration-500
       `}></div>
 
-      {/* Wrapper com Efeito Spotlight e Tilt 3D */}
       <SpotlightCard isSecretMode={isSecretMode} className="p-5 sm:p-6 transition-transform duration-300 group-hover:-translate-y-1">
         
-        {/* Header do Card */}
         <div className="flex flex-col gap-3 sm:gap-4 mb-4">
-            
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
-                {/* Cargo e Empresa */}
                 <div>
-                    <h3 className="text-lg sm:text-xl font-bold text-white leading-tight">
+                    <h3 className={`text-lg sm:text-xl font-bold leading-tight ${styles.textMain}`}>
                         {experience.role}
                     </h3>
-                    
                     <div className="flex items-center gap-2 mt-2">
-                        <div className={`p-1.5 rounded-md border ${theme.iconBg} ${theme.iconColor}`}>
+                        <div className={`p-1.5 rounded-md border ${styles.iconBg} ${styles.iconColor}`}>
                             <Building2 size={14} />
                         </div>
-                        <span className="text-sm sm:text-base font-medium text-slate-300">
+                        <span className={`text-sm sm:text-base font-medium ${styles.textSub}`}>
                             {experience.company}
                         </span>
                     </div>
                 </div>
 
-                {/* Badge de Data (Design Compacto Mobile) */}
                 <div className={`
                     self-start flex items-center gap-2 px-3 py-1 rounded-full text-[10px] sm:text-xs font-mono font-bold border whitespace-nowrap mt-1 sm:mt-0
-                    ${isCurrentRole ? theme.dateBadge : 'bg-slate-800/50 border-slate-700 text-slate-400'}
+                    ${isCurrentRole ? styles.dateBadge : styles.inactiveBadge}
                 `}>
                     <Calendar size={12} />
                     <span className="uppercase tracking-wide">{startDate} — {endDate}</span>
                 </div>
             </div>
-
         </div>
 
-        {/* Descrição */}
         <div className="relative">
-            <p className="text-slate-400 leading-relaxed text-sm sm:text-base border-t border-slate-800/50 pt-4 mt-2">
+            <p className={`${styles.textDesc} leading-relaxed text-sm sm:text-base border-t pt-4 mt-2 ${theme === 'dark' ? 'border-slate-800/50' : 'border-slate-100'}`}>
                 {experience.description}
             </p>
         </div>
 
-        {/* Rodapé: Localização */}
         {experience.location && (
-            <div className="mt-4 pt-3 flex items-center gap-2 text-xs font-mono text-slate-500 border-t border-slate-800/30 border-dashed">
-                <MapPin size={12} className={theme.iconColor} />
+            <div className={`mt-4 pt-3 flex items-center gap-2 text-xs font-mono border-t border-dashed ${theme === 'dark' ? 'text-slate-500 border-slate-800/30' : 'text-slate-400 border-slate-200'}`}>
+                <MapPin size={12} className={styles.iconColor} />
                 <span>{experience.location}</span>
             </div>
         )}
