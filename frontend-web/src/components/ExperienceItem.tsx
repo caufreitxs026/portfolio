@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Calendar, Building2, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
+// CORREÇÃO: Importando do caminho correto (dentro da pasta ui)
 import SpotlightCard from './ui/SpotlightCard';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -43,7 +44,6 @@ export default function ExperienceItem({ experience, index }: ExperienceProps) {
   const endDate = experience.end_date ? formatDate(experience.end_date) : 'Momento Atual';
   const isCurrentRole = !experience.end_date;
 
-  // Tema Dinâmico (Dark / Light / Secret)
   const styles = theme === 'dark' ? {
     iconColor: isSecretMode ? 'text-pink-400' : 'text-emerald-400',
     iconBg: isSecretMode ? 'bg-pink-500/10 border-pink-500/20' : 'bg-emerald-500/10 border-emerald-500/20',
@@ -56,7 +56,6 @@ export default function ExperienceItem({ experience, index }: ExperienceProps) {
     border: 'border-slate-950',
     inactiveBadge: 'bg-slate-800/50 border-slate-700 text-slate-400'
   } : {
-    // TEMA CLARO
     iconColor: 'text-indigo-600',
     iconBg: 'bg-indigo-50 border-indigo-100',
     timelineDot: 'bg-indigo-500',
@@ -65,7 +64,7 @@ export default function ExperienceItem({ experience, index }: ExperienceProps) {
     textMain: 'text-slate-900',
     textSub: 'text-slate-600',
     textDesc: 'text-slate-600',
-    border: 'border-slate-100', // Borda do dot para se misturar ao fundo
+    border: 'border-slate-100',
     inactiveBadge: 'bg-slate-100 border-slate-200 text-slate-500'
   };
 
@@ -77,7 +76,6 @@ export default function ExperienceItem({ experience, index }: ExperienceProps) {
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className="relative mb-10 sm:mb-12 last:mb-0 pl-4 sm:pl-6 group"
     >
-      {/* Nó da Timeline */}
       <div className={`
         absolute -left-[39px] sm:-left-[41px] top-1 sm:top-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-[3px] sm:border-4 ${styles.border} 
         ${styles.timelineDot} ${isCurrentRole ? `animate-pulse ${styles.timelineGlow}` : 'shadow-sm'} 
