@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion';
 import { Calendar, Building2, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
-// CORREÇÃO: Importando do caminho correto (dentro da pasta ui)
-import SpotlightCard from './ui/SpotlightCard';
+// CORREÇÃO: Importando do caminho correto (raiz de components)
+import SpotlightCard from './SpotlightCard';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface ExperienceProps {
