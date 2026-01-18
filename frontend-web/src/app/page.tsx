@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Code, Server, Gamepad2 } from 'lucide-react';
+import { Code, Server, ChevronUp, History } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 // Componentes
@@ -11,99 +11,52 @@ import ExperienceItem from '@/components/ExperienceItem';
 import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
 import ProjectCarousel from '@/components/ProjectCarousel';
-import TechWordle from '@/components/TechWordle';
 import CompetenceSection from '@/components/CompetenceSection';
-import FeedbackWidget from '@/components/FeedbackWidget'; // <--- Importado aqui
 import { ProjectSkeleton, ExperienceSkeleton } from '@/components/Skeletons';
 import { usePortfolioData } from '@/hooks/usePortfolioData';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext'; // Usar tema para estilos condicionais
 
 export default function Home() {
   const { projects, experiences, skills, certificates, loading } = usePortfolioData();
-  const [isGameOpen, setIsGameOpen] = useState(false);
-  const [isSecretMode, setIsSecretMode] = useState(false);
   const [mounted, setMounted] = useState(false);
-  
-  // Estado para controlar a expansão da experiência
   const [showAllExperiences, setShowAllExperiences] = useState(false);
   const INITIAL_EXP_COUNT = 3;
   
-  // Hook de Tradução
   const { t } = useLanguage();
+  const { theme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
-    const checkSecretMode = () => {
-      if (typeof document !== 'undefined') {
-        setIsSecretMode(document.body.classList.contains('secret-active'));
-      }
-    };
-    const interval = setInterval(checkSecretMode, 500);
-    return () => clearInterval(interval);
   }, []);
 
   if (!mounted) return null;
-
-  // Definição de Tema para o Botão "Ver Mais"
-  const theme = isSecretMode ? {
-    buttonExp: 'bg-pink-900/20 text-pink-400 border-pink-500/30 hover:bg-pink-500/10 hover:border-pink-500/60',
-    iconExp: 'text-pink-500'
-  } : {
-    buttonExp: 'bg-emerald-900/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 hover:border-emerald-500/60',
-    iconExp: 'text-emerald-500'
-  };
 
   const displayedExperiences = showAllExperiences 
     ? experiences 
     : experiences.slice(0, INITIAL_EXP_COUNT);
 
+  // Estilos condicionais para cabeçalhos de seção
+  const sectionHeaderClass = theme === 'dark' ? 'text-white' : 'text-slate-900';
+  const sectionSubClass = theme === 'dark' ? 'text-slate-400' : 'text-slate-600';
+  const iconClass = theme === 'dark' ? 'text-emerald-400' : 'text-indigo-600';
+  const buttonClass = theme === 'dark' 
+    ? 'bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-800' 
+    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm';
+
   return (
-    <main className="min-h-screen text-slate-300 selection:bg-emerald-500 selection:text-white overflow-x-hidden">
+    <main className="min-h-screen overflow-x-hidden">
       
       <Navbar />
       <Hero />
 
-      {/* --- WIDGETS FLUTUANTES --- */}
-      
-      {/* 1. Nave de Feedback (Drone de Patrulha) */}
-      <FeedbackWidget />
-
-      {/* 2. Botão do Jogo (GameHub) */}
-      <AnimatePresence>
-        {!isGameOpen && (
-          <motion.button
-            key="game-btn"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            onClick={() => setIsGameOpen(true)}
-            className={`
-              fixed bottom-28 right-8 p-3 w-14 h-14 flex items-center justify-center rounded-full shadow-2xl z-[90] transition-colors duration-300 border backdrop-blur-md group cursor-pointer
-              ${isSecretMode 
-                ? 'bg-black/90 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white shadow-pink-500/40 ring-1 ring-pink-500/30' 
-                : 'bg-slate-900/90 border-emerald-500/50 text-emerald-400 hover:bg-emerald-600 hover:text-white shadow-emerald-500/40 ring-1 ring-emerald-500/30'}
-            `}
-            title={isSecretMode ? "SYSTEM HACK" : "Jogar Code Breaker"}
-            whileHover={{ scale: 1.1, rotate: 10 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <Gamepad2 size={28} />
-          </motion.button>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {isGameOpen && <TechWordle onClose={() => setIsGameOpen(false)} />}
-      </AnimatePresence>
-
       {/* --- SEÇÃO DE PROJETOS --- */}
-      <section id="projetos" className="py-20 bg-slate-800/50 relative">
+      <section id="projetos" className={`py-20 relative ${theme === 'dark' ? 'bg-slate-900/30' : 'bg-slate-50/50'}`}>
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
-             <Code className="text-emerald-400"/> {t.home.projectsTitle}
+          <h2 className={`text-3xl font-bold mb-2 flex items-center gap-2 ${sectionHeaderClass}`}>
+             <Code className={iconClass}/> {t.home.projectsTitle}
           </h2>
-          <p className="text-slate-400 mb-12">{t.home.projectsSubtitle}</p>
+          <p className={`mb-12 ${sectionSubClass}`}>{t.home.projectsSubtitle}</p>
 
           {loading ? (
              <div className="max-w-4xl mx-auto">
@@ -112,7 +65,7 @@ export default function Home() {
           ) : projects.length > 0 ? (
             <ProjectCarousel projects={projects} />
           ) : (
-            <div className="text-center py-20 text-slate-500 bg-slate-900/50 rounded-xl border border-slate-800">
+            <div className={`text-center py-20 rounded-xl border ${theme === 'dark' ? 'bg-slate-900/50 border-slate-800 text-slate-500' : 'bg-white border-slate-200 text-slate-400'}`}>
               <p>{t.home.loading}</p>
             </div>
           )}
@@ -123,21 +76,20 @@ export default function Home() {
       <CompetenceSection 
         skills={skills} 
         certificates={certificates} 
-        isSecretMode={isSecretMode} 
+        isSecretMode={theme === 'dark'} // Adaptação para usar o tema
       />
 
       {/* --- SEÇÃO DE EXPERIÊNCIA --- */}
-      <section id="experiencia" className="py-20 bg-slate-900/30">
+      <section id="experiencia" className="py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="mb-12">
-             <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
-                <Server className="text-emerald-400"/> {t.home.experienceTitle}
+             <h2 className={`text-3xl font-bold mb-2 flex items-center gap-2 ${sectionHeaderClass}`}>
+                <Server className={iconClass}/> {t.home.experienceTitle}
              </h2>
           </div>
           
           <div className="ml-3 pl-8 relative">
-             {/* Linha Vertical Contínua */}
-             <div className="absolute left-0 top-2 bottom-0 w-[2px] bg-slate-800/50"></div>
+             <div className={`absolute left-0 top-2 bottom-0 w-[2px] ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'}`}></div>
             
             {loading ? (
               <div className="space-y-12">
@@ -150,20 +102,18 @@ export default function Home() {
                   <ExperienceItem key={exp.id} experience={exp} index={index} />
                 ))}
 
-                {/* Botão de Expandir/Recolher */}
+                {/* Botão de Expandir */}
                 {experiences.length > INITIAL_EXP_COUNT && (
                   <div className="mt-8 relative z-20 flex justify-center md:justify-start pl-6">
                     <motion.button
                       onClick={() => setShowAllExperiences(!showAllExperiences)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`
-                        group flex items-center gap-3 px-6 py-3 rounded-xl border backdrop-blur-sm transition-all duration-300 font-mono text-sm font-bold uppercase tracking-wider
-                        ${theme.buttonExp}
-                      `}
+                      className={`group flex items-center gap-3 px-6 py-3 rounded-xl border backdrop-blur-sm transition-all duration-300 font-mono text-sm font-bold uppercase tracking-wider ${buttonClass}`}
                     >
+                      {showAllExperiences ? <ChevronUp size={16} /> : <History size={16} />}
                       <span>
-                        {showAllExperiences ? 'Recolher Histórico' : 'Carregar Linha do Tempo Completa'}
+                        {showAllExperiences ? t.home.collapseTimeline : t.home.loadTimeline}
                       </span>
                     </motion.button>
                   </div>
@@ -174,10 +124,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="contato" className="py-20 bg-slate-800/30">
+      <section id="contato" className={`py-20 ${theme === 'dark' ? 'bg-slate-900/30' : 'bg-slate-100/50'}`}>
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">{t.home.contactTitle}</h2>
-          <p className="text-slate-400 mb-12">
+          <h2 className={`text-3xl font-bold mb-6 ${sectionHeaderClass}`}>{t.home.contactTitle}</h2>
+          <p className={`mb-12 ${sectionSubClass}`}>
             {t.home.contactSubtitle}
           </p>
           <ContactForm />
