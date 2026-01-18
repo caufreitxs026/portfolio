@@ -1,42 +1,21 @@
 'use client';
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim"; 
 import type { Engine } from "tsparticles-engine";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function ParticleBackground() {
-  const [isSecretMode, setIsSecretMode] = useState(false);
+  const { theme } = useTheme();
 
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadSlim(engine);
   }, []);
 
-  useEffect(() => {
-    const checkSecretMode = () => {
-      if (typeof document !== 'undefined') {
-        setIsSecretMode(document.body.classList.contains('secret-active'));
-      }
-    };
-    checkSecretMode();
-
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.attributeName === 'class') {
-            checkSecretMode();
-          }
-        });
-    });
-    
-    if (typeof document !== 'undefined') {
-        observer.observe(document.body, { attributes: true });
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  // Cores: Emerald para Normal, Pink para Hacker
-  const color = isSecretMode ? "#ec4899" : "#10b981";
+  // Cores baseadas no tema
+  const color = theme === 'dark' ? "#10b981" : "#64748b"; // Emerald vs Slate-500
+  const opacity = theme === 'dark' ? 0.3 : 0.6; // Mais visível no claro
 
   return (
     <Particles
@@ -46,30 +25,17 @@ export default function ParticleBackground() {
       options={{
         fullScreen: { enable: true, zIndex: -1 },
         background: { color: { value: "transparent" } },
-        fpsLimit: 60, // Otimização de bateria
+        fpsLimit: 60,
         interactivity: {
           detectsOn: "window",
           events: {
-            onHover: {
-              enable: true,
-              mode: "grab", // Conecta partículas ao mouse suavemente
-            },
-            onClick: {
-              enable: true,
-              mode: "push", // Cria novas partículas ao clicar
-            },
+            onHover: { enable: true, mode: "grab" },
             resize: true,
           },
           modes: {
             grab: {
               distance: 180,
-              links: {
-                opacity: 0.5, // Linhas mais fortes perto do mouse
-                color: color
-              },
-            },
-            push: {
-              quantity: 3,
+              links: { opacity: 0.4, color: color },
             },
           },
         },
@@ -79,46 +45,35 @@ export default function ParticleBackground() {
             enable: true,
             distance: 150,
             color: color,
-            opacity: 0.1, // Linhas de fundo quase invisíveis para limpeza visual
+            opacity: theme === 'dark' ? 0.1 : 0.2, // Um pouco mais forte no claro
             width: 1,
           },
           move: {
-            direction: "none",
             enable: true,
-            outModes: { default: "out" },
+            speed: 0.4, // Lento e suave
+            direction: "none",
             random: true,
-            speed: 0.3, // Movimento ultra-lento para elegância ("Drift")
             straight: false,
+            outModes: { default: "out" },
           },
           number: {
-            density: {
-              enable: true,
-              area: 1000,
-            },
-            value: 35, // Quantidade equilibrada
+            density: { enable: true, area: 1200 },
+            value: 30, // Leveza
           },
-          // Efeito de Cintilação (Twinkle)
           opacity: {
-            value: 0.5,
+            value: opacity,
             random: true,
             animation: {
               enable: true,
-              speed: 0.8, // Velocidade da cintilação
+              speed: 0.5,
               minimumValue: 0.1,
               sync: false
             }
           },
           shape: { type: "circle" },
-          // Efeito de Pulsação (Breathing)
           size: {
-            value: { min: 1, max: 3 },
+            value: { min: 1, max: 2.5 },
             random: true,
-            animation: {
-              enable: true,
-              speed: 1.5, // Velocidade da pulsação de tamanho
-              minimumValue: 0.5,
-              sync: false
-            }
           },
         },
         detectRetina: true,
