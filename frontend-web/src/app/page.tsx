@@ -38,7 +38,7 @@ export default function Home() {
     ? experiences 
     : experiences.slice(0, INITIAL_EXP_COUNT);
 
-  // Estilos condicionais
+  // Estilos condicionais baseados no tema
   const sectionHeaderClass = theme === 'dark' ? 'text-white' : 'text-slate-900';
   const sectionSubClass = theme === 'dark' ? 'text-slate-400' : 'text-slate-600';
   const iconClass = theme === 'dark' ? 'text-emerald-400' : 'text-indigo-600';
@@ -52,7 +52,7 @@ export default function Home() {
       <Navbar />
       <Hero />
 
-      {/* Botão do Jogo */}
+      {/* Botão do Jogo (GameHub) - Mantido */}
       <AnimatePresence>
         {!isGameOpen && (
           <motion.button
