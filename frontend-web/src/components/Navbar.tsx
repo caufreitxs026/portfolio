@@ -89,7 +89,7 @@ export default function Navbar() {
             <div className={`h-4 w-[1px] ${theme === 'dark' ? 'bg-white/10' : 'bg-slate-300'}`}></div>
 
             <div className="flex items-center gap-3">
-              {/* Botão Idioma */}
+              {/* Botao Idioma */}
               <button
                 onClick={toggleLanguage}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 text-xs font-mono font-bold ${styles.button}`}
@@ -98,7 +98,7 @@ export default function Navbar() {
                 <span>{language === 'pt' ? 'EN' : 'PT'}</span>
               </button>
 
-              {/* Botão Tema */}
+              {/* Botao Tema */}
               <button
                 onClick={toggleTheme}
                 className={`p-2 rounded-full border transition-all duration-300 ${styles.button}`}
@@ -109,13 +109,25 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile Toggle */}
-          <button 
-            className={`md:hidden p-2 relative z-50 focus:outline-none ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
+          {/* Mobile Actions (Tema + Toggle Menu) */}
+          <div className="md:hidden flex items-center gap-3 relative z-50">
+            {/* Botão de Tema no Mobile (Visível no Header) */}
+            <button
+                onClick={toggleTheme}
+                className={`p-2 rounded-full border transition-all duration-300 ${styles.button}`}
+                title="Alternar Tema"
+            >
+                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+
+            {/* Toggle do Menu */}
+            <button 
+              className={`p-2 focus:outline-none ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X size={28} /> : <Menu size={28} />}
+            </button>
+          </div>
         </div>
       </motion.nav>
 
@@ -161,6 +173,7 @@ export default function Navbar() {
                     <span className="text-sm font-bold">{language === 'pt' ? 'PT-BR' : 'EN-US'}</span>
                   </button>
 
+                  {/* Botão de Tema no Rodapé do Menu (Opcional, mas bom para consistência) */}
                   <button
                     onClick={toggleTheme}
                     className={`p-3 rounded-full border ${styles.button}`}
