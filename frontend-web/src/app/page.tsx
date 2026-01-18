@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Code, Server, ChevronUp, History } from 'lucide-react';
+import { Code, Server, ChevronUp, History, Gamepad2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 // Componentes
@@ -12,15 +12,17 @@ import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
 import ProjectCarousel from '@/components/ProjectCarousel';
 import CompetenceSection from '@/components/CompetenceSection';
+import TechWordle from '@/components/TechWordle';
 import { ProjectSkeleton, ExperienceSkeleton } from '@/components/Skeletons';
 import { usePortfolioData } from '@/hooks/usePortfolioData';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useTheme } from '@/contexts/ThemeContext'; // Usar tema para estilos condicionais
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function Home() {
   const { projects, experiences, skills, certificates, loading } = usePortfolioData();
   const [mounted, setMounted] = useState(false);
   const [showAllExperiences, setShowAllExperiences] = useState(false);
+  const [isGameOpen, setIsGameOpen] = useState(false);
   const INITIAL_EXP_COUNT = 3;
   
   const { t } = useLanguage();
@@ -36,7 +38,7 @@ export default function Home() {
     ? experiences 
     : experiences.slice(0, INITIAL_EXP_COUNT);
 
-  // Estilos condicionais para cabeçalhos de seção
+  // Estilos condicionais
   const sectionHeaderClass = theme === 'dark' ? 'text-white' : 'text-slate-900';
   const sectionSubClass = theme === 'dark' ? 'text-slate-400' : 'text-slate-600';
   const iconClass = theme === 'dark' ? 'text-emerald-400' : 'text-indigo-600';
@@ -49,6 +51,35 @@ export default function Home() {
       
       <Navbar />
       <Hero />
+
+      {/* Botão do Jogo */}
+      <AnimatePresence>
+        {!isGameOpen && (
+          <motion.button
+            key="game-btn"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            onClick={() => setIsGameOpen(true)}
+            className={`
+              fixed bottom-8 right-8 p-3 w-12 h-12 flex items-center justify-center rounded-full shadow-2xl z-[90] transition-colors duration-300 border backdrop-blur-md group cursor-pointer
+              ${theme === 'dark'
+                ? 'bg-slate-900/90 border-emerald-500/50 text-emerald-400 hover:bg-emerald-600 hover:text-white shadow-emerald-500/40 ring-1 ring-emerald-500/30' 
+                : 'bg-white border-indigo-500/50 text-indigo-600 hover:bg-indigo-600 hover:text-white shadow-indigo-500/40 ring-1 ring-indigo-500/30'}
+            `}
+            title="Jogar Code Breaker"
+            whileHover={{ scale: 1.1, rotate: 10 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Gamepad2 size={24} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isGameOpen && <TechWordle onClose={() => setIsGameOpen(false)} />}
+      </AnimatePresence>
 
       {/* --- SEÇÃO DE PROJETOS --- */}
       <section id="projetos" className={`py-20 relative ${theme === 'dark' ? 'bg-slate-900/30' : 'bg-slate-50/50'}`}>
@@ -76,7 +107,7 @@ export default function Home() {
       <CompetenceSection 
         skills={skills} 
         certificates={certificates} 
-        isSecretMode={theme === 'dark'} // Adaptação para usar o tema
+        isSecretMode={theme === 'dark'} 
       />
 
       {/* --- SEÇÃO DE EXPERIÊNCIA --- */}
