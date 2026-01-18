@@ -3,9 +3,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
-// Importação dinâmica de todos os efeitos
-// Se algum componente estiver quebrando o build, comente a importação dele aqui também se necessário.
-const SystemBoot = dynamic(() => import('./SystemBoot'), { ssr: false });
+// Importação dinâmica com SSR desativado para componentes pesados
 const CustomCursor = dynamic(() => import('./CustomCursor'), { ssr: false });
 const EffectsWrapper = dynamic(() => import('./EffectsWrapper'), { ssr: false });
 const ParticleBackground = dynamic(() => import('./ParticleBackground'), { ssr: false });
@@ -22,13 +20,10 @@ export default function ClientEffects() {
 
   return (
     <>
-      {/* 1. Componentes Leves (Provavelmente seguros) - Ativados */}
+      {/* Componentes Lógicos e Visuais */}
       <EffectsWrapper />
       <CustomCursor />
       <ScrollProgress />
-
-      {/* 2. Componentes Pesados - Agora seguros para ativação */}
-      <SystemBoot />
       <ParticleBackground />
 
       {/* Camada de Textura (Noise) */}
