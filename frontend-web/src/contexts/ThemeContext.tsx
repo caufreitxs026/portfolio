@@ -16,7 +16,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Recupera preferência salva ou do sistema
     const savedTheme = localStorage.getItem('portfolio_theme') as Theme;
     if (savedTheme) {
       setTheme(savedTheme);
@@ -32,13 +31,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('portfolio_theme', newTheme);
   };
 
-  // Evita flash de conteúdo incorreto
-  if (!mounted) return <>{children}</>;
-
+  // Correção: Sempre renderiza o Provider. Usamos visibility: hidden para evitar flash antes de montar.
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {/* Classe global para controle de CSS via Tailwind */}
-      <div className={theme}>
+      <div className={theme} style={{ visibility: mounted ? 'visible' : 'hidden' }}>
         {children}
       </div>
     </ThemeContext.Provider>
