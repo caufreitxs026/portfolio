@@ -4,17 +4,16 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, CheckCircle2, AlertCircle, Loader2, Mail, User, MessageSquare, Terminal } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function ContactForm() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    content: ''
-  });
+  const [formData, setFormData] = useState({ name: '', email: '', content: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [isSecretMode, setIsSecretMode] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  
   const { t } = useLanguage();
+  const { theme } = useTheme();
 
   useEffect(() => {
     const checkSecretMode = () => {
@@ -26,44 +25,21 @@ export default function ContactForm() {
     return () => clearInterval(interval);
   }, []);
 
-  // Configuração de Tema
-  const theme = isSecretMode ? {
-    borderFocus: 'border-pink-500/50',
-    glow: 'shadow-[0_0_20px_rgba(236,72,153,0.15)]',
-    button: 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500',
-    icon: 'text-pink-500',
-    inputBg: 'bg-slate-900/80',
-    label: 'text-pink-300'
-  } : {
-    borderFocus: 'border-emerald-500/50',
-    glow: 'shadow-[0_0_20px_rgba(16,185,129,0.15)]',
-    button: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500',
-    icon: 'text-emerald-500',
-    inputBg: 'bg-slate-900/80',
-    label: 'text-emerald-300'
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.content) return;
-
     setStatus('loading');
-
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-acxt.onrender.com';
-      
       const res = await fetch(`${API_URL}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-
       if (!res.ok) throw new Error('Falha no envio');
-
       setStatus('success');
       setFormData({ name: '', email: '', content: '' });
       setTimeout(() => setStatus('idle'), 5000);
-
     } catch (error) {
       console.error(error);
       setStatus('error');
@@ -75,28 +51,54 @@ export default function ContactForm() {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  // Estilos por tema
+  const styles = theme === 'dark' ? {
+    formBg: 'bg-slate-950/80 border-slate-800',
+    inputBg: 'bg-slate-900/80',
+    inputText: 'text-slate-200 placeholder-slate-600',
+    label: focusedField ? (isSecretMode ? 'text-pink-300' : 'text-emerald-300') : 'text-slate-500',
+    iconDefault: 'text-slate-600',
+    iconActive: isSecretMode ? 'text-pink-500' : 'text-emerald-500',
+    borderDefault: 'border-slate-800 hover:border-slate-700',
+    borderFocus: isSecretMode ? 'border-pink-500/50 shadow-[0_0_20px_rgba(236,72,153,0.15)]' : 'border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.15)]',
+    button: isSecretMode ? 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500' : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500',
+    glowColor: isSecretMode ? 'bg-pink-600' : 'bg-emerald-600'
+  } : {
+    // TEMA CLARO
+    formBg: 'bg-white/80 border-slate-200 shadow-xl',
+    inputBg: 'bg-white border-slate-200',
+    inputText: 'text-slate-800 placeholder-slate-400',
+    label: focusedField ? 'text-indigo-600' : 'text-slate-400',
+    iconDefault: 'text-slate-400',
+    iconActive: 'text-indigo-600',
+    borderDefault: 'border-slate-200 hover:border-slate-300',
+    borderFocus: 'border-indigo-500/50 ring-2 ring-indigo-500/10',
+    button: 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-200',
+    glowColor: 'bg-indigo-600'
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto relative">
-      <div className={`absolute -inset-1 rounded-2xl blur-xl opacity-20 transition-colors duration-500 ${isSecretMode ? 'bg-pink-600' : 'bg-emerald-600'}`}></div>
+      <div className={`absolute -inset-1 rounded-2xl blur-xl opacity-20 transition-colors duration-500 ${styles.glowColor}`}></div>
 
       <motion.form 
         onSubmit={handleSubmit}
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="relative bg-slate-950/80 backdrop-blur-xl p-8 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden"
+        className={`relative backdrop-blur-xl p-8 rounded-2xl border shadow-2xl overflow-hidden ${styles.formBg}`}
       >
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
         
         <div className="space-y-6 relative z-10">
           
           <div className="relative group">
-            <label className={`block text-xs font-mono font-bold uppercase mb-2 ml-1 transition-colors ${focusedField === 'name' ? theme.label : 'text-slate-500'}`}>
+            <label className={`block text-xs font-mono font-bold uppercase mb-2 ml-1 transition-colors ${styles.label}`}>
               {t.contact.nameLabel}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <User size={18} className={`transition-colors duration-300 ${focusedField === 'name' ? theme.icon : 'text-slate-600'}`} />
+                <User size={18} className={`transition-colors duration-300 ${focusedField === 'name' ? styles.iconActive : styles.iconDefault}`} />
               </div>
               <input
                 type="text"
@@ -107,9 +109,9 @@ export default function ContactForm() {
                 onFocus={() => setFocusedField('name')}
                 onBlur={() => setFocusedField(null)}
                 className={`
-                  w-full pl-12 pr-4 py-4 rounded-xl text-slate-200 placeholder-slate-600 outline-none border transition-all duration-300
-                  ${theme.inputBg} 
-                  ${focusedField === 'name' ? `${theme.borderFocus} ${theme.glow} ring-1 ring-white/5` : 'border-slate-800 hover:border-slate-700'}
+                  w-full pl-12 pr-4 py-4 rounded-xl outline-none border transition-all duration-300
+                  ${styles.inputBg} ${styles.inputText}
+                  ${focusedField === 'name' ? styles.borderFocus : styles.borderDefault}
                 `}
                 placeholder={t.contact.namePlaceholder}
               />
@@ -117,12 +119,12 @@ export default function ContactForm() {
           </div>
 
           <div className="relative group">
-            <label className={`block text-xs font-mono font-bold uppercase mb-2 ml-1 transition-colors ${focusedField === 'email' ? theme.label : 'text-slate-500'}`}>
+            <label className={`block text-xs font-mono font-bold uppercase mb-2 ml-1 transition-colors ${styles.label}`}>
               {t.contact.emailLabel}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Mail size={18} className={`transition-colors duration-300 ${focusedField === 'email' ? theme.icon : 'text-slate-600'}`} />
+                <Mail size={18} className={`transition-colors duration-300 ${focusedField === 'email' ? styles.iconActive : styles.iconDefault}`} />
               </div>
               <input
                 type="email"
@@ -133,9 +135,9 @@ export default function ContactForm() {
                 onFocus={() => setFocusedField('email')}
                 onBlur={() => setFocusedField(null)}
                 className={`
-                  w-full pl-12 pr-4 py-4 rounded-xl text-slate-200 placeholder-slate-600 outline-none border transition-all duration-300
-                  ${theme.inputBg}
-                  ${focusedField === 'email' ? `${theme.borderFocus} ${theme.glow} ring-1 ring-white/5` : 'border-slate-800 hover:border-slate-700'}
+                  w-full pl-12 pr-4 py-4 rounded-xl outline-none border transition-all duration-300
+                  ${styles.inputBg} ${styles.inputText}
+                  ${focusedField === 'email' ? styles.borderFocus : styles.borderDefault}
                 `}
                 placeholder={t.contact.emailPlaceholder}
               />
@@ -143,12 +145,12 @@ export default function ContactForm() {
           </div>
 
           <div className="relative group">
-            <label className={`block text-xs font-mono font-bold uppercase mb-2 ml-1 transition-colors ${focusedField === 'content' ? theme.label : 'text-slate-500'}`}>
+            <label className={`block text-xs font-mono font-bold uppercase mb-2 ml-1 transition-colors ${styles.label}`}>
               {t.contact.msgLabel}
             </label>
             <div className="relative">
               <div className="absolute top-4 left-0 pl-4 pointer-events-none">
-                <MessageSquare size={18} className={`transition-colors duration-300 ${focusedField === 'content' ? theme.icon : 'text-slate-600'}`} />
+                <MessageSquare size={18} className={`transition-colors duration-300 ${focusedField === 'content' ? styles.iconActive : styles.iconDefault}`} />
               </div>
               <textarea
                 name="content"
@@ -159,9 +161,9 @@ export default function ContactForm() {
                 onFocus={() => setFocusedField('content')}
                 onBlur={() => setFocusedField(null)}
                 className={`
-                  w-full pl-12 pr-4 py-4 rounded-xl text-slate-200 placeholder-slate-600 outline-none border transition-all duration-300 resize-none
-                  ${theme.inputBg}
-                  ${focusedField === 'content' ? `${theme.borderFocus} ${theme.glow} ring-1 ring-white/5` : 'border-slate-800 hover:border-slate-700'}
+                  w-full pl-12 pr-4 py-4 rounded-xl outline-none border transition-all duration-300 resize-none
+                  ${styles.inputBg} ${styles.inputText}
+                  ${focusedField === 'content' ? styles.borderFocus : styles.borderDefault}
                 `}
                 placeholder={t.contact.msgPlaceholder}
               />
@@ -174,7 +176,7 @@ export default function ContactForm() {
             disabled={status === 'loading' || status === 'success'}
             className={`
               w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden group
-              ${status === 'success' ? 'bg-green-600' : status === 'error' ? 'bg-red-600' : theme.button}
+              ${status === 'success' ? 'bg-green-600' : status === 'error' ? 'bg-red-600' : styles.button}
               disabled:opacity-80 disabled:cursor-not-allowed
             `}
           >
@@ -226,10 +228,9 @@ export default function ContactForm() {
               )}
             </AnimatePresence>
           </motion.button>
-
         </div>
 
-        <div className="mt-6 pt-4 border-t border-slate-800/50 flex justify-between items-center text-[10px] text-slate-600 font-mono">
+        <div className={`mt-6 pt-4 border-t flex justify-between items-center text-[10px] font-mono ${theme === 'dark' ? 'border-slate-800/50 text-slate-600' : 'border-slate-200 text-slate-400'}`}>
            <div className="flex items-center gap-1">
              <Terminal size={12} />
              <span>{t.contact.secure}</span>
