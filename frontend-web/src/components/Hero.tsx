@@ -48,7 +48,7 @@ export default function Hero() {
     // TEMA CLARO
     badge: 'bg-white/80 border-slate-200 text-slate-600 hover:border-slate-400 shadow-sm',
     titleMain: 'text-slate-900',
-    titleAccent: 'bg-gradient-to-r from-indigo-600 to-violet-600', // Gradiente mais forte no claro
+    titleAccent: 'bg-gradient-to-r from-indigo-600 to-violet-600',
     desc: 'text-slate-600 font-medium',
     btnPrimary: 'bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 text-white shadow-xl shadow-slate-900/20',
     btnSecondary: 'text-slate-700 border-slate-300 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 bg-white/50',
@@ -65,7 +65,6 @@ export default function Hero() {
   return (
     <section className="relative min-h-[90vh] flex items-center pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden bg-transparent">
       
-      {/* Backgrounds - Ocultos no modo claro pois o wrapper já trata */}
       {theme === 'dark' && (
         <>
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] -z-20"></div>
@@ -76,12 +75,12 @@ export default function Hero() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         
-        {/* COLUNA ESQUERDA */}
+        {/* COLUNA ESQUERDA - Alinhamento forçado para a esquerda */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="flex flex-col items-center lg:items-start text-center lg:text-left z-10"
+          className="flex flex-col items-start text-left z-10"
         >
           {/* Badge */}
           <motion.div 
@@ -110,7 +109,7 @@ export default function Hero() {
           </p>
 
           {/* Botões de Ação */}
-          <div className="flex flex-row gap-3 w-full justify-center lg:justify-start">
+          <div className="flex flex-row gap-3 w-full justify-start">
             <Link 
               href="#projetos"
               className={`
@@ -166,6 +165,7 @@ export default function Hero() {
 
             <div className="p-5 sm:p-6 overflow-x-auto custom-scrollbar">
               <div className="font-mono text-xs sm:text-sm leading-7">
+                {/* Linhas de código atualizadas com novas infos e cores corrigidas */}
                 <div className="flex">
                   <span className="text-slate-500 w-6 select-none text-right mr-4">1</span>
                   <div className="whitespace-nowrap">
@@ -189,41 +189,61 @@ export default function Hero() {
                   </div>
                 </div>
 
-                 <div className="flex">
+                <div className="flex">
                   <span className="text-slate-500 w-6 select-none text-right mr-4">5</span>
                   <div className="whitespace-nowrap pl-4">
                      <span className="text-blue-500">stack</span> = [
                   </div>
                 </div>
 
+                {/* Stacks Atualizadas */}
                 <div className="flex">
                   <span className="text-slate-500 w-6 select-none text-right mr-4">6</span>
                   <div className="whitespace-nowrap pl-8">
-                    <span className={styles.codeWindow.string}>'Python'</span>, <span className={styles.codeWindow.string}>'Django'</span>, <span className={styles.codeWindow.string}>'React'</span>,
+                    <span className={styles.codeWindow.string}>'Python'</span>, <span className={styles.codeWindow.string}>'Django'</span>, <span className={styles.codeWindow.string}>'React'</span>, <span className={styles.codeWindow.string}>'Vue.js'</span>,
                   </div>
                 </div>
 
-                {/* ... (Resto do código mantido igual, mas usando styles.codeWindow) ... */}
-                {/* Por brevidade, aplicando o estilo nas linhas seguintes */}
-                 <div className="flex">
+                <div className="flex">
                   <span className="text-slate-500 w-6 select-none text-right mr-4">7</span>
                   <div className="whitespace-nowrap pl-8">
-                    <span className={styles.codeWindow.string}>'Node.js'</span>, <span className={styles.codeWindow.string}>'Java'</span>, <span className={styles.codeWindow.string}>'SQL'</span>
+                    <span className={styles.codeWindow.string}>'Node.js'</span>, <span className={styles.codeWindow.string}>'Java'</span>, <span className={styles.codeWindow.string}>'SQL'</span>,
                   </div>
                 </div>
-                
-                 <div className="flex">
+
+                <div className="flex">
                   <span className="text-slate-500 w-6 select-none text-right mr-4">8</span>
+                  <div className="whitespace-nowrap pl-8">
+                    <span className={styles.codeWindow.string}>'Docker'</span>, <span className={styles.codeWindow.string}>'SaaS'</span>
+                  </div>
+                </div>
+
+                <div className="flex">
+                  <span className="text-slate-500 w-6 select-none text-right mr-4">9</span>
                   <div className="whitespace-nowrap pl-4">
                      ]
                   </div>
                 </div>
-                
-                 <div className="flex">
-                  <span className="text-slate-500 w-6 select-none text-right mr-4">9</span>
+
+                <div className="flex">
+                  <span className="text-slate-500 w-6 select-none text-right mr-4">10</span>
                   <div className="whitespace-nowrap pl-4">
                     <span className="text-blue-500">role</span> = <span className="text-orange-500">'{t.hero.codeRole}'</span>
                   </div>
+                </div>
+
+                <div className="flex">
+                  <span className="text-slate-500 w-6 select-none text-right mr-4">11</span>
+                  <div className="whitespace-nowrap pl-4">
+                    <span className="text-blue-500">location</span> = <span className="text-orange-500">'{t.hero.codeLocation}'</span>
+                  </div>
+                </div>
+
+                <div className="flex">
+                   <span className="text-slate-500 w-6 select-none text-right mr-4">12</span>
+                   <div className="whitespace-nowrap pl-4">
+                     <span className="text-blue-500">availability</span> = <span className="text-orange-500">'{t.hero.codeAvailability}'</span>
+                   </div>
                 </div>
 
               </div>
