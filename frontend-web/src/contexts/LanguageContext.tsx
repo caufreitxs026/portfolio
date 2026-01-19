@@ -15,13 +15,13 @@ const translations = {
       openToWork: 'Disponível para Projetos',
       greeting: 'Olá, sou',
       role: 'Desenvolvedor Full Stack & Analista de Dados',
-      description: 'Desenvolvedor Full Stack e Analista de Dados focado em construir aplicações performáticas e dashboards estratégicos que geram valor real para o negócio.',
+      description: 'Desenvolvedor Full Stack, Suporte técnico e Analista de Dados focado em construir aplicações performáticas e dashboards estratégicos que geram valor real para o negócio.',
       btnProject: 'Ver Projetos',
       btnCv: 'Currículo',
       codeComment: '# Inicializando perfil...',
       codeRole: 'Analista de Suporte & Dev Full Stack',
       codeLocation: 'Feira de Santana - BA',
-      codeAvailability: 'Presencial, Híbrido e Home Office (Disponível para mudança)'
+      codeAvailability: 'Presencial, Híbrido e Home Office'
     },
     home: {
       projectsTitle: 'Projetos em Destaque',
@@ -80,13 +80,13 @@ const translations = {
       openToWork: 'Open to Work',
       greeting: 'Hi, I am',
       role: 'Full Stack Developer & Data Analyst',
-      description: 'Full Stack Developer and Data Analyst focused on building high-performance applications and strategic dashboards that generate real business value.',
+      description: 'Full Stack Developer, Technical Support and Data Analyst focused on building high-performance applications and strategic dashboards that generate real value for the business.',
       btnProject: 'View Projects',
       btnCv: 'Resume',
       codeComment: '# Initializing profile...',
       codeRole: 'Support Analyst & Full Stack Dev',
       codeLocation: 'Bahia - Brazil',
-      codeAvailability: 'On-site, Hybrid, Remote (Open to relocation)'
+      codeAvailability: 'On-site, Hybrid, Remote'
     },
     home: {
       projectsTitle: 'Featured Projects',
