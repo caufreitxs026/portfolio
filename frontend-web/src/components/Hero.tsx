@@ -62,6 +62,9 @@ export default function Hero() {
     }
   };
 
+  // Classe utilitária para os números de linha (Garante largura fixa e não encolhe)
+  const lineNumberClass = "shrink-0 text-slate-500 w-6 select-none text-right mr-4";
+
   return (
     <section className="relative min-h-[90vh] flex items-center pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden bg-transparent">
       
@@ -75,7 +78,7 @@ export default function Hero() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         
-        {/* COLUNA ESQUERDA - Alinhamento forçado para a esquerda */}
+        {/* COLUNA ESQUERDA */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -165,82 +168,82 @@ export default function Hero() {
 
             <div className="p-5 sm:p-6 overflow-x-auto custom-scrollbar">
               <div className="font-mono text-xs sm:text-sm leading-7">
-                {/* Linhas de código atualizadas com novas infos e cores corrigidas */}
-                <div className="flex">
-                  <span className="text-slate-500 w-6 select-none text-right mr-4">1</span>
+                {/* Linhas de código atualizadas com shrink-0 para alinhamento mobile perfeito */}
+                
+                <div className="flex items-start">
+                  <span className={lineNumberClass}>1</span>
                   <div className="whitespace-nowrap">
                     <span className={styles.codeWindow.keyword}>from</span> <span className={styles.codeWindow.text}>universe</span> <span className={styles.codeWindow.keyword}>import</span> <span className={styles.codeWindow.variable}>Caua</span>
                   </div>
                 </div>
 
-                <div className="flex"><span className="text-slate-500 w-6 select-none text-right mr-4">2</span></div>
+                <div className="flex items-start"><span className={lineNumberClass}>2</span></div>
 
-                <div className="flex">
-                  <span className="text-slate-500 w-6 select-none text-right mr-4">3</span>
+                <div className="flex items-start">
+                  <span className={lineNumberClass}>3</span>
                   <div className="whitespace-nowrap">
                     <span className={`${styles.codeWindow.comment} italic`}>{t.hero.codeComment}</span>
                   </div>
                 </div>
 
-                <div className="flex">
-                  <span className="text-slate-500 w-6 select-none text-right mr-4">4</span>
+                <div className="flex items-start">
+                  <span className={lineNumberClass}>4</span>
                   <div className="whitespace-nowrap">
                     <span className={styles.codeWindow.keyword}>class</span> <span className="text-yellow-500">Profile</span>:
                   </div>
                 </div>
 
-                <div className="flex">
-                  <span className="text-slate-500 w-6 select-none text-right mr-4">5</span>
+                 <div className="flex items-start">
+                  <span className={lineNumberClass}>5</span>
                   <div className="whitespace-nowrap pl-4">
                      <span className="text-blue-500">stack</span> = [
                   </div>
                 </div>
 
-                {/* Stacks Atualizadas */}
-                <div className="flex">
-                  <span className="text-slate-500 w-6 select-none text-right mr-4">6</span>
+                <div className="flex items-start">
+                  <span className={lineNumberClass}>6</span>
                   <div className="whitespace-nowrap pl-8">
                     <span className={styles.codeWindow.string}>'Python'</span>, <span className={styles.codeWindow.string}>'Django'</span>, <span className={styles.codeWindow.string}>'React'</span>, <span className={styles.codeWindow.string}>'Vue.js'</span>,
                   </div>
                 </div>
 
-                <div className="flex">
-                  <span className="text-slate-500 w-6 select-none text-right mr-4">7</span>
+                <div className="flex items-start">
+                  <span className={lineNumberClass}>7</span>
                   <div className="whitespace-nowrap pl-8">
                     <span className={styles.codeWindow.string}>'Node.js'</span>, <span className={styles.codeWindow.string}>'Java'</span>, <span className={styles.codeWindow.string}>'SQL'</span>,
                   </div>
                 </div>
 
-                <div className="flex">
-                  <span className="text-slate-500 w-6 select-none text-right mr-4">8</span>
+                <div className="flex items-start">
+                  <span className={lineNumberClass}>8</span>
                   <div className="whitespace-nowrap pl-8">
                     <span className={styles.codeWindow.string}>'Docker'</span>, <span className={styles.codeWindow.string}>'SaaS'</span>
                   </div>
                 </div>
 
-                <div className="flex">
-                  <span className="text-slate-500 w-6 select-none text-right mr-4">9</span>
+                <div className="flex items-start">
+                  <span className={lineNumberClass}>9</span>
                   <div className="whitespace-nowrap pl-4">
                      ]
                   </div>
                 </div>
 
-                <div className="flex">
-                  <span className="text-slate-500 w-6 select-none text-right mr-4">10</span>
+                <div className="flex items-start">
+                  <span className={lineNumberClass}>10</span>
                   <div className="whitespace-nowrap pl-4">
                     <span className="text-blue-500">role</span> = <span className="text-orange-500">'{t.hero.codeRole}'</span>
                   </div>
                 </div>
 
-                <div className="flex">
-                  <span className="text-slate-500 w-6 select-none text-right mr-4">11</span>
+                <div className="flex items-start">
+                  <span className={lineNumberClass}>11</span>
                   <div className="whitespace-nowrap pl-4">
                     <span className="text-blue-500">location</span> = <span className="text-orange-500">'{t.hero.codeLocation}'</span>
                   </div>
                 </div>
 
-                <div className="flex">
-                   <span className="text-slate-500 w-6 select-none text-right mr-4">12</span>
+                <div className="flex items-start">
+                   <span className={lineNumberClass}>12</span>
                    <div className="whitespace-nowrap pl-4">
                      <span className="text-blue-500">availability</span> = <span className="text-orange-500">'{t.hero.codeAvailability}'</span>
                    </div>
