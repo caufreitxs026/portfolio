@@ -19,9 +19,9 @@ export default function CertificatesHUD({ certificates, isSecretMode }: { certif
   const [canScroll, setCanScroll] = useState(false);
   const { theme } = useTheme();
 
-  // Adaptação de cores para Light Mode
+  // Adaptação de cores
   const styles = theme === 'dark' ? {
-    container: 'bg-slate-900/40 border-pink-500/30 shadow-xl', // Border corrigida na logica abaixo
+    container: 'bg-slate-900/40 border-slate-800',
     border: isSecretMode ? 'border-pink-500/30' : 'border-emerald-500/30',
     accent: isSecretMode ? 'text-pink-500' : 'text-emerald-500',
     textMain: 'text-white',
@@ -29,17 +29,20 @@ export default function CertificatesHUD({ certificates, isSecretMode }: { certif
     cardBg: isSecretMode ? 'hover:bg-pink-900/20' : 'hover:bg-emerald-900/20',
     cardBorder: 'border-slate-800',
     cardTitle: 'text-slate-200',
-    scrollThumb: isSecretMode ? 'scrollbar-thumb-pink-500/20' : 'scrollbar-thumb-emerald-500/20'
+    scrollThumb: isSecretMode ? 'scrollbar-thumb-pink-500/20' : 'scrollbar-thumb-emerald-500/20',
+    highlight: isSecretMode ? 'bg-pink-500' : 'bg-emerald-500'
   } : {
-    container: 'bg-white/60 border-slate-200 shadow-xl shadow-slate-200/50',
-    border: 'border-slate-200',
-    accent: 'text-indigo-600',
+    // TEMA CLARO
+    container: 'bg-white/80 border-slate-300 shadow-xl',
+    border: 'border-slate-300',
+    accent: 'text-purple-600', // Roxo no claro
     textMain: 'text-slate-900',
-    textSub: 'text-slate-500',
-    cardBg: 'hover:bg-slate-50',
-    cardBorder: 'border-slate-200 bg-white/50',
-    cardTitle: 'text-slate-800',
-    scrollThumb: 'scrollbar-thumb-slate-300'
+    textSub: 'text-slate-600',
+    cardBg: 'hover:bg-purple-50', // Fundo roxo suave no hover
+    cardBorder: 'border-slate-200 bg-white',
+    cardTitle: 'text-slate-900',
+    scrollThumb: 'scrollbar-thumb-slate-400',
+    highlight: 'bg-purple-600' // Marcador roxo
   };
 
   useEffect(() => {
@@ -100,22 +103,22 @@ export default function CertificatesHUD({ certificates, isSecretMode }: { certif
             {/* Marcador Lateral */}
             <div className={`
               absolute left-0 top-0 bottom-0 w-[3px] rounded-l-lg transition-all duration-300
-              ${hoveredId === cert.id ? (isSecretMode ? 'bg-pink-500' : (theme === 'dark' ? 'bg-emerald-500' : 'bg-indigo-500')) : 'bg-transparent'}
+              ${hoveredId === cert.id ? styles.highlight : 'bg-transparent'}
             `}></div>
 
             <div className="pl-2">
                 <div className="flex justify-between items-start">
-                    <span className={`text-[10px] font-mono uppercase tracking-wide px-1.5 py-0.5 rounded ${theme === 'dark' ? (isSecretMode ? 'bg-pink-500/10 text-pink-300' : 'bg-emerald-500/10 text-emerald-300') : 'bg-indigo-50 text-indigo-700 border border-indigo-100'}`}>
+                    <span className={`text-[10px] font-mono uppercase tracking-wide px-1.5 py-0.5 rounded ${theme === 'dark' ? (isSecretMode ? 'bg-pink-500/10 text-pink-300' : 'bg-emerald-500/10 text-emerald-300') : 'bg-slate-100 text-slate-700 border border-slate-200'}`}>
                       {cert.issuer}
                     </span>
                     <ExternalLink size={12} className={`opacity-0 group-hover:opacity-100 transition-opacity ${styles.accent}`} />
                 </div>
-                <h4 className={`font-bold text-sm mt-2 transition-colors line-clamp-2 ${styles.cardTitle} group-hover:${theme === 'dark' ? 'text-white' : 'text-indigo-900'}`}>
+                <h4 className={`font-bold text-sm mt-2 transition-colors line-clamp-2 ${styles.cardTitle} group-hover:${theme === 'dark' ? 'text-white' : 'text-purple-900'}`}>
                   {cert.name}
                 </h4>
                 <div className={`flex justify-between items-end mt-2 border-t pt-2 ${theme === 'dark' ? 'border-white/5' : 'border-slate-100'}`}>
                     <span className={`text-[10px] font-mono ${styles.textSub}`}>Issued: {new Date(cert.issue_date).getFullYear()}</span>
-                    <span className={`text-[9px] font-mono uppercase ${theme === 'dark' ? 'text-slate-700' : 'text-slate-300'}`}>ID: {cert.id.toString().padStart(4, '0')}</span>
+                    <span className={`text-[9px] font-mono uppercase ${theme === 'dark' ? 'text-slate-700' : 'text-slate-400'}`}>ID: {cert.id.toString().padStart(4, '0')}</span>
                 </div>
             </div>
           </motion.a>
@@ -123,7 +126,7 @@ export default function CertificatesHUD({ certificates, isSecretMode }: { certif
       </div>
 
       {/* Footer Fixo */}
-      <div className={`flex-shrink-0 mt-3 pt-3 border-t flex justify-between items-center text-[10px] font-mono ${theme === 'dark' ? 'border-white/5 text-slate-600' : 'border-slate-200 text-slate-400'}`}>
+      <div className={`flex-shrink-0 mt-3 pt-3 border-t flex justify-between items-center text-[10px] font-mono ${theme === 'dark' ? 'border-white/5 text-slate-600' : 'border-slate-200 text-slate-500'}`}>
         <span>TOTAL: {certificates.length}</span>
         
         <div className="flex items-center gap-3">
@@ -131,7 +134,7 @@ export default function CertificatesHUD({ certificates, isSecretMode }: { certif
             <motion.div 
                animate={{ y: [0, 2, 0] }}
                transition={{ repeat: Infinity, duration: 1.5 }}
-               className={`flex items-center gap-1 ${theme === 'dark' ? 'text-slate-500' : 'text-indigo-400'}`}
+               className={`flex items-center gap-1 ${theme === 'dark' ? 'text-slate-500' : 'text-purple-400'}`}
             >
                <span>SCROLL</span>
                <ChevronDown size={10} />
