@@ -31,19 +31,21 @@ interface Certificate {
 interface Props {
   skills: Skill[];
   certificates: Certificate[];
-  isSecretMode: boolean; // Mantido para compatibilidade, mas usaremos theme
+  isSecretMode: boolean; 
 }
 
 export default function CompetenceSection({ skills, certificates, isSecretMode }: Props) {
   const { theme } = useTheme();
 
-  // Estilos de container baseados no tema
   const containerClass = theme === 'dark' 
     ? 'border-slate-800 bg-slate-950/50 shadow-2xl' 
     : 'border-slate-200 bg-white/60 shadow-xl shadow-slate-200/50';
   
-  const textClass = theme === 'dark' ? 'text-white' : 'text-slate-900';
   const subTextClass = theme === 'dark' ? 'text-slate-500' : 'text-slate-500';
+
+  // Lógica de Cor: Secret -> Pink | Dark -> Emerald | Light -> Indigo
+  const titleColor = isSecretMode ? 'text-pink-500' : (theme === 'dark' ? 'text-emerald-400' : 'text-indigo-600');
+  const dotColor = isSecretMode ? 'bg-pink-500' : (theme === 'dark' ? 'bg-emerald-500' : 'bg-indigo-600');
 
   return (
     <section className="py-24 relative w-full overflow-hidden z-20">
@@ -51,14 +53,13 @@ export default function CompetenceSection({ skills, certificates, isSecretMode }
             
             <div className="grid lg:grid-cols-3 gap-8 h-auto">
                 
-                {/* ÁREA 3D (Neural Nexus) */}
                 <div className={`lg:col-span-2 h-[600px] lg:h-[700px] w-full relative rounded-2xl overflow-hidden border backdrop-blur-sm group ${containerClass}`}>
                     <div className="absolute top-5 left-6 z-10 pointer-events-none select-none">
-                        <h2 className={`text-2xl font-bold font-mono tracking-tighter ${isSecretMode ? 'text-pink-500' : (theme === 'dark' ? 'text-emerald-400' : 'text-indigo-600')}`}>
+                        <h2 className={`text-2xl font-bold font-mono tracking-tighter ${titleColor}`}>
                             NEURAL NEXUS
                         </h2>
                         <div className="flex items-center gap-2 mt-1">
-                           <span className={`w-2 h-2 rounded-full ${isSecretMode ? 'bg-pink-500' : 'bg-emerald-500'} animate-pulse`}></span>
+                           <span className={`w-2 h-2 rounded-full ${dotColor} animate-pulse`}></span>
                            <p className={`text-[10px] uppercase tracking-widest ${subTextClass}`}>Interactive Skill Map</p>
                         </div>
                     </div>
@@ -74,7 +75,6 @@ export default function CompetenceSection({ skills, certificates, isSecretMode }
                     </div>
                 </div>
 
-                {/* HUD DE DADOS (Certificados) */}
                 <div className="h-[600px] lg:h-[700px] w-full">
                     <CertificatesHUD certificates={certificates} isSecretMode={isSecretMode} />
                 </div>
