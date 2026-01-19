@@ -23,6 +23,8 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [showAllExperiences, setShowAllExperiences] = useState(false);
   const [isGameOpen, setIsGameOpen] = useState(false);
+  // Reativado para passar aos filhos
+  const [isSecretMode, setIsSecretMode] = useState(false);
   const INITIAL_EXP_COUNT = 3;
   
   const { t } = useLanguage();
@@ -30,6 +32,20 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
+    // Detector de Modo Secreto
+    const checkSecretMode = () => {
+      if (typeof document !== 'undefined') {
+        setIsSecretMode(document.body.classList.contains('secret-active'));
+      }
+    };
+    checkSecretMode();
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class') checkSecretMode();
+        });
+    });
+    if (typeof document !== 'undefined') observer.observe(document.body, { attributes: true });
+    return () => observer.disconnect();
   }, []);
 
   if (!mounted) return null;
@@ -38,7 +54,7 @@ export default function Home() {
     ? experiences 
     : experiences.slice(0, INITIAL_EXP_COUNT);
 
-  // Estilos condicionais baseados no tema
+  // Estilos condicionais
   const sectionHeaderClass = theme === 'dark' ? 'text-white' : 'text-slate-900';
   const sectionSubClass = theme === 'dark' ? 'text-slate-400' : 'text-slate-600';
   const iconClass = theme === 'dark' ? 'text-emerald-400' : 'text-indigo-600';
@@ -52,7 +68,7 @@ export default function Home() {
       <Navbar />
       <Hero />
 
-      {/* Botão do Jogo (GameHub) - Mantido */}
+      {/* Botão do Jogo */}
       <AnimatePresence>
         {!isGameOpen && (
           <motion.button
@@ -64,9 +80,12 @@ export default function Home() {
             onClick={() => setIsGameOpen(true)}
             className={`
               fixed bottom-8 right-8 p-3 w-12 h-12 flex items-center justify-center rounded-full shadow-2xl z-[90] transition-colors duration-300 border backdrop-blur-md group cursor-pointer
-              ${theme === 'dark'
-                ? 'bg-slate-900/90 border-emerald-500/50 text-emerald-400 hover:bg-emerald-600 hover:text-white shadow-emerald-500/40 ring-1 ring-emerald-500/30' 
-                : 'bg-white border-indigo-500/50 text-indigo-600 hover:bg-indigo-600 hover:text-white shadow-indigo-500/40 ring-1 ring-indigo-500/30'}
+              ${isSecretMode 
+                ? 'bg-black/90 border-pink-500 text-pink-500 hover:bg-pink-600 hover:text-white shadow-pink-500/40 ring-1 ring-pink-500/30' 
+                : (theme === 'dark' 
+                    ? 'bg-slate-900/90 border-emerald-500/50 text-emerald-400 hover:bg-emerald-600 hover:text-white shadow-emerald-500/40 ring-1 ring-emerald-500/30'
+                    : 'bg-white border-indigo-500/50 text-indigo-600 hover:bg-indigo-600 hover:text-white shadow-indigo-500/40 ring-1 ring-indigo-500/30')
+              }
             `}
             title="Jogar Code Breaker"
             whileHover={{ scale: 1.1, rotate: 10 }}
@@ -104,10 +123,11 @@ export default function Home() {
       </section>
 
       {/* --- SEÇÃO: COMPETÊNCIAS E CERTIFICADOS --- */}
+      {/* CORREÇÃO: Passando o isSecretMode correto, não apenas theme === 'dark' */}
       <CompetenceSection 
         skills={skills} 
         certificates={certificates} 
-        isSecretMode={theme === 'dark'} 
+        isSecretMode={isSecretMode} 
       />
 
       {/* --- SEÇÃO DE EXPERIÊNCIA --- */}
