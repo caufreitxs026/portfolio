@@ -19,8 +19,9 @@ const translations = {
       btnProject: 'Ver Projetos',
       btnCv: 'Currículo',
       codeComment: '# Inicializando perfil...',
-      codeRole: 'Analista de Suporte',
-      codeLocation: 'Feira de Santana, BA'
+      codeRole: 'Analista de Suporte & Dev Full Stack',
+      codeLocation: 'Feira de Santana - BA',
+      codeAvailability: 'Presencial, Híbrido e Home Office (Disponível para mudança)'
     },
     home: {
       projectsTitle: 'Projetos em Destaque',
@@ -83,8 +84,9 @@ const translations = {
       btnProject: 'View Projects',
       btnCv: 'Resume',
       codeComment: '# Initializing profile...',
-      codeRole: 'Support Analyst',
-      codeLocation: 'Bahia, Brazil'
+      codeRole: 'Support Analyst & Full Stack Dev',
+      codeLocation: 'Bahia - Brazil',
+      codeAvailability: 'On-site, Hybrid, Remote (Open to relocation)'
     },
     home: {
       projectsTitle: 'Featured Projects',
