@@ -4,27 +4,22 @@ import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import BackgroundWrapper from "@/components/BackgroundWrapper";
-import dynamic from "next/dynamic";
+import ClientEffects from "@/components/ClientEffects"; // Importação direta
 
-// Carregando apenas os efeitos essenciais e leves
-const ClientEffects = dynamic(() => import("@/components/ClientEffects"), { 
-  ssr: false 
-});
-
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
   variable: '--font-inter',
   display: 'swap',
 });
 
-const jetbrainsMono = JetBrains_Mono({ 
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: '--font-mono',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://caufreitxs.vercel.app'), 
+  metadataBase: new URL('https://caufreitxs.vercel.app'),
   title: {
     default: "Cauã Freitas | Full Stack & Data Analyst",
     template: "%s | Cauã Freitas"
@@ -57,7 +52,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt" className="scroll-smooth">
-      <body 
+      <body
         className={`
           ${inter.variable} ${jetbrainsMono.variable} 
           font-sans antialiased 
@@ -67,10 +62,11 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <LanguageProvider>
-            
+
             <BackgroundWrapper>
+              {/* O ClientEffects agora lida com seu próprio carregamento dinâmico internamente */}
               <ClientEffects />
-              
+
               <div className="relative z-10 animate-in fade-in duration-700 ease-out">
                 {children}
               </div>
