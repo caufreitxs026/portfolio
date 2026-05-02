@@ -12,6 +12,7 @@ export default function NewProjectPage() {
     const [description, setDescription] = useState("");
     const [repoLink, setRepoLink] = useState("");
     const [techStack, setTechStack] = useState("");
+    const [videoUrl, setVideoUrl] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -39,7 +40,9 @@ export default function NewProjectPage() {
         try {
             const fileExt = file.name.split('.').pop();
             const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-            const mediaType = file.type.startsWith("video/") ? "video" : "image";
+
+            // Correção: Tipagem explícita (Literal Type)
+            const mediaType: "image" | "video" = file.type.startsWith("video/") ? "video" : "image";
 
             const { error: uploadError } = await supabase.storage
                 .from("portfolio-media")
@@ -51,7 +54,6 @@ export default function NewProjectPage() {
                 .from("portfolio-media")
                 .getPublicUrl(fileName);
 
-            // Tratamento do vetor de strings: quebra nas vírgulas, remove espaços nulos e ignora campos vazios.
             const techStackArray = techStack
                 .split(",")
                 .map((tech) => tech.trim())
@@ -67,6 +69,7 @@ export default function NewProjectPage() {
                         media_type: mediaType,
                         status: "active",
                         repo_link: repoLink,
+                        video_url: videoUrl.trim() === "" ? null : videoUrl.trim(),
                         tech_stack: techStackArray
                     }
                 ]);
@@ -151,7 +154,19 @@ export default function NewProjectPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-300">Mídia (Imagem ou Vídeo)</label>
+                        <label className="text-sm font-medium text-slate-300">URL do Vídeo (YouTube)</label>
+                        <input
+                            type="url"
+                            value={videoUrl}
+                            onChange={(e) => setVideoUrl(e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 text-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:border-indigo-500 transition-colors"
+                            placeholder="Ex: https://www.youtube.com/watch?v=..."
+                        />
+                        <p className="text-xs text-slate-500">Opcional. Link para a demonstração do projeto.</p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Imagem de Capa (Thumbnail)</label>
 
                         <div className="relative border-2 border-dashed border-slate-700 rounded-2xl bg-slate-950 hover:bg-slate-900/80 transition-colors overflow-hidden group">
                             {previewUrl ? (
@@ -173,14 +188,14 @@ export default function NewProjectPage() {
                                         <ImageIcon size={32} className="text-slate-500" />
                                         <FileVideo size={32} className="text-slate-500" />
                                     </div>
-                                    <p className="text-slate-300 font-medium">Arraste um arquivo ou clique para selecionar</p>
-                                    <p className="text-slate-500 text-sm mt-1">MP4, WebM, PNG, JPG (Recomendado 16:9)</p>
+                                    <p className="text-slate-300 font-medium">Arraste uma imagem ou clique para selecionar</p>
+                                    <p className="text-slate-500 text-sm mt-1">PNG, JPG ou WebP (Recomendado 16:9)</p>
                                 </div>
                             )}
 
                             <input
                                 type="file"
-                                accept="image/*,video/*"
+                                accept="image/*"
                                 onChange={handleFileChange}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             />

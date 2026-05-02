@@ -4,12 +4,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Github, ChevronLeft, ChevronRight, X, Cpu, Terminal } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
+import VideoEmbed from '@/components/VideoEmbed';
 
 interface Project {
   id: string;
   title: string;
   description: string;
   media_url?: string;
+  video_url?: string;
   media_type?: 'image' | 'video';
   repo_link?: string;
   deploy_url?: string;
@@ -178,12 +180,17 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                   ) : (
                     <img src={project.media_url} alt={project.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none" />
                   )
+                ) : project.video_url ? (
+                  <div className="w-full h-full flex items-center justify-center bg-black pointer-events-none opacity-90 transition-opacity duration-700 group-hover:opacity-100">
+                    <VideoEmbed url={project.video_url} title={project.title} />
+                  </div>
                 ) : (
                   <TechFallback />
                 )}
-                {project.media_url && (
+
+                {(project.media_url || project.video_url) && (
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <span className="bg-black/60 text-white px-5 py-2.5 rounded-full text-sm font-medium backdrop-blur-md border border-white/20 shadow-xl">
+                    <span className="bg-black/60 text-white px-5 py-2.5 rounded-full text-sm font-medium backdrop-blur-md border border-white/20 shadow-xl pointer-events-none">
                       Explorar Projeto
                     </span>
                   </div>
@@ -257,9 +264,18 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
               </button>
 
               {/* Lado Esquerdo: Mídia 100% Imersiva (60% width) */}
-              <motion.div layoutId={`media-${selectedId}`} className="w-full md:w-[60%] h-[40vh] md:h-full bg-black relative shrink-0">
+              <motion.div layoutId={`media-${selectedId}`} className="w-full md:w-[60%] h-[40vh] md:h-full bg-black relative shrink-0 flex items-center justify-center">
                 {(() => {
                   const selectedProject = projects.find(p => p.id === selectedId);
+
+                  if (selectedProject?.video_url) {
+                    return (
+                      <div className="w-full h-full max-h-full flex items-center justify-center p-0 md:p-8">
+                        <VideoEmbed url={selectedProject.video_url} title={selectedProject.title} />
+                      </div>
+                    );
+                  }
+
                   if (!selectedProject?.media_url) return <TechFallback />;
 
                   if (selectedProject.media_type === 'video') {
@@ -268,9 +284,8 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                   return <img src={selectedProject.media_url} alt={selectedProject.title} className="w-full h-full object-cover" />;
                 })()}
 
-                {/* Máscara de Transição para o Painel de Texto (Apenas Desktop) */}
+                {/* Máscaras de Transição para o Painel de Texto */}
                 <div className={`absolute inset-y-0 right-0 w-32 bg-gradient-to-l ${styles.fadeGradient} to-transparent hidden md:block opacity-95 pointer-events-none`}></div>
-                {/* Máscara de Transição Mobile */}
                 <div className={`absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t ${styles.fadeGradient} to-transparent md:hidden opacity-95 pointer-events-none`}></div>
               </motion.div>
 

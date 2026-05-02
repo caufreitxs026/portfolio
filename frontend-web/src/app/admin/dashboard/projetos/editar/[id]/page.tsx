@@ -7,6 +7,18 @@ import { ArrowLeft, UploadCloud, FileVideo, Image as ImageIcon, Loader2 } from "
 import { supabase } from "@/lib/supabase";
 import Swal from "sweetalert2";
 
+// Definição da interface local para garantir tipagem estrita no retorno do Supabase
+interface ProjectData {
+    id: string;
+    title: string;
+    description: string | null;
+    media_url: string | null;
+    media_type: "image" | "video" | null;
+    repo_link: string | null;
+    video_url: string | null;
+    tech_stack: string[] | null;
+}
+
 export default function EditProjectPage() {
     const router = useRouter();
     const params = useParams<{ id: string }>();
@@ -20,6 +32,7 @@ export default function EditProjectPage() {
     const [description, setDescription] = useState("");
     const [repoLink, setRepoLink] = useState("");
     const [techStack, setTechStack] = useState("");
+    const [videoUrl, setVideoUrl] = useState("");
 
     // Estados de Mídia
     const [currentMediaUrl, setCurrentMediaUrl] = useState<string | null>(null);
@@ -39,16 +52,20 @@ export default function EditProjectPage() {
 
                 if (dbError) throw new Error(dbError.message);
 
-                setTitle(data.title);
-                setDescription(data.description || "");
-                setRepoLink(data.repo_link || "");
-                setCurrentMediaUrl(data.media_url);
-                setCurrentMediaType(data.media_type);
-                setPreviewUrl(data.media_url); // Mostra a mídia atual no preview
+                // Type Assertion para mapear o retorno dinâmico para a interface estrita
+                const projectData = data as unknown as ProjectData;
+
+                setTitle(projectData.title);
+                setDescription(projectData.description || "");
+                setRepoLink(projectData.repo_link || "");
+                setVideoUrl(projectData.video_url || "");
+                setCurrentMediaUrl(projectData.media_url);
+                setCurrentMediaType(projectData.media_type);
+                setPreviewUrl(projectData.media_url); // Mostra a mídia atual no preview
 
                 // Transforma o array do banco ['React', 'Node'] na string 'React, Node' para o input
-                if (data.tech_stack) {
-                    setTechStack(data.tech_stack.join(", "));
+                if (projectData.tech_stack) {
+                    setTechStack(projectData.tech_stack.join(", "));
                 }
             } catch (err: any) {
                 Swal.fire("Erro", "Não foi possível carregar os dados do projeto.", "error");
@@ -81,7 +98,9 @@ export default function EditProjectPage() {
 
         try {
             let finalMediaUrl = currentMediaUrl;
-            let finalMediaType = currentMediaType;
+
+            // Variável intermediária com tipagem estrita requerida pelo payload
+            let finalMediaType: "image" | "video" | null = currentMediaType;
 
             // Se o usuário selecionou um NOVO arquivo, fazemos a substituição
             if (file) {
@@ -124,6 +143,7 @@ export default function EditProjectPage() {
                     media_url: finalMediaUrl,
                     media_type: finalMediaType,
                     repo_link: repoLink,
+                    video_url: videoUrl.trim() === "" ? null : videoUrl.trim(),
                     tech_stack: techStackArray
                 })
                 .eq("id", params.id);
@@ -203,7 +223,18 @@ export default function EditProjectPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-300">Mídia (Deixe vazio para manter a atual)</label>
+                        <label className="text-sm font-medium text-slate-300">URL do Vídeo (YouTube)</label>
+                        <input
+                            type="url"
+                            value={videoUrl}
+                            onChange={(e) => setVideoUrl(e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 text-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:border-indigo-500 transition-colors"
+                            placeholder="Ex: https://www.youtube.com/watch?v=..."
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-300">Imagem de Capa (Deixe vazio para manter a atual)</label>
                         <div className="relative border-2 border-dashed border-slate-700 rounded-2xl bg-slate-950 hover:bg-slate-900/80 transition-colors overflow-hidden group">
                             {previewUrl ? (
                                 <div className="relative w-full aspect-video flex items-center justify-center bg-black">
@@ -224,10 +255,10 @@ export default function EditProjectPage() {
                                         <ImageIcon size={32} className="text-slate-500" />
                                         <FileVideo size={32} className="text-slate-500" />
                                     </div>
-                                    <p className="text-slate-300 font-medium">Sem mídia. Clique para adicionar.</p>
+                                    <p className="text-slate-300 font-medium">Sem imagem de capa. Clique para adicionar.</p>
                                 </div>
                             )}
-                            <input type="file" accept="image/*,video/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                            <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                         </div>
                     </div>
 
