@@ -26,8 +26,7 @@ export default function VideoEmbed({ url, title, thumbnailUrl }: VideoEmbedProps
         );
     }
 
-    // Validação estrita: Só usa a capa do Supabase se for um link válido.
-    // Caso contrário, usa a hqdefault (Alta Qualidade) do YouTube que tem 100% de disponibilidade.
+    // Validação: Prioriza a capa do painel (media_url). Se falhar, usa a thumb padrão do YouTube.
     const isValidCustomThumb = thumbnailUrl && thumbnailUrl.trim().startsWith('http');
     const coverImage = isValidCustomThumb ? thumbnailUrl : `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
