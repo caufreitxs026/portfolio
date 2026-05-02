@@ -4,3 +4,4 @@ venv/
 .next/
 pycache/
 .DS_Store
+.env.local
