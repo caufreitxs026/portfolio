@@ -85,14 +85,14 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
     badge: isSecretMode ? 'bg-pink-500/10 text-pink-300 border-pink-500/20' : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20',
     modalBg: 'bg-slate-900',
     modalBorder: 'border-slate-800',
-    cardBg: 'bg-slate-900/90 border-slate-800',
+    cardBg: 'bg-slate-900/60 border-slate-800',
     textTitle: 'text-white',
     textDesc: 'text-slate-300',
     closeBtn: isSecretMode ? 'hover:bg-pink-500/20 text-pink-400' : 'hover:bg-indigo-500/20 text-indigo-400',
     scanColor: isSecretMode ? 'via-pink-500/20' : 'via-indigo-500/20',
     navBtn: 'bg-slate-900/50 border-slate-700 text-slate-400 hover:text-white',
     techFallbackBg: 'bg-slate-950',
-    footerBg: 'bg-slate-900 border-slate-800',
+    footerBg: 'bg-slate-900/95 border-slate-800',
     fadeGradient: 'from-slate-900',
   } : {
     primary: 'text-indigo-600',
@@ -104,35 +104,41 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
     badge: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     modalBg: 'bg-white',
     modalBorder: 'border-slate-200',
-    cardBg: 'bg-white/95 border-slate-200 shadow-xl',
+    cardBg: 'bg-white/80 border-slate-200 shadow-xl',
     textTitle: 'text-slate-900',
     textDesc: 'text-slate-600',
     closeBtn: 'hover:bg-slate-100 text-slate-500',
     scanColor: 'via-indigo-500/10',
-    navBtn: 'bg-white/90 border-slate-200 text-slate-500 hover:text-indigo-600 shadow-sm',
+    navBtn: 'bg-white/80 border-slate-200 text-slate-500 hover:text-indigo-600 shadow-sm',
     techFallbackBg: 'bg-slate-50',
-    footerBg: 'bg-white border-slate-100',
+    footerBg: 'bg-white/95 border-slate-100',
     fadeGradient: 'from-white',
   };
 
   const swipeConfidenceThreshold = 10000;
   const swipePower = (offset: number, velocity: number) => Math.abs(offset) * velocity;
 
-  // Otimização de Performance: Filtros de blur foram removidos para evitar GPU bottleneck em Android.
-  // Escala foi minimizada para manter a fluidez do layout.
   const variants = {
-    enter: (direction: number) => ({ x: direction > 0 ? 30 : -30, opacity: 0 }),
-    center: { zIndex: 1, x: 0, opacity: 1 },
-    exit: (direction: number) => ({ zIndex: 0, x: direction < 0 ? 30 : -30, opacity: 0 })
+    enter: (direction: number) => ({ x: direction > 0 ? 50 : -50, opacity: 0, scale: 0.95, filter: 'blur(10px)' }),
+    center: { zIndex: 1, x: 0, opacity: 1, scale: 1, filter: 'blur(0px)' },
+    exit: (direction: number) => ({ zIndex: 0, x: direction < 0 ? 50 : -50, opacity: 0, scale: 0.95, filter: 'blur(10px)' })
   };
 
   const TechFallback = () => (
     <div className={`w-full h-full relative overflow-hidden flex items-center justify-center group/tech ${styles.techFallbackBg}`}>
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-      <div className={`relative z-10 p-6 rounded-2xl border shadow-lg flex flex-col items-center gap-4 ${styles.cardBg}`}>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+      <motion.div
+        className={`absolute inset-x-0 h-12 bg-gradient-to-b from-transparent ${styles.scanColor} to-transparent opacity-30`}
+        animate={{ top: ['-20%', '120%'] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+      />
+      <div className={`relative z-10 p-6 rounded-2xl border backdrop-blur-xl shadow-lg flex flex-col items-center gap-4 ${styles.cardBg}`}>
         <Terminal className={`w-10 h-10 ${styles.primary}`} />
         <div className="flex justify-between items-center text-[10px] text-slate-500 font-mono uppercase tracking-wider w-full">
           <span>Compiling</span><span>98%</span>
+        </div>
+        <div className={`h-1.5 w-32 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'}`}>
+          <motion.div className={`h-full ${styles.bgPrimary}`} animate={{ width: ['0%', '100%'] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} />
         </div>
       </div>
     </div>
@@ -141,11 +147,10 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
   return (
     <div className="relative w-full max-w-5xl mx-auto mt-10">
 
-      <div className={`absolute inset-0 bg-gradient-to-r ${styles.gradient} opacity-30 -z-10 rounded-full scale-90`}></div>
+      <div className={`absolute inset-0 bg-gradient-to-r ${styles.gradient} blur-3xl opacity-30 -z-10 rounded-full scale-90`}></div>
 
       {/* --- CARROSSEL PRINCIPAL --- */}
-      {/* Ajuste Mobile: Altura dinâmica min-h-[550px] para acomodar textos longos sem cortar */}
-      <div className="relative h-auto min-h-[550px] md:min-h-[450px] md:h-[450px]">
+      <div className="relative h-[500px] md:h-[450px]">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           {selectedId === null && (
             <motion.div
@@ -156,27 +161,27 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ type: "spring", stiffness: 400, damping: 30, opacity: { duration: 0.15 } }}
+              transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.8}
+              dragElastic={1}
               onDragEnd={(e, { offset, velocity }) => {
                 const swipe = swipePower(offset.x, velocity.x);
                 if (swipe < -swipeConfidenceThreshold) nextSlide();
                 else if (swipe > swipeConfidenceThreshold) prevSlide();
               }}
-              className={`absolute inset-0 flex flex-col md:flex-row overflow-hidden rounded-2xl border shadow-xl cursor-grab active:cursor-grabbing group ${styles.cardBg}`}
+              className={`absolute inset-0 flex flex-col md:flex-row overflow-hidden rounded-2xl backdrop-blur-xl border shadow-2xl ring-1 ring-white/5 cursor-grab active:cursor-grabbing group ${styles.cardBg}`}
               onClick={() => setSelectedId(project.id)}
             >
-              <motion.div layoutId={`media-${project.id}`} className={`w-full md:w-1/2 h-56 md:h-full relative overflow-hidden border-b md:border-b-0 md:border-r ${theme === 'dark' ? 'bg-black/40 border-slate-800/50' : 'bg-slate-50 border-slate-200'}`}>
+              <motion.div layoutId={`media-${project.id}`} className={`w-full md:w-1/2 h-64 md:h-full relative overflow-hidden border-b md:border-b-0 md:border-r ${theme === 'dark' ? 'bg-black/40 border-slate-800/50' : 'bg-slate-50 border-slate-200'}`}>
                 {project.media_url ? (
                   project.media_type === 'video' ? (
-                    <video src={project.media_url} autoPlay muted loop playsInline className="w-full h-full object-cover pointer-events-none" />
+                    <video src={project.media_url} autoPlay muted loop playsInline className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none" />
                   ) : (
-                    <img src={project.media_url} alt={project.title} className="w-full h-full object-cover pointer-events-none" />
+                    <img src={project.media_url} alt={project.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none" />
                   )
                 ) : project.video_url ? (
-                  <div className="w-full h-full flex items-center justify-center bg-black pointer-events-none opacity-95">
+                  <div className="w-full h-full flex items-center justify-center bg-black pointer-events-none opacity-90 transition-opacity duration-700 group-hover:opacity-100">
                     <VideoEmbed url={project.video_url} title={project.title} thumbnailUrl={project.media_url} />
                   </div>
                 ) : (
@@ -184,33 +189,33 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                 )}
 
                 {(project.media_url || project.video_url) && (
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 hidden md:flex">
-                    <span className="bg-black/80 text-white px-5 py-2.5 rounded-full text-sm font-medium border border-white/10 shadow-xl pointer-events-none">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <span className="bg-black/60 text-white px-5 py-2.5 rounded-full text-sm font-medium backdrop-blur-md border border-white/20 shadow-xl pointer-events-none">
                       Explorar Projeto
                     </span>
                   </div>
                 )}
               </motion.div>
 
-              <div className="w-full md:w-1/2 flex flex-col p-5 md:p-10 pointer-events-none h-full">
-                <motion.h3 layoutId={`title-${project.id}`} className={`text-xl sm:text-2xl md:text-3xl font-bold mb-3 ${styles.textTitle}`}>
+              <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center relative pointer-events-none">
+                <motion.h3 layoutId={`title-${project.id}`} className={`text-2xl sm:text-3xl font-bold mb-4 ${styles.textTitle}`}>
                   {project.title}
                 </motion.h3>
-                <motion.p layoutId={`desc-${project.id}`} className={`leading-relaxed mb-4 text-sm md:text-base line-clamp-4 md:line-clamp-3 flex-grow ${styles.textDesc}`}>
+                <motion.p layoutId={`desc-${project.id}`} className={`leading-relaxed mb-6 line-clamp-3 text-sm sm:text-base ${styles.textDesc}`}>
                   {project.description}
                 </motion.p>
-                <div className="flex flex-wrap gap-2 mb-6">
+                <div className="flex flex-wrap gap-2 mb-8">
                   {project.tech_stack?.slice(0, 3).map((tech) => (
-                    <span key={tech} className={`px-2 py-1 md:px-3 md:py-1 rounded-md text-[10px] md:text-xs font-medium border font-mono tracking-wide ${styles.badge}`}>
+                    <span key={tech} className={`px-3 py-1 rounded-md text-xs font-medium border font-mono tracking-wide ${styles.badge}`}>
                       {tech}
                     </span>
                   ))}
                   {(project.tech_stack?.length || 0) > 3 && (
-                    <span className="text-[10px] md:text-xs text-slate-500 self-center">+{project.tech_stack.length - 3}</span>
+                    <span className="text-xs text-slate-500 self-center">+{project.tech_stack.length - 3}</span>
                   )}
                 </div>
-                <div className="mt-auto flex items-center gap-2 text-[9px] md:text-[10px] font-mono text-slate-500">
-                  <Cpu size={12} className="md:w-[14px] md:h-[14px]" />
+                <div className="mt-auto flex items-center gap-2 text-[10px] sm:text-xs font-mono text-slate-500">
+                  <Cpu size={14} />
                   <span>SYSTEM READY // SWIPE NAV ENABLED</span>
                 </div>
               </div>
@@ -218,49 +223,48 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
           )}
         </AnimatePresence>
 
-        {/* Controles do Carrossel (Visíveis apenas em Desktop) */}
+        {/* Controles do Carrossel */}
         {selectedId === null && (
-          <div className="hidden md:block">
-            <button onClick={(e) => { e.stopPropagation(); prevSlide(); }} className={`absolute left-0 top-1/2 -translate-y-1/2 p-3 -ml-8 rounded-full transition-all hover:scale-110 z-10 ${styles.navBtn} shadow-md`}>
-              <ChevronLeft size={24} />
+          <>
+            <button onClick={(e) => { e.stopPropagation(); prevSlide(); }} className={`absolute left-0 top-1/2 -translate-y-1/2 p-2 sm:p-3 -ml-3 sm:-ml-8 rounded-full transition-all hover:scale-110 z-10 ${styles.navBtn} shadow-md`}>
+              <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
             </button>
-            <button onClick={(e) => { e.stopPropagation(); nextSlide(); }} className={`absolute right-0 top-1/2 -translate-y-1/2 p-3 -mr-8 rounded-full transition-all hover:scale-110 z-10 ${styles.navBtn} shadow-md`}>
-              <ChevronRight size={24} />
+            <button onClick={(e) => { e.stopPropagation(); nextSlide(); }} className={`absolute right-0 top-1/2 -translate-y-1/2 p-2 sm:p-3 -mr-3 sm:-mr-8 rounded-full transition-all hover:scale-110 z-10 ${styles.navBtn} shadow-md`}>
+              <ChevronRight size={20} className="sm:w-6 sm:h-6" />
             </button>
-          </div>
+          </>
         )}
       </div>
 
       {/* --- CINEMATIC MODAL EXPANDIDO --- */}
       <AnimatePresence>
         {selectedId !== null && (
-          <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center sm:p-6 md:p-8">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-8">
 
-            {/* Backdrop Opaco (Mais leve para Android) */}
+            {/* Backdrop Escuro */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
               onClick={() => setSelectedId(null)}
-              className="absolute inset-0 bg-slate-950/95"
+              className="absolute inset-0 bg-slate-950/90 backdrop-blur-md"
             />
 
             <motion.div
               layoutId={`card-${selectedId}`}
-              transition={{ type: "spring", stiffness: 350, damping: 30 }}
-              className={`relative w-full max-w-[1400px] h-[92vh] md:h-[85vh] flex flex-col md:flex-row rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl border-t md:border ${styles.modalBg} ${styles.modalBorder}`}
+              className={`relative w-full max-w-[1400px] h-[90vh] md:h-[85vh] flex flex-col md:flex-row rounded-3xl overflow-hidden shadow-2xl border ${styles.modalBg} ${styles.modalBorder}`}
             >
 
+              {/* Botão Fechar Global */}
               <button
                 onClick={() => setSelectedId(null)}
-                className={`absolute top-4 right-4 md:top-6 md:right-6 z-50 p-2.5 rounded-full border transition-colors bg-black/20 md:bg-white/5 border-white/10 ${styles.closeBtn}`}
+                className={`absolute top-4 right-4 md:top-6 md:right-6 z-50 p-2.5 rounded-full backdrop-blur-md border border-white/10 transition-colors bg-white/5 ${styles.closeBtn}`}
               >
-                <X size={20} className="md:w-6 md:h-6 text-white md:text-inherit" />
+                <X size={24} />
               </button>
 
-              {/* Lado Esquerdo: Mídia */}
-              <motion.div layoutId={`media-${selectedId}`} className="w-full md:w-[60%] h-[35vh] md:h-full bg-black relative shrink-0 flex items-center justify-center">
+              {/* Lado Esquerdo: Mídia 100% Imersiva (60% width) */}
+              <motion.div layoutId={`media-${selectedId}`} className="w-full md:w-[60%] h-[40vh] md:h-full bg-black relative shrink-0 flex items-center justify-center">
                 {(() => {
                   const selectedProject = projects.find(p => p.id === selectedId);
 
@@ -279,42 +283,49 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                   }
                   return <img src={selectedProject.media_url} alt={selectedProject.title} className="w-full h-full object-cover" />;
                 })()}
+
+                {/* Máscaras de Transição para o Painel de Texto */}
+                <div className={`absolute inset-y-0 right-0 w-32 bg-gradient-to-l ${styles.fadeGradient} to-transparent hidden md:block opacity-95 pointer-events-none`}></div>
+                <div className={`absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t ${styles.fadeGradient} to-transparent md:hidden opacity-95 pointer-events-none`}></div>
               </motion.div>
 
-              {/* Lado Direito: Textos */}
-              <div className="w-full md:w-[40%] flex flex-col relative flex-1 h-[57vh] md:h-full">
-                <div className="flex-1 overflow-y-auto p-5 md:p-10 custom-scrollbar pb-32 md:pb-32">
-                  <motion.h2 layoutId={`title-${selectedId}`} className={`text-2xl md:text-4xl font-extrabold mb-4 md:mb-6 leading-tight pr-10 ${styles.textTitle}`}>
+              {/* Lado Direito: Informações & Call to Action (40% width) */}
+              <div className="w-full md:w-[40%] flex flex-col relative h-[50vh] md:h-full">
+
+                {/* Conteúdo Rolável */}
+                <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar pb-24 md:pb-32">
+                  <motion.h2 layoutId={`title-${selectedId}`} className={`text-3xl md:text-4xl font-extrabold mb-6 leading-tight pr-10 ${styles.textTitle}`}>
                     {projects.find(p => p.id === selectedId)?.title}
                   </motion.h2>
 
-                  <div className="flex flex-wrap gap-2 mb-6 md:mb-8">
+                  {/* Tech Stacks Destaque */}
+                  <div className="flex flex-wrap gap-2 mb-8">
                     {projects.find(p => p.id === selectedId)?.tech_stack?.map((tech) => (
-                      <span key={tech} className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-bold border font-mono tracking-wide shadow-sm ${styles.badge}`}>
+                      <span key={tech} className={`px-4 py-2 rounded-lg text-xs font-bold border font-mono tracking-wide shadow-sm ${styles.badge}`}>
                         {tech}
                       </span>
                     ))}
                   </div>
 
-                  <h4 className={`text-[10px] md:text-xs font-bold uppercase tracking-widest mb-3 md:mb-4 border-b pb-2 md:pb-3 ${theme === 'dark' ? 'border-slate-800 text-slate-500' : 'border-slate-200 text-slate-400'}`}>
+                  <h4 className={`text-xs font-bold uppercase tracking-widest mb-4 border-b pb-3 ${theme === 'dark' ? 'border-slate-800 text-slate-500' : 'border-slate-200 text-slate-400'}`}>
                     Visão Geral do Sistema
                   </h4>
 
-                  <motion.p layoutId={`desc-${selectedId}`} className={`leading-relaxed text-sm md:text-lg whitespace-pre-line ${styles.textDesc}`}>
+                  <motion.p layoutId={`desc-${selectedId}`} className={`leading-relaxed text-base md:text-lg whitespace-pre-line ${styles.textDesc}`}>
                     {projects.find(p => p.id === selectedId)?.description}
                   </motion.p>
                 </div>
 
-                {/* Footer Fixo */}
-                <div className={`absolute bottom-0 left-0 right-0 p-5 md:p-8 border-t flex flex-col sm:flex-row gap-3 md:gap-4 shrink-0 ${styles.footerBg}`}>
+                {/* Footer de Ações Fixo */}
+                <div className={`absolute bottom-0 left-0 right-0 p-6 md:p-8 border-t flex flex-col sm:flex-row gap-4 shrink-0 backdrop-blur-xl ${styles.footerBg}`}>
                   {projects.find(p => p.id === selectedId)?.deploy_url && (
                     <a
                       href={projects.find(p => p.id === selectedId)?.deploy_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 md:px-6 py-3 md:py-4 rounded-xl text-sm md:text-base font-bold transition-transform active:scale-95 ${styles.buttonPrimary}`}
+                      className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold transition-all hover:-translate-y-1 ${styles.buttonPrimary}`}
                     >
-                      <ExternalLink size={18} />
+                      <ExternalLink size={20} />
                       Acessar Sistema
                     </a>
                   )}
@@ -323,9 +334,9 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                       href={projects.find(p => p.id === selectedId)?.repo_link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 md:px-6 py-3 md:py-4 rounded-xl text-sm md:text-base font-bold transition-colors border active:bg-slate-800 ${styles.buttonSecondary}`}
+                      className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold transition-colors border ${styles.buttonSecondary}`}
                     >
-                      <Github size={18} />
+                      <Github size={20} />
                       Código Fonte
                     </a>
                   )}
@@ -337,7 +348,8 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
         )}
       </AnimatePresence>
 
-      <div className="flex justify-center gap-2 mt-6 md:mt-8">
+      {/* Indicadores de Paginação do Carrossel */}
+      <div className="flex justify-center gap-2 mt-8">
         {projects.map((_, idx) => (
           <button
             key={idx}
@@ -350,7 +362,7 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
             className={`
                 h-1.5 rounded-full transition-all duration-300
                 ${idx === currentIndex
-                ? `w-6 md:w-8 ${isSecretMode ? 'bg-pink-500' : (theme === 'dark' ? 'bg-indigo-500' : 'bg-indigo-600')}`
+                ? `w-8 ${isSecretMode ? 'bg-pink-500' : (theme === 'dark' ? 'bg-indigo-500' : 'bg-indigo-600')}`
                 : `w-2 ${theme === 'dark' ? 'bg-slate-700' : 'bg-slate-300'}`}
             `}
           />
