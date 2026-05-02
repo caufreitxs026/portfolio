@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play } from 'lucide-react';
 
 interface VideoEmbedProps {
@@ -9,6 +9,7 @@ interface VideoEmbedProps {
 
 export default function VideoEmbed({ url, title, thumbnailUrl }: VideoEmbedProps) {
     const [isPlaying, setIsPlaying] = useState(false);
+    const [coverImage, setCoverImage] = useState<string>('');
 
     const getYouTubeId = (url: string) => {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -18,6 +19,13 @@ export default function VideoEmbed({ url, title, thumbnailUrl }: VideoEmbedProps
 
     const videoId = getYouTubeId(url);
 
+    // Inicializa a imagem. Prioriza o upload do painel (Supabase), depois tenta a thumb HD do YouTube.
+    useEffect(() => {
+        if (videoId) {
+            setCoverImage(thumbnailUrl || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`);
+        }
+    }, [videoId, thumbnailUrl]);
+
     if (!videoId) {
         return (
             <div className="w-full h-full flex items-center justify-center bg-slate-900 text-slate-500 border border-slate-800 rounded-lg">
@@ -26,15 +34,14 @@ export default function VideoEmbed({ url, title, thumbnailUrl }: VideoEmbedProps
         );
     }
 
-    // Fallback: Se não houver capa no Supabase, busca a thumb original do YouTube em alta resolução
-    const coverImage = thumbnailUrl || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    // Interceptador de erro 404 da imagem
+    const handleImageError = () => {
+        // Se a imagem de resolução máxima não existir no YouTube, cai para a imagem padrão que sempre existe
+        if (coverImage.includes('maxresdefault')) {
+            setCoverImage(`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`);
+        }
+    };
 
-    // Parâmetros otimizados do iframe:
-    // autoplay=1: Inicia imediatamente após o clique na nossa capa falsa.
-    // rel=0: Evita mostrar vídeos de outros canais recomendados no final.
-    // modestbranding=1: Minimiza ao máximo a logo do YouTube.
-    // vq=hd1080: Sugere resolução em 1080p.
-    // color=white: Barra de progresso branca para estética clean.
     const iframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&vq=hd1080&color=white`;
 
     return (
@@ -47,6 +54,7 @@ export default function VideoEmbed({ url, title, thumbnailUrl }: VideoEmbedProps
                     <img
                         src={coverImage}
                         alt={`Capa do vídeo: ${title}`}
+                        onError={handleImageError}
                         className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500"
                     />
                     {/* Overlay escuro sutil para garantir contraste no botão Play */}
