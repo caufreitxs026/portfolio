@@ -7,25 +7,23 @@
 ```text
 portfolio/
     .gitignore
+    eslint.config.mjs
+    next.config.mjs
+    package-lock.json
+    package.json
+    postcss.config.mjs
+    tailwind.config.ts
+    tsconfig.json
     backend-api/
         .env
         main.py
         package.json
         requirements.txt
     frontend-web/
-        package-lock.json
-        package.json
         src/
             .env.local
-            eslint.config.mjs
             middleware.ts
             next-env.d.ts
-            next.config.mjs
-            package-lock.json
-            package.json
-            postcss.config.mjs
-            tailwind.config.ts
-            tsconfig.json
             .next/
                 app-build-manifest.json
                 build-manifest.json
@@ -370,22 +368,20 @@ portfolio/
 | Arquivo | Tamanho | Linhas | Ultima Modificacao |
 | :--- | :--- | :--- | :--- |
 | .gitignore | 149.00B | 12 | 2026-05-02 10:04:57 |
+| eslint.config.mjs | 483.00B | 18 | 2026-04-27 21:27:29 |
+| next.config.mjs | 286.00B | 13 | 2026-04-27 21:27:29 |
+| package-lock.json | 282.16KB | 7742 | 2026-05-01 12:37:36 |
+| package.json | 1.08KB | 42 | 2026-05-01 12:37:36 |
+| postcss.config.mjs | 164.00B | 9 | 2026-04-27 21:27:29 |
+| tailwind.config.ts | 593.00B | 21 | 2026-04-27 21:27:29 |
+| tsconfig.json | 665.00B | 40 | 2026-05-02 11:09:15 |
 | backend-api\.env | 441.00B | 6 | 2026-05-01 11:39:11 |
 | backend-api\main.py | 14.90KB | 329 | 2026-04-27 21:27:29 |
 | backend-api\package.json | 852.00B | 34 | 2026-04-27 21:27:29 |
 | backend-api\requirements.txt | 119.00B | 10 | 2026-04-27 21:27:29 |
-| frontend-web\package-lock.json | 276.68KB | 7797 | 2026-05-02 11:00:20 |
-| frontend-web\package.json | 999.00B | 40 | 2026-05-02 10:55:58 |
-| frontend-web\src\.env.local | 852.00B | 10 | 2026-05-02 09:59:09 |
-| frontend-web\src\eslint.config.mjs | 483.00B | 18 | 2026-04-27 21:27:29 |
+| frontend-web\src\.env.local | 828.00B | 10 | 2026-05-02 11:09:28 |
 | frontend-web\src\middleware.ts | 307.00B | 15 | 2026-05-01 11:50:12 |
 | frontend-web\src\next-env.d.ts | 233.00B | 5 | 2026-05-01 11:47:00 |
-| frontend-web\src\next.config.mjs | 286.00B | 13 | 2026-04-27 21:27:29 |
-| frontend-web\src\package-lock.json | 282.16KB | 7742 | 2026-05-01 12:37:36 |
-| frontend-web\src\package.json | 1.08KB | 42 | 2026-05-01 12:37:36 |
-| frontend-web\src\postcss.config.mjs | 164.00B | 9 | 2026-04-27 21:27:29 |
-| frontend-web\src\tailwind.config.ts | 593.00B | 21 | 2026-04-27 21:27:29 |
-| frontend-web\src\tsconfig.json | 714.00B | 42 | 2026-05-01 11:47:00 |
 | frontend-web\src\.next\app-build-manifest.json | 4.96KB | 114 | 2026-05-02 09:56:21 |
 | frontend-web\src\.next\build-manifest.json | 968.00B | 32 | 2026-05-02 09:56:21 |
 | frontend-web\src\.next\package.json | 20.00B | 1 | 2026-05-02 09:56:04 |
@@ -637,7 +633,7 @@ portfolio/
 
 ## Informacoes de Geracao
 * Diretorio mapeado: C:/portfolio
-* Data da geracao: 02/05/2026 11:06:56
+* Data da geracao: 02/05/2026 11:13:28
 
 ---
 Gerado automaticamente por generate_detalhado_readme.py
