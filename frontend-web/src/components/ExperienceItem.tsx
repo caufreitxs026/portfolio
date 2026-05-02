@@ -3,18 +3,18 @@
 import { motion } from 'framer-motion';
 import { Calendar, Building2, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
-// CORREÇÃO: Importando diretamente de ./SpotlightCard (sem /ui)
 import SpotlightCard from './SpotlightCard';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface ExperienceProps {
   experience: {
-    id: number;
+    id: string;
     company: string;
     role: string;
     start_date: string;
-    end_date?: string;
-    description: string;
+    end_date?: string | null;
+    description?: string | null;
+    is_current?: boolean;
     location?: string;
   };
   index: number;
@@ -34,15 +34,17 @@ export default function ExperienceItem({ experience, index }: ExperienceProps) {
     return () => clearInterval(interval);
   }, []);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'Momento Atual';
-    const date = new Date(dateString);
+    // Corrige problema de fuso horário forçando o parse correto
+    const [year, month, day] = dateString.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day) || 1);
     return date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
   };
 
+  const isCurrentRole = experience.is_current || !experience.end_date;
   const startDate = formatDate(experience.start_date);
-  const endDate = experience.end_date ? formatDate(experience.end_date) : 'Momento Atual';
-  const isCurrentRole = !experience.end_date;
+  const endDate = isCurrentRole ? 'Momento Atual' : formatDate(experience.end_date);
 
   const styles = theme === 'dark' ? {
     iconColor: isSecretMode ? 'text-pink-400' : 'text-emerald-400',
@@ -69,7 +71,7 @@ export default function ExperienceItem({ experience, index }: ExperienceProps) {
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: -20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: "-50px" }}
@@ -83,44 +85,46 @@ export default function ExperienceItem({ experience, index }: ExperienceProps) {
       `}></div>
 
       <SpotlightCard isSecretMode={isSecretMode} className="p-5 sm:p-6 transition-transform duration-300 group-hover:-translate-y-1">
-        
-        <div className="flex flex-col gap-3 sm:gap-4 mb-4">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
-                <div>
-                    <h3 className={`text-lg sm:text-xl font-bold leading-tight ${styles.textMain}`}>
-                        {experience.role}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-2">
-                        <div className={`p-1.5 rounded-md border ${styles.iconBg} ${styles.iconColor}`}>
-                            <Building2 size={14} />
-                        </div>
-                        <span className={`text-sm sm:text-base font-medium ${styles.textSub}`}>
-                            {experience.company}
-                        </span>
-                    </div>
-                </div>
 
-                <div className={`
+        <div className="flex flex-col gap-3 sm:gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
+            <div>
+              <h3 className={`text-lg sm:text-xl font-bold leading-tight ${styles.textMain}`}>
+                {experience.role}
+              </h3>
+              <div className="flex items-center gap-2 mt-2">
+                <div className={`p-1.5 rounded-md border ${styles.iconBg} ${styles.iconColor}`}>
+                  <Building2 size={14} />
+                </div>
+                <span className={`text-sm sm:text-base font-medium ${styles.textSub}`}>
+                  {experience.company}
+                </span>
+              </div>
+            </div>
+
+            <div className={`
                     self-start flex items-center gap-2 px-3 py-1 rounded-full text-[10px] sm:text-xs font-mono font-bold border whitespace-nowrap mt-1 sm:mt-0
                     ${isCurrentRole ? styles.dateBadge : styles.inactiveBadge}
                 `}>
-                    <Calendar size={12} />
-                    <span className="uppercase tracking-wide">{startDate} — {endDate}</span>
-                </div>
+              <Calendar size={12} />
+              <span className="uppercase tracking-wide">{startDate} — {endDate}</span>
             </div>
+          </div>
         </div>
 
-        <div className="relative">
+        {experience.description && (
+          <div className="relative">
             <p className={`${styles.textDesc} leading-relaxed text-sm sm:text-base border-t pt-4 mt-2 ${theme === 'dark' ? 'border-slate-800/50' : 'border-slate-100'}`}>
-                {experience.description}
+              {experience.description}
             </p>
-        </div>
+          </div>
+        )}
 
         {experience.location && (
-            <div className={`mt-4 pt-3 flex items-center gap-2 text-xs font-mono border-t border-dashed ${theme === 'dark' ? 'text-slate-500 border-slate-800/30' : 'text-slate-400 border-slate-200'}`}>
-                <MapPin size={12} className={styles.iconColor} />
-                <span>{experience.location}</span>
-            </div>
+          <div className={`mt-4 pt-3 flex items-center gap-2 text-xs font-mono border-t border-dashed ${theme === 'dark' ? 'text-slate-500 border-slate-800/30' : 'text-slate-400 border-slate-200'}`}>
+            <MapPin size={12} className={styles.iconColor} />
+            <span>{experience.location}</span>
+          </div>
         )}
 
       </SpotlightCard>

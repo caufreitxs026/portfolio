@@ -1,25 +1,57 @@
 import useSWR from 'swr';
+import { supabase } from '@/lib/supabase';
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Erro ao buscar dados');
-  return res.json();
+const fetchSupabaseProjects = async () => {
+  const { data, error } = await supabase
+    .from('portfolio_projects')
+    .select('*')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(`Supabase Error: ${error.message}`);
+  return data;
+};
+
+const fetchSupabaseSkills = async () => {
+  const { data, error } = await supabase
+    .from('portfolio_skills')
+    .select('*')
+    .order('category', { ascending: true })
+    .order('display_order', { ascending: true });
+  if (error) throw new Error(`Supabase Error: ${error.message}`);
+  return data;
+};
+
+const fetchSupabaseExperiences = async () => {
+  const { data, error } = await supabase
+    .from('portfolio_experiences')
+    .select('*')
+    .order('is_current', { ascending: false })
+    .order('start_date', { ascending: false });
+  if (error) throw new Error(`Supabase Error: ${error.message}`);
+  return data;
+};
+
+const fetchSupabaseCertificates = async () => {
+  const { data, error } = await supabase
+    .from('portfolio_certificates')
+    .select('*')
+    .order('display_order', { ascending: true })
+    .order('issue_date', { ascending: false });
+  if (error) throw new Error(`Supabase Error: ${error.message}`);
+  return data;
 };
 
 export function usePortfolioData() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-
   const swrConfig = {
     revalidateOnFocus: false,
     dedupingInterval: 60000,
     shouldRetryOnError: true,
   };
 
-  const { data: projects, isLoading: pLoading } = useSWR(`${API_URL}/projects`, fetcher, swrConfig);
-  const { data: experiences, isLoading: eLoading } = useSWR(`${API_URL}/experiences`, fetcher, swrConfig);
-  // Novos Fetchs
-  const { data: skills, isLoading: sLoading } = useSWR(`${API_URL}/skills`, fetcher, swrConfig);
-  const { data: certificates, isLoading: cLoading } = useSWR(`${API_URL}/certificates`, fetcher, swrConfig);
+  const { data: projects, isLoading: pLoading } = useSWR('supabase_projects', fetchSupabaseProjects, swrConfig);
+  const { data: skills, isLoading: sLoading } = useSWR('supabase_skills', fetchSupabaseSkills, swrConfig);
+  const { data: experiences, isLoading: eLoading } = useSWR('supabase_experiences', fetchSupabaseExperiences, swrConfig);
+  const { data: certificates, isLoading: cLoading } = useSWR('supabase_certificates', fetchSupabaseCertificates, swrConfig);
 
   return {
     projects: projects || [],
