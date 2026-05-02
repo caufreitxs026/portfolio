@@ -182,7 +182,7 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                   )
                 ) : project.video_url ? (
                   <div className="w-full h-full flex items-center justify-center bg-black pointer-events-none opacity-90 transition-opacity duration-700 group-hover:opacity-100">
-                    <VideoEmbed url={project.video_url} title={project.title} />
+                    <VideoEmbed url={project.video_url} title={project.title} thumbnailUrl={project.media_url} />
                   </div>
                 ) : (
                   <TechFallback />
@@ -271,7 +271,7 @@ export default function ProjectCarousel({ projects }: { projects: Project[] }) {
                   if (selectedProject?.video_url) {
                     return (
                       <div className="w-full h-full max-h-full flex items-center justify-center p-0 md:p-8">
-                        <VideoEmbed url={selectedProject.video_url} title={selectedProject.title} />
+                        <VideoEmbed url={selectedProject.video_url} title={selectedProject.title} thumbnailUrl={selectedProject?.media_url} />
                       </div>
                     );
                   }
